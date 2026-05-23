@@ -1,7 +1,7 @@
 {
   "name": "tradingmint-pro",
-  "version": "5.1.0",
-  "description": "TradingMint PRO v5.1 3-year proof-based historical scanner with edge scoring, auto backtesting, optimizer guardrails, and risk lockouts.",
+  "version": "5.2.0",
+  "description": "TradingMint PRO v5.2 max-history proof engine with stronger heatmap, fallback historical ranges, stricter edge scoring, and real-money style risk thinking.",
   "main": "src/server.js",
   "type": "commonjs",
   "scripts": {

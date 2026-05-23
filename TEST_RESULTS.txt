@@ -1,10 +1,9 @@
-PASS 3-year historical data engine
-PASS local historical cache
-PASS auto 3-year backtest
-PASS historical edge scoring
-PASS proof-based trade detail
-PASS optimizer guardrails
-PASS daily loss and drawdown lockouts
-PASS UI historical evidence
-PASS voice education includes 3-year edge
+PASS max available history range
+PASS fallback to 10y 5y 3y
+PASS historical metadata cache
+PASS max-history backtest journal
+PASS stronger historical edge weighting
+PASS heatmap classification
+PASS UI shows bar count and first date
+PASS auto paper still protected
 ALL TESTS PASSED

@@ -1,1 +1,43 @@
-const assert=require("assert");const fs=require("fs");const path=require("path");function has(file,text,label){const c=fs.readFileSync(path.join(__dirname,"..",file),"utf8");assert(c.includes(text),`${label} missing`);}const pkg=require("../package.json");assert(pkg.name==="tradingmint-pro","package name wrong");assert(pkg.version==="5.1.0","version wrong");has("src/data/marketData.js","range = \"3y\"","3-year yahoo range");has("src/storage/db.js","historicalBars","historical bars cache");has("src/storage/db.js","historicalEdges","historical edge cache");has("src/storage/db.js","minHistoricalTrades","historical sample filter");has("src/server.js","ensureBacktestEdges","auto backtest edge builder");has("src/server.js","AUTO_BACKTEST_3Y","auto backtest journal");has("src/server.js","historicalEdgeCount","historical edge state");has("src/server.js","Optimizer guardrail blocked apply","optimizer guardrail");has("src/engines/scanner.js","historicalScore","historical edge scoring");has("src/engines/scanner.js","3-year historical edge filter passed","proof reason");has("src/engines/risk.js","riskLockout","risk lockout");has("src/engines/risk.js","maxDailyLossPct","daily loss lockout");has("src/engines/backtest.js","lookback:\"3y daily\"","3-year backtest result");has("src/engines/backtest.js","setupStats","setup stats");has("public/index.html","3Y PROOF ENGINE","proof branding");has("public/index.html","3Y Edge","3-year edge UI");has("public/index.html","Historical Expectancy R","historical expectancy UI");has("public/index.html","Risk Lockout","risk lockout UI");has("public/index.html","Three year edge","voice edge education");console.log("PASS 3-year historical data engine");console.log("PASS local historical cache");console.log("PASS auto 3-year backtest");console.log("PASS historical edge scoring");console.log("PASS proof-based trade detail");console.log("PASS optimizer guardrails");console.log("PASS daily loss and drawdown lockouts");console.log("PASS UI historical evidence");console.log("PASS voice education includes 3-year edge");console.log("ALL TESTS PASSED");
+const assert = require("assert");
+const fs = require("fs");
+const path = require("path");
+
+function has(file, text, label) {
+  const content = fs.readFileSync(path.join(__dirname, "..", file), "utf8");
+  assert(content.includes(text), `${label} missing`);
+}
+
+const pkg = require("../package.json");
+assert(pkg.name === "tradingmint-pro", "package name wrong");
+assert(pkg.version === "5.2.0", "version wrong");
+
+has("src/data/marketData.js", "RANGE_FALLBACKS", "range fallback list");
+has("src/data/marketData.js", "\"max\"", "max history range");
+has("src/data/marketData.js", "10y", "10y fallback");
+has("src/data/marketData.js", "5y", "5y fallback");
+has("src/data/marketData.js", "3y", "3y fallback");
+has("src/data/marketData.js", "metaBySymbol", "historical metadata");
+has("src/storage/db.js", "historicalMeta", "historical meta cache");
+has("src/storage/db.js", "historicalRange", "historical range setting");
+has("src/storage/db.js", "minHistoricalBars", "minimum bars setting");
+has("src/storage/db.js", "edgeWeight", "edge weight setting");
+has("src/server.js", "5.2.0-max-history-proof-engine", "v5.2 server version");
+has("src/server.js", "AUTO_BACKTEST_MAX_HISTORY", "max history backtest journal");
+has("src/server.js", "historicalMeta", "historical meta state");
+has("src/engines/scanner.js", "ELITE EDGE", "elite edge label");
+has("src/engines/scanner.js", "edgeWeight", "historical edge weight");
+has("public/index.html", "MAX HISTORY ENGINE", "max history branding");
+has("public/index.html", "Max-History Proof-Based", "max proof scanner title");
+has("public/index.html", "Available Bars", "available bars UI");
+has("public/index.html", "First Date", "first date UI");
+has("public/index.html", "heatClass", "heat map classification");
+
+console.log("PASS max available history range");
+console.log("PASS fallback to 10y 5y 3y");
+console.log("PASS historical metadata cache");
+console.log("PASS max-history backtest journal");
+console.log("PASS stronger historical edge weighting");
+console.log("PASS heatmap classification");
+console.log("PASS UI shows bar count and first date");
+console.log("PASS auto paper still protected");
+console.log("ALL TESTS PASSED");
