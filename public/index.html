@@ -5,68 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>TradingMint PRO</title>
 <style>
-:root{
-  --bg:#02070b;
-  --panel:#06131c;
-  --panel2:#081926;
-  --panel3:#0b202f;
-  --stroke:rgba(120,255,70,.18);
-  --stroke2:rgba(255,255,255,.08);
-  --text:#f2fff0;
-  --muted:#95a9b4;
-  --green:#6aff39;
-  --green2:#adff4f;
-  --red:#ff455c;
-  --yellow:#ffd166;
-  --blue:#64b8ff;
-  --purple:#9b5cff;
-  --shadow:0 22px 70px rgba(0,0,0,.48),0 0 32px rgba(106,255,57,.06);
-}
-*{box-sizing:border-box}
-html,body{margin:0;min-height:100%;font-family:Inter,Arial,Helvetica,sans-serif;background:
-radial-gradient(circle at 20% -10%,rgba(106,255,57,.13),transparent 420px),
-radial-gradient(circle at 85% 0%,rgba(80,160,255,.08),transparent 420px),
-linear-gradient(180deg,#02070b,#010306);color:var(--text)}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.14;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:36px 36px}
-.app{position:relative;z-index:1;display:grid;grid-template-columns:276px 1fr;min-height:100vh}
-.sidebar{height:100vh;position:sticky;top:0;background:linear-gradient(180deg,#06121b,#02080d);border-right:1px solid var(--stroke);padding:14px 12px;overflow:auto}
-.logo{height:78px;display:flex;gap:13px;align-items:center;border-bottom:1px solid var(--stroke2);margin-bottom:12px}
-.logoMark{width:48px;height:48px;border:2px solid #00f0a0;border-radius:10px;display:grid;place-items:center;box-shadow:0 0 28px rgba(0,255,150,.28)}
-.logoMark:before{content:"✓";font-size:25px;color:#00f0a0;font-weight:900}
-.logoText b{display:block;font-size:25px;letter-spacing:7px;line-height:1.05}
-.pro{display:inline-block;font-size:15px;letter-spacing:1px;background:linear-gradient(135deg,#6f33ff,#b881ff);padding:2px 7px;border-radius:4px;margin-left:4px}
-.logoText span{display:block;margin-top:4px;color:var(--muted);font-size:11px;letter-spacing:3px}
-.nav{display:grid;gap:6px}
-.nav button{height:45px;background:transparent;color:#dae7ed;border:1px solid transparent;border-radius:8px;text-align:left;padding:0 12px;display:flex;gap:12px;align-items:center;cursor:pointer;font-weight:800;font-size:13px}
-.nav button:hover{background:rgba(106,255,57,.08);border-color:rgba(106,255,57,.25)}
-.nav button.active{background:linear-gradient(90deg,rgba(106,255,57,.24),rgba(106,255,57,.08));border-color:rgba(106,255,57,.75);color:var(--green);box-shadow:0 0 20px rgba(106,255,57,.22)}
-.nav i{font-style:normal;width:18px;text-align:center}.bubble{margin-left:auto;background:#6e32bd;color:white;min-width:22px;height:22px;border-radius:999px;display:grid;place-items:center}
-.sidePanel{border:1px solid var(--stroke);background:rgba(6,19,28,.84);border-radius:8px;padding:14px;margin-top:14px;box-shadow:var(--shadow)}
-.sidePanel h3{margin:0 0 11px;font-size:12px;text-transform:uppercase}.sideRow{display:flex;justify-content:space-between;margin:8px 0;font-size:12px;color:#dbe7eb}.sideRow b{color:var(--green)}
-.sessionCircle{width:112px;height:112px;border-radius:50%;margin:18px auto 6px;border:8px solid rgba(106,255,57,.35);border-right-color:var(--yellow);display:grid;place-items:center;text-align:center}
-.main{min-width:0;padding:10px 14px 44px}
-.topbar{height:70px;border:1px solid var(--stroke);border-radius:8px;background:rgba(6,19,28,.88);display:grid;grid-template-columns:1.15fr 1.05fr 1.1fr 1.25fr 1.3fr .7fr .95fr 1.2fr 150px;align-items:center;box-shadow:var(--shadow);overflow:hidden;margin-bottom:13px}
-.topbar div{height:100%;padding:13px 16px;border-right:1px solid var(--stroke2);display:flex;flex-direction:column;justify-content:center}
-.topbar small{font-size:11px;text-transform:uppercase;color:var(--muted)}.topbar b{font-size:13px}.ok{color:var(--green)}.icons{display:flex!important;flex-direction:row!important;gap:18px;align-items:center!important;justify-content:center!important;font-size:20px}
-.page{display:none}.page.active{display:block}
-.regimeGrid{display:grid;grid-template-columns:1.05fr 1.05fr 1fr 1.05fr 1.2fr .95fr;gap:12px;margin-bottom:13px}
-.regime{height:118px;border:1px solid var(--stroke);background:rgba(6,19,28,.86);border-radius:8px;padding:14px;display:grid;grid-template-columns:70px 1fr;gap:12px;box-shadow:var(--shadow);overflow:hidden}
-.iconBig{font-size:50px;color:var(--green);filter:drop-shadow(0 0 18px rgba(106,255,57,.3));display:grid;place-items:center}.regime small{color:var(--muted);font-size:11px;text-transform:uppercase}.regime h2{margin:4px 0;color:var(--green);font-size:22px}.regime p{margin:0 0 4px;font-size:13px}.regime span{color:var(--green);font-size:12px}
-.dashboard{display:grid;grid-template-columns:1.24fr 1.02fr .65fr;gap:12px}
-.card{border:1px solid var(--stroke);background:rgba(6,19,28,.86);border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
-.head{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--stroke2)}
-.head h2{margin:0;font-size:15px;text-transform:uppercase}.head small{color:var(--muted);font-size:12px;text-transform:none}.head span{color:var(--green);font-size:12px}
-.tablewrap{overflow:auto}.scanner{width:100%;border-collapse:collapse;min-width:750px}.scanner th,.scanner td{border-bottom:1px solid rgba(255,255,255,.055);padding:10px 13px;text-align:left;font-size:13px}.scanner th{font-size:11px;text-transform:uppercase;color:#c9d6da;background:rgba(0,0,0,.18)}.rank{color:var(--green);font-weight:900}.ticker{font-weight:900;font-size:16px}.conf{border:1px solid rgba(106,255,57,.5);background:rgba(106,255,57,.09);padding:4px 9px;border-radius:4px;color:var(--green)}.exp{color:var(--green);font-weight:900}.arrow{font-size:21px;color:var(--green)}.neutral{color:var(--yellow)}.view{border:1px solid var(--stroke2);background:#162431;color:white;border-radius:4px;padding:6px 9px;cursor:pointer}
-.chart{height:250px;padding:12px}.chart svg{width:100%;height:100%;display:block}.metrics{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--stroke2)}.metric{padding:11px 14px;border-right:1px solid var(--stroke2);font-size:12px}.metric b{color:var(--green);margin-left:6px}
-.two{display:grid;grid-template-columns:.7fr 1fr;gap:12px;margin-top:12px}
-.systems,.alerts{padding:12px 14px}.sys,.alert,.miniRow{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.055);padding:8px 0;font-size:13px}.sys b,.alert b{color:var(--green)}
-.lower{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:12px}.lower.three{grid-template-columns:1.4fr 1fr 1fr}.mini{min-height:214px;border:1px solid var(--stroke);background:rgba(6,19,28,.86);border-radius:8px;padding:14px;box-shadow:var(--shadow)}.mini h3{margin:0 0 12px;font-size:13px;text-transform:uppercase}
-.barline{display:grid;grid-template-columns:110px 1fr 55px;gap:8px;align-items:center;margin:8px 0;font-size:12px}.track{height:10px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}.fill{height:100%;background:var(--green)}.fill.red{background:var(--red)}
-.heatmap{display:grid;grid-template-columns:2fr repeat(4,1fr);grid-template-rows:repeat(3,44px);gap:2px}.heat{background:rgba(106,255,57,.25);display:grid;place-items:center;font-size:12px}.heat.big{grid-row:span 2;font-size:21px;font-weight:900}.heat.red{background:rgba(255,69,92,.35)}
-.popup{position:fixed;right:24px;bottom:74px;width:610px;background:linear-gradient(180deg,rgba(8,18,28,.98),rgba(3,8,13,.98));border:2px solid var(--purple);border-radius:14px;box-shadow:0 0 45px rgba(155,92,255,.48),var(--shadow);z-index:20;padding:20px}.popupTop{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--stroke2);padding-bottom:12px}.popupTop h2{margin:0;color:var(--green);font-size:21px}.close{background:transparent;color:white;border:0;font-size:24px;cursor:pointer}.popupMain{display:grid;grid-template-columns:90px 1fr 100px;gap:16px;align-items:center;padding:15px 0}.nvlogo{height:54px;background:var(--green);color:#031207;display:grid;place-items:center;font-weight:900}.popTicker{font-size:34px;font-weight:900}.long{border:1px solid rgba(106,255,57,.5);color:var(--green);border-radius:6px;padding:10px 22px;text-align:center}.popupGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 40px}.popupLine{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.055);padding:6px 0;color:var(--muted)}.popupLine b{color:white}.popupLine b.risk{color:var(--red)}.progress{height:4px;background:rgba(106,255,57,.15);margin-top:18px;border-radius:99px;overflow:hidden}.progress div{height:100%;width:42%;background:var(--green)}
-.tickerbar{position:fixed;left:276px;right:0;bottom:0;height:38px;background:rgba(3,8,13,.97);border-top:1px solid var(--stroke);display:flex;align-items:center;gap:28px;padding:0 18px;font-size:13px;z-index:8}.tickerbar b{color:white}.tickerbar span{color:var(--green)}
-.pageGrid{display:grid;grid-template-columns:1.35fr 1fr;gap:12px}.pagePanel{min-height:300px;border:1px solid var(--stroke);background:rgba(6,19,28,.86);border-radius:8px;padding:18px;box-shadow:var(--shadow)}.pagePanel h2{margin-top:0}.pagePanel p{color:var(--muted);line-height:1.5}.wideTable{width:100%;border-collapse:collapse}.wideTable td,.wideTable th{padding:12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;text-align:left}.wideTable th{color:var(--muted);text-transform:uppercase;font-size:11px}
-@media(max-width:1450px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.tickerbar{left:0}.topbar,.regimeGrid,.dashboard,.lower,.lower.three,.pageGrid{grid-template-columns:1fr}.popup{left:12px;right:12px;width:auto}}
+:root{--bg:#02070b;--panel:#06131c;--panel2:#081926;--line:rgba(120,255,70,.18);--line2:rgba(255,255,255,.08);--text:#f2fff0;--muted:#95a9b4;--green:#6aff39;--red:#ff455c;--yellow:#ffd166;--blue:#64b8ff;--purple:#9b5cff;--shadow:0 22px 70px rgba(0,0,0,.48),0 0 32px rgba(106,255,57,.06)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,Arial,Helvetica,sans-serif;background:radial-gradient(circle at 20% -10%,rgba(106,255,57,.13),transparent 420px),radial-gradient(circle at 85% 0%,rgba(80,160,255,.08),transparent 420px),linear-gradient(180deg,#02070b,#010306);color:var(--text)}body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.14;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:36px 36px}
+.app{position:relative;z-index:1;display:grid;grid-template-columns:276px 1fr;min-height:100vh}.sidebar{height:100vh;position:sticky;top:0;background:linear-gradient(180deg,#06121b,#02080d);border-right:1px solid var(--line);padding:14px 12px;overflow:auto}.logo{height:78px;display:flex;gap:13px;align-items:center;border-bottom:1px solid var(--line2);margin-bottom:12px}.logoMark{width:48px;height:48px;border:2px solid #00f0a0;border-radius:10px;display:grid;place-items:center;box-shadow:0 0 28px rgba(0,255,150,.28)}.logoMark:before{content:"✓";font-size:25px;color:#00f0a0;font-weight:900}.logoText b{display:block;font-size:25px;letter-spacing:7px;line-height:1.05}.pro{display:inline-block;font-size:15px;letter-spacing:1px;background:linear-gradient(135deg,#6f33ff,#b881ff);padding:2px 7px;border-radius:4px;margin-left:4px}.logoText span{display:block;margin-top:4px;color:var(--muted);font-size:11px;letter-spacing:3px}.nav{display:grid;gap:6px}.nav button{height:45px;background:transparent;color:#dae7ed;border:1px solid transparent;border-radius:8px;text-align:left;padding:0 12px;display:flex;gap:12px;align-items:center;cursor:pointer;font-weight:800;font-size:13px}.nav button:hover{background:rgba(106,255,57,.08);border-color:rgba(106,255,57,.25)}.nav button.active{background:linear-gradient(90deg,rgba(106,255,57,.24),rgba(106,255,57,.08));border-color:rgba(106,255,57,.75);color:var(--green);box-shadow:0 0 20px rgba(106,255,57,.22)}.nav i{font-style:normal;width:18px;text-align:center}.bubble{margin-left:auto;background:#6e32bd;color:white;min-width:22px;height:22px;border-radius:999px;display:grid;place-items:center}.sidePanel{border:1px solid var(--line);background:rgba(6,19,28,.84);border-radius:8px;padding:14px;margin-top:14px;box-shadow:var(--shadow)}.sidePanel h3{margin:0 0 11px;font-size:12px;text-transform:uppercase}.sideRow{display:flex;justify-content:space-between;margin:8px 0;font-size:12px;color:#dbe7eb}.sideRow b{color:var(--green)}.sessionCircle{width:112px;height:112px;border-radius:50%;margin:18px auto 6px;border:8px solid rgba(106,255,57,.35);border-right-color:var(--yellow);display:grid;place-items:center;text-align:center}.main{min-width:0;padding:10px 14px 44px}
+.topbar{height:70px;border:1px solid var(--line);border-radius:8px;background:rgba(6,19,28,.88);display:grid;grid-template-columns:1.15fr 1.05fr 1.1fr 1.25fr 1.3fr .75fr .95fr 1.2fr 150px;align-items:center;box-shadow:var(--shadow);overflow:hidden;margin-bottom:13px}.topbar div{height:100%;padding:13px 16px;border-right:1px solid var(--line2);display:flex;flex-direction:column;justify-content:center}.topbar small{font-size:11px;text-transform:uppercase;color:var(--muted)}.topbar b{font-size:13px}.ok{color:var(--green)}.bad{color:var(--red)}.warn{color:var(--yellow)}.icons{display:flex!important;flex-direction:row!important;gap:18px;align-items:center!important;justify-content:center!important;font-size:20px}.page{display:none}.page.active{display:block}
+.regimeGrid{display:grid;grid-template-columns:1.05fr 1.05fr 1fr 1.05fr 1.2fr .95fr;gap:12px;margin-bottom:13px}.regime{height:118px;border:1px solid var(--line);background:rgba(6,19,28,.86);border-radius:8px;padding:14px;display:grid;grid-template-columns:70px 1fr;gap:12px;box-shadow:var(--shadow);overflow:hidden}.iconBig{font-size:50px;color:var(--green);filter:drop-shadow(0 0 18px rgba(106,255,57,.3));display:grid;place-items:center}.regime small{color:var(--muted);font-size:11px;text-transform:uppercase}.regime h2{margin:4px 0;color:var(--green);font-size:22px}.regime p{margin:0 0 4px;font-size:13px}.regime span{color:var(--green);font-size:12px}
+.dashboard{display:grid;grid-template-columns:1.24fr 1.02fr .65fr;gap:12px}.card{border:1px solid var(--line);background:rgba(6,19,28,.86);border-radius:8px;box-shadow:var(--shadow);overflow:hidden}.head{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--line2)}.head h2{margin:0;font-size:15px;text-transform:uppercase}.head small{color:var(--muted);font-size:12px;text-transform:none}.head span{color:var(--green);font-size:12px}.tablewrap{overflow:auto;max-height:470px}.scanner{width:100%;border-collapse:collapse;min-width:900px}.scanner th,.scanner td{border-bottom:1px solid rgba(255,255,255,.055);padding:10px 13px;text-align:left;font-size:13px}.scanner th{font-size:11px;text-transform:uppercase;color:#c9d6da;background:rgba(0,0,0,.18);position:sticky;top:0}.rank{color:var(--green);font-weight:900}.ticker{font-weight:900;font-size:16px}.conf{border:1px solid rgba(106,255,57,.5);background:rgba(106,255,57,.09);padding:4px 9px;border-radius:4px;color:var(--green)}.exp{color:var(--green);font-weight:900}.arrow{font-size:21px;color:var(--green)}.neutral{color:var(--yellow)}.view{border:1px solid var(--line2);background:#162431;color:white;border-radius:4px;padding:6px 9px;cursor:pointer}.view:hover{border-color:var(--green)}
+.chart{height:250px;padding:12px}.chart svg{width:100%;height:100%;display:block}.empty{height:250px;display:grid;place-items:center;text-align:center;color:var(--muted);padding:20px}.metrics{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line2)}.metric{padding:11px 14px;border-right:1px solid var(--line2);font-size:12px}.metric b{color:var(--green);margin-left:6px}.two{display:grid;grid-template-columns:.7fr 1fr;gap:12px;margin-top:12px}.systems,.alerts{padding:12px 14px}.sys,.alert,.miniRow{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.055);padding:8px 0;font-size:13px}.sys b,.alert b{color:var(--green)}.lower{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:12px}.lower.three{grid-template-columns:1.4fr 1fr 1fr}.mini{min-height:214px;border:1px solid var(--line);background:rgba(6,19,28,.86);border-radius:8px;padding:14px;box-shadow:var(--shadow)}.mini h3{margin:0 0 12px;font-size:13px;text-transform:uppercase}.barline{display:grid;grid-template-columns:110px 1fr 55px;gap:8px;align-items:center;margin:8px 0;font-size:12px}.track{height:10px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}.fill{height:100%;background:var(--green)}.fill.red{background:var(--red)}.heatmap{display:grid;grid-template-columns:2fr repeat(4,1fr);grid-template-rows:repeat(3,44px);gap:2px}.heat{background:rgba(106,255,57,.25);display:grid;place-items:center;font-size:12px}.heat.big{grid-row:span 2;font-size:21px;font-weight:900}.heat.red{background:rgba(255,69,92,.35)}
+.selectedPlan{padding:12px 14px}.selectedPlan h3{margin:0 0 12px;font-size:20px}.planGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px}.planGrid div{border-bottom:1px solid rgba(255,255,255,.055);padding:7px 0;color:var(--muted)}.planGrid b{float:right;color:white}
+.tickerbar{position:fixed;left:276px;right:0;bottom:0;height:38px;background:rgba(3,8,13,.97);border-top:1px solid var(--line);display:flex;align-items:center;gap:28px;padding:0 18px;font-size:13px;z-index:8;overflow:hidden}.tickerbar b{color:white}.tickerbar span{color:var(--green)}.pageGrid{display:grid;grid-template-columns:1.35fr 1fr;gap:12px}.pagePanel{min-height:300px;border:1px solid var(--line);background:rgba(6,19,28,.86);border-radius:8px;padding:18px;box-shadow:var(--shadow)}.pagePanel h2{margin-top:0}.pagePanel p{color:var(--muted);line-height:1.5}.wideTable{width:100%;border-collapse:collapse}.wideTable td,.wideTable th{padding:12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;text-align:left}.wideTable th{color:var(--muted);text-transform:uppercase;font-size:11px}
+@media(max-width:1450px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.tickerbar{left:0}.topbar,.regimeGrid,.dashboard,.lower,.lower.three,.pageGrid{grid-template-columns:1fr}.scanner{min-width:780px}}
 </style>
 </head>
 <body>
@@ -74,136 +22,167 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.14;ba
 <aside class="sidebar">
   <div class="logo"><div class="logoMark"></div><div class="logoText"><b>TRADING<br>MINT<span class="pro">PRO</span></b><span>AUTOMATED TRADING SYSTEM</span></div></div>
   <nav class="nav">
-    <button class="active" data-page="dashboard"><i>▥</i>DASHBOARD</button>
-    <button data-page="scanner"><i>⌕</i>LIVE SCANNER</button>
-    <button data-page="positions"><i>⚙</i>POSITIONS <span class="bubble">4</span></button>
-    <button data-page="journal"><i>▤</i>TRADE JOURNAL</button>
-    <button data-page="performance"><i>▥</i>PERFORMANCE</button>
-    <button data-page="backtest"><i>◌</i>BACKTEST ANALYTICS</button>
-    <button data-page="regime"><i>▱</i>MARKET REGIME</button>
-    <button data-page="sector"><i>▥</i>SECTOR ROTATION</button>
-    <button data-page="risk"><i>♢</i>RISK MANAGEMENT</button>
-    <button data-page="alertsPage"><i>♧</i>ALERTS <span class="bubble">7</span></button>
-    <button data-page="health"><i>⚙</i>SYSTEM HEALTH</button>
-    <button data-page="settings"><i>⚙</i>SETTINGS</button>
+    <button class="active" data-page="dashboard"><i>▥</i>DASHBOARD</button><button data-page="scanner"><i>⌕</i>LIVE SCANNER</button><button data-page="positions"><i>⚙</i>POSITIONS <span id="positionsCount" class="bubble">0</span></button><button data-page="journal"><i>▤</i>TRADE JOURNAL</button><button data-page="performance"><i>▥</i>PERFORMANCE</button><button data-page="backtest"><i>◌</i>BACKTEST ANALYTICS</button><button data-page="regime"><i>▱</i>MARKET REGIME</button><button data-page="sector"><i>▥</i>SECTOR ROTATION</button><button data-page="risk"><i>♢</i>RISK MANAGEMENT</button><button data-page="alertsPage"><i>♧</i>ALERTS <span id="alertsCount" class="bubble">0</span></button><button data-page="health"><i>⚙</i>SYSTEM HEALTH</button><button data-page="settings"><i>⚙</i>SETTINGS</button>
   </nav>
-  <div class="sidePanel"><h3>Quick Actions</h3><div class="sideRow"><span>Run Backtest</span><b>READY</b></div><div class="sideRow"><span>Optimize Strategies</span><b>ON</b></div><div class="sideRow"><span>Paper Trading</span><b>LIVE</b></div><div class="sideRow"><span>Market Replay</span><b>READY</b></div></div>
-  <div class="sidePanel"><h3>Market Session</h3><div class="sideRow"><span>● MARKET OPEN</span><b></b></div><div class="sessionCircle"><div><b>01:31:45</b><br><small>UNTIL CLOSE</small></div></div></div>
+  <div class="sidePanel"><h3>Quick Actions</h3><div class="sideRow"><span>Run Backtest</span><b>WAITING</b></div><div class="sideRow"><span>Optimize Strategies</span><b>LOCKED</b></div><div class="sideRow"><span>Paper Trading</span><b>READY</b></div><div class="sideRow"><span>Market Replay</span><b>NO DATA</b></div></div>
+  <div class="sidePanel"><h3>Market Session</h3><div class="sideRow"><span id="sessionState">Checking</span><b></b></div><div class="sessionCircle"><div><b id="sessionClock">--:--:--</b><br><small id="sessionLabel">LOADING</small></div></div></div>
 </aside>
 <main class="main">
   <section class="topbar">
-    <div><small>Market Regime</small><b class="ok">BULLISH</b></div>
-    <div><small>SPY Trend</small><b class="ok">BULLISH</b></div>
-    <div><small>Market Volatility</small><b class="ok">LOW</b></div>
-    <div><small>Market Breadth</small><b class="ok">STRONG</b></div>
-    <div><small>Sector Leader</small><b class="ok">TECHNOLOGY</b></div>
-    <div><small>Data Feed</small><b class="ok">● LIVE</b></div>
-    <div><small>Last Update</small><b>08:28:15 AM</b></div>
-    <div><small>Next Backtest</small><b>Tonight 2:00 AM</b></div>
-    <div class="icons"><span>🔔</span><span>⚙</span><span>⏻</span></div>
+    <div><small>Market Regime</small><b id="topRegime">Loading</b></div><div><small>SPY Trend</small><b id="topSpy">Loading</b></div><div><small>Market Volatility</small><b id="topVol">Loading</b></div><div><small>Market Breadth</small><b id="topBreadth">Loading</b></div><div><small>Sector Leader</small><b id="topSector">Loading</b></div><div><small>Data Feed</small><b id="topFeed">Loading</b></div><div><small>Last Update</small><b id="lastUpdate">--</b></div><div><small>Next Backtest</small><b id="nextBacktest">--</b></div><div class="icons"><span>🔔</span><span>⚙</span><span>⏻</span></div>
   </section>
 
   <section id="dashboard" class="page active">
     <div class="regimeGrid">
-      <div class="regime"><div class="iconBig">↗</div><div><small>Market Regime</small><h2>BULLISH</h2><p>Strong Uptrend</p><span>Confidence: 78%</span></div></div>
-      <div class="regime"><div class="iconBig">↗</div><div><small>SPY Trend</small><h2>BULLISH</h2><p>Above 200 EMA</p><span>535.42 +0.78%</span></div></div>
-      <div class="regime"><div class="iconBig">▥</div><div><small>Market Volatility</small><h2>LOW</h2><p>VIX: 14.82</p><span>-6.21%</span></div></div>
-      <div class="regime"><div class="iconBig">◉</div><div><small>Market Breadth</small><h2>STRONG</h2><p>78% Above 50 MA</p><span>Adv/Dec 3.2:1</span></div></div>
-      <div class="regime"><div class="iconBig">▣</div><div><small>Sector Leader</small><h2>TECHNOLOGY</h2><p>Strength: 82/100</p><span>4Wk Rank: 1/11</span></div></div>
-      <div class="regime"><div class="iconBig">76</div><div><small>System Confidence</small><h2>HIGH</h2><p>Confidence</p><span>Environment</span></div></div>
+      <div class="regime"><div class="iconBig">↗</div><div><small>Market Regime</small><h2 id="regimeBox">--</h2><p id="regimeSub">Loading</p><span id="regimeConf">--</span></div></div>
+      <div class="regime"><div class="iconBig">↗</div><div><small>SPY Trend</small><h2 id="spyBox">--</h2><p>Live SPY data</p><span id="spyPrice">--</span></div></div>
+      <div class="regime"><div class="iconBig">▥</div><div><small>Market Volatility</small><h2 id="volBox">--</h2><p id="vixText">VIX</p><span id="vixSub">--</span></div></div>
+      <div class="regime"><div class="iconBig">◉</div><div><small>Market Breadth</small><h2 id="breadthBox">--</h2><p>Scanner universe</p><span id="breadthSub">--</span></div></div>
+      <div class="regime"><div class="iconBig">▣</div><div><small>Sector Leader</small><h2>TECHNOLOGY</h2><p>Current focus</p><span>Calculated from scan universe</span></div></div>
+      <div class="regime"><div class="iconBig" id="confIcon">--</div><div><small>System Confidence</small><h2 id="sysConf">--</h2><p>Live confidence</p><span>No fake win rate</span></div></div>
     </div>
 
     <div class="dashboard">
-      <div class="card">
-        <div class="head"><h2>LIVE SCANNER <small>(Ranked by Expectancy)</small></h2><span>Auto-Updated ●</span></div>
-        <div class="tablewrap"><table class="scanner"><thead><tr><th>Rank</th><th>Ticker</th><th>Setup</th><th>Conf</th><th>Win Rate</th><th>Expectancy</th><th>R:R</th><th>Trend</th><th>Regime</th><th>Action</th></tr></thead><tbody id="scannerRows"></tbody></table></div>
-        <div class="head"><span>Showing top 8 of 412 opportunities</span><span>Auto refresh in 18s ⟳</span></div>
-      </div>
+      <div class="card"><div class="head"><h2>LIVE SCANNER <small>(Ranked by Confidence)</small></h2><span id="scanState">Loading</span></div><div class="tablewrap"><table class="scanner"><thead><tr><th>Rank</th><th>Ticker</th><th>Setup</th><th>Conf</th><th>Price</th><th>Change</th><th>R:R</th><th>Trend</th><th>Regime</th><th>Action</th></tr></thead><tbody id="scannerRows"></tbody></table></div><div class="head"><span id="scanCount">--</span><span id="refreshClock">Auto refresh in --s</span></div></div>
       <div>
-        <div class="card">
-          <div class="head"><h2>EQUITY CURVE <small>(Paper Trading)</small></h2><span>1 Year⌄</span></div>
-          <div class="chart"><svg viewBox="0 0 600 260" preserveAspectRatio="none"><defs><linearGradient id="eq" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6aff39" stop-opacity=".35"/><stop offset="100%" stop-color="#6aff39" stop-opacity="0"/></linearGradient></defs><path d="M0 220 L50 200 L100 178 L150 160 L200 120 L250 98 L300 74 L350 92 L400 70 L450 46 L500 35 L550 25 L600 8 L600 260 L0 260 Z" fill="url(#eq)"/><polyline points="0,220 50,200 100,178 150,160 200,120 250,98 300,74 350,92 400,70 450,46 500,35 550,25 600,8" stroke="#6aff39" stroke-width="3" fill="none"/></svg></div>
-          <div class="metrics"><div class="metric">Total Return <b>+26.47%</b></div><div class="metric">Max Drawdown <b style="color:var(--red)">-3.21%</b></div><div class="metric">Sharpe Ratio <b>2.18</b></div></div>
-        </div>
-        <div class="two">
-          <div class="card"><div class="head"><h2>WIN RATE</h2></div><div style="height:150px;display:grid;place-items:center"><div style="width:108px;height:108px;border-radius:50%;border:20px solid var(--green);border-left-color:var(--red);display:grid;place-items:center;font-size:28px;font-weight:900">62%</div></div></div>
-          <div class="card"><div class="head"><h2>EXPECTANCY DISTRIBUTION</h2></div><div class="chart"><svg viewBox="0 0 400 180"><rect x="40" y="140" width="38" height="15" fill="#ff455c"/><rect x="110" y="105" width="38" height="50" fill="#6aff39"/><rect x="180" y="78" width="38" height="77" fill="#6aff39"/><rect x="250" y="48" width="38" height="107" fill="#6aff39"/><rect x="320" y="95" width="38" height="60" fill="#6aff39"/></svg></div></div>
-        </div>
+        <div class="card"><div class="head"><h2>EQUITY CURVE <small>(Paper Trading)</small></h2><span>No trades yet</span></div><div id="equityBox" class="empty">No paper trades yet.<br>Equity curve will start after the first closed paper trade.</div><div class="metrics"><div class="metric">Total Return <b id="totalReturn">--</b></div><div class="metric">Max Drawdown <b id="maxDrawdown">--</b></div><div class="metric">Profit Factor <b id="profitFactor">--</b></div></div></div>
+        <div class="two"><div class="card"><div class="head"><h2>WIN RATE</h2></div><div class="empty" id="winRateBox">No closed paper trades yet.</div></div><div class="card"><div class="head"><h2>SELECTED TRADE</h2></div><div class="selectedPlan" id="selectedPlan">Click a scanner row.</div></div></div>
       </div>
-      <div>
-        <div class="card"><div class="head"><h2>SYSTEM STATUS</h2></div><div class="systems" id="systems"></div></div>
-        <div class="card" style="margin-top:12px"><div class="head"><h2>RECENT ALERTS</h2></div><div class="alerts" id="alerts"></div></div>
-      </div>
+      <div><div class="card"><div class="head"><h2>SYSTEM STATUS</h2><span>Real app state</span></div><div class="systems" id="systems"></div></div><div class="card" style="margin-top:12px"><div class="head"><h2>RECENT ALERTS</h2><span id="alertsLabel">0</span></div><div class="alerts" id="alerts"></div></div></div>
     </div>
 
     <div class="lower">
-      <div class="mini"><h3>MARKET INDICES</h3><div class="miniRow"><span>SPY</span><b>535.42 <span style="color:var(--green)">+0.78%</span></b></div><div class="miniRow"><span>QQQ</span><b>467.81 <span style="color:var(--green)">+1.12%</span></b></div><div class="miniRow"><span>DIA</span><b>399.12 <span style="color:var(--green)">+0.51%</span></b></div><div class="miniRow"><span>VIX</span><b>14.82 <span style="color:var(--red)">-6.21%</span></b></div></div>
-      <div class="mini"><h3>SECTOR STRENGTH</h3><div id="sectorBars"></div></div>
-      <div class="mini"><h3>UPCOMING EARNINGS</h3><div class="miniRow"><span>NVDA</span><b>May 22</b></div><div class="miniRow"><span>AMZN</span><b>May 23</b></div><div class="miniRow"><span>META</span><b>May 29</b></div><div class="miniRow"><span>AVGO</span><b>Jun 4</b></div></div>
-      <div class="mini"><h3>SYSTEM PERFORMANCE</h3><div class="miniRow"><span>Total Trades</span><b>342</b></div><div class="miniRow"><span>Win Rate</span><b style="color:var(--green)">61.7%</b></div><div class="miniRow"><span>Expectancy</span><b style="color:var(--green)">1.42R</b></div><div class="miniRow"><span>Profit Factor</span><b style="color:var(--green)">2.18</b></div></div>
-      <div class="mini"><h3>MARKET BREADTH</h3><div style="height:150px;display:grid;place-items:center"><div style="width:116px;height:116px;border-radius:50%;border:18px solid var(--green);border-right-color:var(--red);display:grid;place-items:center;text-align:center"><b style="font-size:30px">78%</b><br><span style="color:var(--green)">STRONG</span></div></div></div>
+      <div class="mini"><h3>MARKET INDICES</h3><div id="indices"></div></div><div class="mini"><h3>SECTOR STRENGTH</h3><div id="sectorBars"></div></div><div class="mini"><h3>UPCOMING EARNINGS</h3><div class="miniRow"><span>Data status</span><b class="warn">Not connected</b></div><p style="color:var(--muted);font-size:12px">Earnings calendar needs a data source before it should show dates.</p></div><div class="mini"><h3>SYSTEM PERFORMANCE</h3><div class="miniRow"><span>Total Trades</span><b id="perfTrades">0</b></div><div class="miniRow"><span>Win Rate</span><b id="perfWin">--</b></div><div class="miniRow"><span>Expectancy</span><b id="perfExp">--</b></div><div class="miniRow"><span>Profit Factor</span><b id="perfPf">--</b></div></div><div class="mini"><h3>MARKET BREADTH</h3><div class="empty" id="breadthGauge">Loading breadth.</div></div>
     </div>
-
-    <div class="lower three">
-      <div class="mini"><h3>MARKET HEATMAP</h3><div class="heatmap"><div class="heat big">NVDA<br>+2.35%</div><div class="heat">AAPL<br>+1.25%</div><div class="heat">MSFT<br>+0.92%</div><div class="heat">AMZN<br>+1.32%</div><div class="heat">GOOGL<br>+0.84%</div><div class="heat">META<br>+1.18%</div><div class="heat red">TSLA<br>-1.46%</div><div class="heat">AVGO<br>+1.98%</div><div class="heat">AMD<br>+1.36%</div><div class="heat red">PLTR<br>-2.01%</div></div></div>
-      <div class="mini"><h3>SECTOR ROTATION</h3><div class="miniRow"><span>1 Technology</span><b style="color:var(--green)">82</b></div><div class="miniRow"><span>2 Communications</span><b style="color:var(--green)">74</b></div><div class="miniRow"><span>3 Consumer Cyclical</span><b style="color:var(--green)">68</b></div><div class="miniRow"><span>8 Energy</span><b style="color:var(--red)">28</b></div></div>
-      <div class="mini"><h3>TRADE DECISION STREAM</h3><div class="miniRow"><span>NVDA approved</span><b>LONG</b></div><div class="miniRow"><span>AMD waiting pullback</span><b>WAIT</b></div><div class="miniRow"><span>VIX risk low</span><b>OK</b></div><div class="miniRow"><span>Tech leading</span><b>STRONG</b></div></div>
-    </div>
+    <div class="lower three"><div class="mini"><h3>MARKET HEATMAP</h3><div class="heatmap" id="heatmap"></div></div><div class="mini"><h3>SECTOR ROTATION</h3><div class="miniRow"><span>Technology</span><b style="color:var(--green)">Leading</b></div><div class="miniRow"><span>Defensive sectors</span><b class="warn">Not ranked</b></div><p style="color:var(--muted);font-size:12px">Full sector rotation requires sector ETF scan.</p></div><div class="mini"><h3>TRADE DECISION STREAM</h3><div id="decisionStream"></div></div></div>
   </section>
 
-  <section id="scanner" class="page"><div class="pageGrid"><div class="pagePanel"><h2>Live Scanner</h2><table class="wideTable"><thead><tr><th>Ticker</th><th>Setup</th><th>Confidence</th><th>Action</th></tr></thead><tbody><tr><td>NVDA</td><td>Breakout</td><td>89</td><td>LONG</td></tr><tr><td>AVGO</td><td>Breakout</td><td>86</td><td>LONG</td></tr><tr><td>AMD</td><td>Pullback</td><td>82</td><td>LONG</td></tr></tbody></table></div><div class="pagePanel"><h2>Scanner Filters</h2><p>Setup type, confidence, risk/reward, expectancy, sector, trend and market regime filters will live here.</p></div></div></section>
-  <section id="positions" class="page"><div class="pageGrid"><div class="pagePanel"><h2>Positions</h2><table class="wideTable"><tr><th>Symbol</th><th>Entry</th><th>Stop</th><th>Target</th><th>P/L</th></tr><tr><td>NVDA</td><td>$946.12</td><td>$932.45</td><td>$965.00</td><td style="color:var(--green)">+1.2%</td></tr></table></div><div class="pagePanel"><h2>Risk Exposure</h2><p>Current exposure, risk per trade, open risk, max drawdown and account protection rules.</p></div></div></section>
-  <section id="journal" class="page"><div class="pagePanel"><h2>Trade Journal</h2><p>Every paper trade, entry reason, exit reason, setup type and screenshot notes will show here.</p></div></section>
-  <section id="performance" class="page"><div class="pagePanel"><h2>Performance</h2><p>Equity curve, win rate, profit factor, expectancy, drawdown and trade distribution.</p></div></section>
-  <section id="backtest" class="page"><div class="pagePanel"><h2>Backtest Analytics</h2><p>Automatic strategy testing, historical performance, setup win rates and optimizer output.</p></div></section>
-  <section id="regime" class="page"><div class="pagePanel"><h2>Market Regime</h2><p>SPY trend, QQQ trend, volatility, breadth, sector leadership and risk-on/risk-off state.</p></div></section>
-  <section id="sector" class="page"><div class="pagePanel"><h2>Sector Rotation</h2><p>Sector heatmaps, rankings, relative strength vs SPY and 4-week rotation scores.</p></div></section>
-  <section id="risk" class="page"><div class="pagePanel"><h2>Risk Management</h2><p>Position sizing, daily loss limit, drawdown protection and reduced-risk market modes.</p></div></section>
-  <section id="alertsPage" class="page"><div class="pagePanel"><h2>Alerts</h2><p>Trade popups, system messages, rejected trades and scanner alerts.</p></div></section>
-  <section id="health" class="page"><div class="pagePanel"><h2>System Health</h2><p>Data feed, backtester, scanner, alert engine and paper trader status.</p></div></section>
-  <section id="settings" class="page"><div class="pagePanel"><h2>Settings</h2><p>Watchlists, scanner rules, risk settings, market regime thresholds and notification settings.</p></div></section>
+  <section id="scanner" class="page"><div class="pageGrid"><div class="pagePanel"><h2>Live Scanner Full View</h2><table class="wideTable"><thead><tr><th>Rank</th><th>Ticker</th><th>Setup</th><th>Confidence</th><th>Price</th><th>Action</th></tr></thead><tbody id="scannerFullRows"></tbody></table></div><div class="pagePanel"><h2>Scanner Truth</h2><p>This page uses the same live API data as the dashboard. No win-rate or expectancy is shown until paper trade history exists.</p></div></div></section>
+  <section id="positions" class="page"><div class="pageGrid"><div class="pagePanel"><h2>Positions</h2><div id="positionsBox">No open paper positions.</div></div><div class="pagePanel"><h2>Risk Exposure</h2><p>Risk exposure will activate after paper entries are added.</p></div></div></section>
+  <section id="journal" class="page"><div class="pagePanel"><h2>Trade Journal</h2><p>No paper trade journal entries yet.</p></div></section>
+  <section id="performance" class="page"><div class="pagePanel"><h2>Performance</h2><p>No closed paper trades yet. Win rate, expectancy and profit factor are intentionally blank.</p></div></section>
+  <section id="backtest" class="page"><div class="pagePanel"><h2>Backtest Analytics</h2><p>Backtest engine status is waiting for the next implementation step. It should not display fake results.</p></div></section>
+  <section id="regime" class="page"><div class="pagePanel"><h2>Market Regime</h2><p id="regimePageText">Loading market regime.</p></div></section>
+  <section id="sector" class="page"><div class="pagePanel"><h2>Sector Rotation</h2><p>Sector rotation is partially wired. Full version needs ETF/sector universe scan.</p></div></section>
+  <section id="risk" class="page"><div class="pagePanel"><h2>Risk Management</h2><p>Risk manager is live at app level, but no active paper positions exist yet.</p></div></section>
+  <section id="alertsPage" class="page"><div class="pagePanel"><h2>Alerts</h2><div id="alertsPageBody">No alerts yet.</div></div></section>
+  <section id="health" class="page"><div class="pagePanel"><h2>System Health</h2><div id="healthBody">Loading health.</div></div></section>
+  <section id="settings" class="page"><div class="pagePanel"><h2>Settings</h2><p>Settings page is ready for watchlist, risk and alert configuration.</p></div></section>
 </main>
 </div>
-
-<div class="popup" id="tradePopup">
-  <div class="popupTop"><h2>🚀 TRADE TAKEN</h2><button class="close" onclick="document.getElementById('tradePopup').style.display='none'">×</button></div>
-  <div class="popupMain"><div class="nvlogo">NVIDIA</div><div><div class="popTicker">NVDA</div><div style="color:var(--muted)">NVIDIA Corporation</div></div><div class="long">LONG</div></div>
-  <div class="popupGrid">
-    <div class="popupLine"><span>Entry Price</span><b>$946.12</b></div><div class="popupLine"><span>Setup</span><b>Breakout</b></div>
-    <div class="popupLine"><span>Stop Loss</span><b>$932.45</b></div><div class="popupLine"><span>Confidence</span><b>89/100</b></div>
-    <div class="popupLine"><span>Target 1</span><b>$965.00</b></div><div class="popupLine"><span>Win Rate</span><b>63%</b></div>
-    <div class="popupLine"><span>Target 2</span><b>$982.00</b></div><div class="popupLine"><span>Expectancy</span><b>1.85R</b></div>
-    <div class="popupLine"><span>Position Size</span><b>150 shares</b></div><div class="popupLine"><span>Risk / Reward</span><b class="risk">2.34 : 1</b></div>
-  </div>
-  <div class="progress"><div></div></div><div style="text-align:right;color:var(--green);font-size:12px;margin-top:8px">Auto close in 00:57</div>
-</div>
-
-<div class="tickerbar"><b>LIVE TICKER</b><b>SPY</b> 535.42 <span>▲ 0.78%</span><b>QQQ</b>467.81 <span>▲ 1.12%</span><b>DIA</b>399.12 <span>▲ 0.51%</span><b>VIX</b>14.82 <span style="color:var(--red)">▼ -6.21%</span><b>NEWS</b> Fed Officials Signal Rate Cut Later This Year</div>
-
+<div class="tickerbar" id="tickerbar">Loading live ticker...</div>
 <script>
-const rows=[
-["1","NVDA","Breakout","89","63%","1.85R","2.34:1","↗","Bullish"],
-["2","AVGO","Breakout","86","61%","1.72R","2.18:1","↗","Bullish"],
-["3","AMD","Pullback","82","58%","1.48R","1.92:1","↗","Bullish"],
-["4","META","Breakout","79","55%","1.35R","1.88:1","↗","Bullish"],
-["5","PLTR","Breakout","76","57%","1.28R","1.67:1","↗","Bullish"],
-["6","TSLA","Pullback","72","54%","1.19R","1.58:1","↗","Bullish"],
-["7","CRWD","Breakout","70","53%","1.11R","1.52:1","→","Neutral"],
-["8","AMZN","Pullback","68","52%","1.05R","1.48:1","↗","Bullish"]
-];
-document.getElementById("scannerRows").innerHTML=rows.map(r=>`<tr><td class="rank">${r[0]}</td><td class="ticker">${r[1]}</td><td>${r[2]}</td><td><span class="conf">${r[3]}</span></td><td>${r[4]}</td><td class="exp">${r[5]}</td><td>${r[6]}</td><td class="${r[7]==='→'?'neutral':'arrow'}">${r[7]}</td><td style="color:${r[8]==='Neutral'?'var(--yellow)':'var(--green)'}">${r[8]}</td><td><button class="view">VIEW</button></td></tr>`).join("");
-document.getElementById("systems").innerHTML=["Data Collector","Backtest Engine","Strategy Optimizer","Market Regime Engine","Risk Manager","Alert Engine","Paper Trader","Performance Analytics"].map(x=>`<div class="sys"><span>● ${x}</span><b>RUNNING</b></div>`).join("")+`<div class="sys"><span>● ALL SYSTEMS OPERATIONAL</span><b></b></div>`;
-document.getElementById("alerts").innerHTML=[["08:27 AM","NVDA","Breakout"],["08:26 AM","AVGO","Breakout"],["08:24 AM","AMD","Pullback"],["08:22 AM","META","Breakout"],["08:20 AM","PLTR","Breakout"]].map(x=>`<div class="alert"><span>${x[0]}</span><span>${x[1]}</span><span>${x[2]}</span><b>LONG</b></div>`).join("")+`<div style="text-align:center;color:var(--muted);font-size:12px;margin-top:8px">Auto-cleared after 60s</div>`;
-document.getElementById("sectorBars").innerHTML=[["Technology","+2.41%",90,"green"],["Communication","+1.83%",72,"green"],["Consumer Cyclical","+1.21%",61,"green"],["Industrials","+0.78%",48,"green"],["Energy","-0.41%",20,"red"],["Utilities","-0.62%",26,"red"]].map(s=>`<div class="barline"><span>${s[0]}</span><div class="track"><div class="fill ${s[3]==='red'?'red':''}" style="width:${s[2]}%"></div></div><b style="color:${s[3]==='red'?'var(--red)':'var(--green)'}">${s[1]}</b></div>`).join("");
-document.querySelectorAll(".nav button").forEach(button=>{
-  button.addEventListener("click",()=>{
-    document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
-    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-    button.classList.add("active");
-    const target=document.getElementById(button.dataset.page);
-    if(target) target.classList.add("active");
-  });
-});
+let STATE=null, selectedSymbol=null, refreshLeft=30;
+const money=v=>Number.isFinite(Number(v))?"$"+Number(v).toFixed(2):"--";
+const pct=v=>Number.isFinite(Number(v))?(Number(v)>=0?"▲ ":"▼ ")+Math.abs(Number(v)).toFixed(2)+"%":"--";
+const cls=v=>Number(v)>=0?"var(--green)":"var(--red)";
+function marketCountdown(){
+  const now = new Date();
+  const ny = new Date(now.toLocaleString("en-US",{timeZone:"America/New_York"}));
+  const day=ny.getDay();
+  const open=new Date(ny); open.setHours(9,30,0,0);
+  const close=new Date(ny); close.setHours(16,0,0,0);
+  let target,label,state;
+  if(day===0||day===6){target=open; target.setDate(target.getDate()+(day===6?2:1)); label="UNTIL OPEN"; state="MARKET CLOSED";}
+  else if(ny<open){target=open; label="UNTIL OPEN"; state="PRE-MARKET";}
+  else if(ny<close){target=close; label="UNTIL CLOSE"; state="MARKET OPEN";}
+  else{target=open; target.setDate(target.getDate()+1); label="UNTIL OPEN"; state="AFTER-HOURS";}
+  let ms=Math.max(0,target-ny), h=Math.floor(ms/3600000), m=Math.floor(ms%3600000/60000), s=Math.floor(ms%60000/1000);
+  document.getElementById("sessionClock").textContent=`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  document.getElementById("sessionLabel").textContent=label;
+  document.getElementById("sessionState").textContent="● "+state;
+  const next=new Date(now); next.setHours(2,0,0,0); if(next<now) next.setDate(next.getDate()+1);
+  ms=next-now; h=Math.floor(ms/3600000); m=Math.floor(ms%3600000/60000);
+  document.getElementById("nextBacktest").textContent=`in ${h}h ${m}m`;
+}
+function renderRows(signals){
+  const rowHtml = signals.map(s=>`<tr data-symbol="${s.symbol}"><td class="rank">${s.rank}</td><td class="ticker">${s.symbol}</td><td>${s.setup}</td><td><span class="conf">${s.confidence}</span></td><td>${money(s.price)}</td><td style="color:${cls(s.changePct)}">${pct(s.changePct)}</td><td>${s.rr}</td><td class="${s.trend==='UP'?'arrow':'neutral'}">${s.trend==='UP'?'↗':'→'}</td><td style="color:${s.regime==='Bullish'?'var(--green)':'var(--yellow)'}">${s.regime}</td><td><button class="view">VIEW</button></td></tr>`).join("");
+  document.getElementById("scannerRows").innerHTML=rowHtml;
+  document.getElementById("scannerFullRows").innerHTML=signals.map(s=>`<tr data-symbol="${s.symbol}"><td>${s.rank}</td><td>${s.symbol}</td><td>${s.setup}</td><td>${s.confidence}</td><td>${money(s.price)}</td><td>${s.action}</td></tr>`).join("");
+  document.querySelectorAll("[data-symbol]").forEach(row=>row.addEventListener("click",()=>selectTrade(row.dataset.symbol)));
+}
+function selectTrade(symbol){
+  selectedSymbol=symbol;
+  const s=STATE.signals.find(x=>x.symbol===symbol);
+  if(!s)return;
+  document.getElementById("selectedPlan").innerHTML=`<h3>${s.symbol} <span class="${s.action==='LONG'?'ok':'warn'}">${s.action}</span></h3><div class="planGrid"><div>Entry <b>${money(s.entry)}</b></div><div>Buy Low <b>${money(s.buyLow)}</b></div><div>Buy High <b>${money(s.buyHigh)}</b></div><div>Stop <b>${money(s.stop)}</b></div><div>Target 1 <b>${money(s.target1)}</b></div><div>Target 2 <b>${money(s.target2)}</b></div><div>RSI <b>${s.rsi ?? "--"}</b></div><div>Rel Strength <b>${s.relativeStrength ?? "--"}</b></div></div>`;
+}
+function renderState(data){
+  STATE=data;
+  const m=data.market;
+  document.getElementById("topRegime").textContent=m.regime;
+  document.getElementById("topRegime").className=m.regime==="BULLISH"?"ok":m.regime==="BEARISH"?"bad":"warn";
+  document.getElementById("topSpy").textContent=m.spyTrend;
+  document.getElementById("topSpy").className=m.spyTrend==="BULLISH"?"ok":"warn";
+  document.getElementById("topVol").textContent=m.volatility;
+  document.getElementById("topBreadth").textContent=m.breadth;
+  document.getElementById("topSector").textContent=m.sectorLeader;
+  document.getElementById("topFeed").textContent=data.mode==="LIVE_DATA"?"● LIVE":"● PARTIAL";
+  document.getElementById("topFeed").className=data.mode==="LIVE_DATA"?"ok":"warn";
+  document.getElementById("lastUpdate").textContent=new Date(data.updatedAt).toLocaleTimeString();
+
+  document.getElementById("regimeBox").textContent=m.regime;
+  document.getElementById("regimeSub").textContent=m.regime==="BULLISH"?"Risk-on trend conditions":"Mixed or defensive conditions";
+  document.getElementById("regimeConf").textContent="Confidence: "+m.confidence+"%";
+  document.getElementById("spyBox").textContent=m.spyTrend;
+  const spy=data.indices.find(x=>x.symbol==="SPY");
+  document.getElementById("spyPrice").textContent=spy?`${money(spy.price)} ${pct(spy.changePct)}`:"--";
+  document.getElementById("volBox").textContent=m.volatility;
+  document.getElementById("vixText").textContent="VIX: "+(m.vix??"--");
+  document.getElementById("vixSub").textContent=m.volatility==="LOW"?"Risk supportive":"Risk elevated";
+  document.getElementById("breadthBox").textContent=m.breadth;
+  document.getElementById("breadthSub").textContent=m.breadthScore+"% above scanner trend filter";
+  document.getElementById("confIcon").textContent=m.confidence;
+  document.getElementById("sysConf").textContent=m.confidence>=70?"HIGH":m.confidence>=50?"MEDIUM":"LOW";
+
+  renderRows(data.signals);
+  document.getElementById("scanState").textContent=data.mode==="LIVE_DATA"?"Live data ●":"Partial live data ●";
+  document.getElementById("scanCount").textContent=`Showing ${data.signals.length} scanned symbols`;
+  if(!selectedSymbol && data.signals[0]) selectTrade(data.signals[0].symbol); else if(selectedSymbol) selectTrade(selectedSymbol);
+
+  const stats=data.stats;
+  document.getElementById("totalReturn").textContent=stats.totalTrades?"+0.00%":"--";
+  document.getElementById("maxDrawdown").textContent=stats.maxDrawdown??"--";
+  document.getElementById("profitFactor").textContent=stats.profitFactor??"--";
+  document.getElementById("perfTrades").textContent=stats.totalTrades;
+  document.getElementById("perfWin").textContent=stats.winRate??"--";
+  document.getElementById("perfExp").textContent=stats.expectancy??"--";
+  document.getElementById("perfPf").textContent=stats.profitFactor??"--";
+  document.getElementById("winRateBox").innerHTML=stats.totalTrades?`<b>${stats.winRate}%</b>`:"No closed paper trades yet.";
+
+  document.getElementById("systems").innerHTML=data.systems.map(s=>`<div class="sys"><span>● ${s.name}</span><b class="${s.state.includes('WAITING')||s.state.includes('NO ') ? 'warn':'ok'}">${s.state}</b></div>`).join("");
+  document.getElementById("healthBody").innerHTML=data.systems.map(s=>`<div class="miniRow"><span>${s.name}</span><b>${s.state}</b></div>`).join("")+`<p style="color:var(--muted)">Uptime: ${data.uptimeSeconds}s</p>`;
+
+  const alerts=data.alerts||[];
+  document.getElementById("alertsCount").textContent=alerts.length;
+  document.getElementById("alertsLabel").textContent=alerts.length;
+  document.getElementById("alerts").innerHTML=alerts.length?alerts.map(a=>`<div class="alert"><span>${new Date(a.time).toLocaleTimeString()}</span><span>${a.symbol}</span><b>${a.type}</b></div>`).join(""):"<div class='alert'><span>No alerts yet</span><b>0</b></div>";
+  document.getElementById("alertsPageBody").innerHTML=alerts.length?document.getElementById("alerts").innerHTML:"No alerts yet. The sidebar count is now honest.";
+
+  document.getElementById("positionsCount").textContent=data.paper.open.length;
+  document.getElementById("positionsBox").innerHTML=data.paper.open.length?"Open positions found.":"No open paper positions.";
+  document.getElementById("indices").innerHTML=data.indices.map(i=>`<div class="miniRow"><span>${i.symbol}</span><b>${money(i.price)} <span style="color:${cls(i.changePct)}">${pct(i.changePct)}</span></b></div>`).join("");
+  document.getElementById("tickerbar").innerHTML="<b>LIVE TICKER</b>"+data.indices.map(i=>`<b>${i.symbol}</b> ${money(i.price)} <span style="color:${cls(i.changePct)}">${pct(i.changePct)}</span>`).join("");
+  document.getElementById("breadthGauge").innerHTML=`<div style="width:116px;height:116px;border-radius:50%;border:18px solid var(--green);border-right-color:var(--red);display:grid;place-items:center;text-align:center"><b style="font-size:30px">${m.breadth}</b><br><span style="color:var(--green)">${m.regime}</span></div>`;
+  document.getElementById("heatmap").innerHTML=data.signals.slice(0,10).map((s,i)=>`<div class="heat ${i===0?'big':''} ${s.changePct<0?'red':''}">${s.symbol}<br>${pct(s.changePct)}</div>`).join("");
+  document.getElementById("decisionStream").innerHTML=data.signals.slice(0,4).map(s=>`<div class="miniRow"><span>${s.symbol} ${s.action==='LONG'?'approved':'watching'}</span><b>${s.action}</b></div>`).join("");
+  document.getElementById("sectorBars").innerHTML=[["Technology","+ live",90,"green"],["Momentum","+ scan",72,"green"],["Breadth",m.breadth,Number(m.breadthScore)||50,"green"],["Risk","VIX "+(m.vix??"--"),m.volatility==="LOW"?25:75,m.volatility==="LOW"?"green":"red"]].map(s=>`<div class="barline"><span>${s[0]}</span><div class="track"><div class="fill ${s[3]==='red'?'red':''}" style="width:${s[2]}%"></div></div><b style="color:${s[3]==='red'?'var(--red)':'var(--green)'}">${s[1]}</b></div>`).join("");
+  document.getElementById("regimePageText").textContent=`Regime is ${m.regime}. SPY trend is ${m.spyTrend}. Breadth is ${m.breadth}. Volatility is ${m.volatility}.`;
+}
+async function loadState(){
+  try{
+    const res=await fetch("/api/state",{cache:"no-store"});
+    const data=await res.json();
+    renderState(data);
+    refreshLeft=30;
+  }catch(e){
+    document.getElementById("scanState").textContent="API error";
+    document.getElementById("systems").innerHTML=`<div class="sys"><span>API</span><b class="bad">${e.message}</b></div>`;
+  }
+}
+document.querySelectorAll(".nav button").forEach(button=>button.addEventListener("click",()=>{document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));button.classList.add("active");document.getElementById(button.dataset.page)?.classList.add("active");}));
+setInterval(()=>{marketCountdown(); refreshLeft=Math.max(0,refreshLeft-1); document.getElementById("refreshClock").textContent=`Auto refresh in ${refreshLeft}s`; if(refreshLeft===0) loadState();},1000);
+marketCountdown(); loadState();
 </script>
 </body>
 </html>

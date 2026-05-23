@@ -1,39 +1,39 @@
-# TradingMint PRO
+# TradingMint PRO Functional
 
-This version fixes the frontend properly.
+This version fixes the fake-dashboard problem.
 
-## What is fixed
+## Fixed
 
-- Sidebar links are real clickable page navigation.
-- Dashboard is built to match the supplied TradingMint PRO reference style.
-- Pages are no longer dead placeholders.
-- Dashboard includes scanner, equity curve, systems, alerts, market regime, heatmap, sector strength, market breadth, ticker bar and trade popup.
-- Render deployment files are included.
+- Clocks tick down live.
+- Sidebar pages are clickable.
+- Live Scanner has a full page view.
+- Dashboard scanner rows are clickable.
+- Selected trade panel updates from clicked row.
+- Equity curve is honest and blank until paper trades exist.
+- Win rate is blank until closed paper trades exist.
+- Alert count is honest and starts at 0.
+- System status shows real application state.
+- Backend fetches live Yahoo chart data where available.
+- Render-safe package.json.
 
-## Run
+## Render
+
+Build Command:
+
+```bash
+npm install
+```
+
+Start Command:
+
+```bash
+npm start
+```
+
+## Local
 
 ```bash
 npm install
 npm test
-npm start
-```
-
-Open:
-
-```txt
-http://localhost:10000
-```
-
-## Render
-
-Build command:
-
-```bash
-npm install
-```
-
-Start command:
-
-```bash
 npm start
 ```

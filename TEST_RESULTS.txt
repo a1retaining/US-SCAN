@@ -1,5 +1,7 @@
 PASS package json
-PASS backend server
-PASS frontend
-PASS clickable sidebar pages
+PASS live backend API
+PASS ticking clocks
+PASS clickable pages
+PASS trade row selection
+PASS honest empty paper stats
 ALL TESTS PASSED
