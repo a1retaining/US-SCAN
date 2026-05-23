@@ -1,30 +1,30 @@
-# TradingMint PRO v4.2
+# TradingMint PRO v5
 
-## Changed from v4.1
+This version consolidates the full system instead of leaving pieces out.
 
-- Auto paper trading is always ON.
-- Starting paper account is fixed at $5,000.
-- Dashboard chart is now full-width across the dashboard.
-- Trade-ready setups and paper entries trigger sound/voice after sound is enabled.
-- Voice reads:
-  - symbol
-  - action
-  - entry
-  - buy zone
-  - stop
-  - targets
-  - confidence
-  - risk/reward
-  - short education lesson
-- Selected trade panel also explains the setup.
-- Optimizer can now apply best settings to the scanner through `/api/optimizer/apply`.
-- Backtest stores evidence in the database.
-- Optimizer stores runs and can update scanner thresholds.
-- Auto paper cannot be disabled from settings.
+## Included
+
+- Auto paper always ON
+- $5,000 starting paper account
+- Full-width non-compressed chart
+- Full-width live scanner
+- Stock heat map
+- Clickable scanner rows with trade detail
+- Trade grades
+- Voice alerts and education
+- Paper entry/exit engine
+- Persistent database
+- Trade journal as black box recorder
+- Performance page with equity curve and win/loss pie
+- Backtest engine
+- Optimizer engine
+- Optimizer apply-to-scanner endpoint
+- Risk settings and slippage/spread modeling
+- Broker adapter in disabled safe mode
 
 ## Sound
 
-Browsers block audio until a click. Press **Enable**, then **Test**.
+Browsers block sound until the user interacts. Press **Enable**, then **Test**.
 
 ## Render
 

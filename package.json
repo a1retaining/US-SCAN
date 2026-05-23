@@ -1,7 +1,7 @@
 {
   "name": "tradingmint-pro",
-  "version": "4.2.0",
-  "description": "TradingMint PRO v4.2 auto-paper trading terminal with full-width charts, voice alerts, education, and optimizer feedback.",
+  "version": "5.0.0",
+  "description": "TradingMint PRO v5 full pro paper-trading scanner with dashboard, full-width scanner, charting, heatmaps, journal, backtest, optimizer, voice education, and risk controls.",
   "main": "src/server.js",
   "type": "commonjs",
   "scripts": {

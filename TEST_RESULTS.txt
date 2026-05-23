@@ -1,10 +1,12 @@
 PASS auto paper always on
 PASS $5000 starting account
-PASS full-width chart
-PASS trade found sound/voice
-PASS spoken trade plan and education
-PASS optimizer can apply settings
-PASS backtest stores evidence
-PASS paper engine
-PASS UI wiring
+PASS full-width non-compressed chart
+PASS full-width live scanner
+PASS stock heat map
+PASS clickable scanner detail
+PASS trade journal explanation
+PASS performance pie chart
+PASS backtest and optimizer
+PASS voice alerts and education
+PASS risk model and paper engine
 ALL TESTS PASSED
