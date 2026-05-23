@@ -1,0 +1,5 @@
+PASS decision engine
+PASS market regime
+PASS risk engine
+PASS auto backtester
+ALL TESTS PASSED

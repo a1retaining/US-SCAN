@@ -1,0 +1,6 @@
+
+"use strict";
+const assert=require("assert");const {evaluateSymbol,makeMarketRegime}=require("../src/decisionEngine");const {runBacktest}=require("../src/backtester");const {calculatePositionSize}=require("../src/riskEngine");
+function makeBars(start,days,drift=.4){const bars=[];let p=start;for(let i=0;i<days;i++){p=Math.max(1,p+drift+Math.sin(i/7)*.08);bars.push({date:new Date(2020,0,1+i).toISOString().slice(0,10),time:Date.now()+i,open:p-.4,high:p+1.2,low:p-1.1,close:p,volume:1000000+i*1000})}return bars}
+const spy=makeBars(300,330,.25),qqq=makeBars(250,330,.32),iwm=makeBars(180,330,.18),nvda=makeBars(100,330,.5),indexBars={SPY:spy,QQQ:qqq,IWM:iwm};
+assert(makeMarketRegime(indexBars).marketScore>50);const sig=evaluateSymbol({symbol:"NVDA",bars:nvda,indexBars,riskDollars:100});assert(sig.symbol==="NVDA");assert(Number.isFinite(sig.score));assert(sig.bars.length<=180);assert(calculatePositionSize({equity:5000,riskPct:1,entry:100,stop:95}).shares>0);const bt=runBacktest({symbols:["NVDA"],barsBySymbol:{NVDA:nvda},indexBars,options:{lookback:220,maxHold:10}});assert(bt.ok===true);assert(bt.summary.trades>=0);console.log("PASS decision engine");console.log("PASS market regime");console.log("PASS risk engine");console.log("PASS auto backtester");console.log("ALL TESTS PASSED");
