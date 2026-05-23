@@ -1,11 +1,15 @@
 PASS package json
-PASS render-ready scripts
-PASS live backend API routes
-PASS live Yahoo data fetch
-PASS safety decision layer
-PASS ticking clocks and next market open
-PASS sound and voice settings
-PASS clickable sidebar pages
+PASS compact screen-fit layout
+PASS persistent database
+PASS paper entries and exits
+PASS trade journal
+PASS backtest engine
+PASS strategy optimizer
+PASS slippage/spread model
+PASS earnings/news filter shells
+PASS broker disabled safe mode
+PASS sound unlock, test and mute controls
 PASS clickable trade chart
-PASS honest paper stats
+PASS useful interactive pages
+PASS APIs wired
 ALL TESTS PASSED

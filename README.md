@@ -1,38 +1,27 @@
-# TradingMint PRO Complete
+# TradingMint PRO v4.1
 
-Clean rebuild from zero.
+This version focuses on the issues raised after v4:
 
-## Included files
+## Fixed
 
-- `package.json`
-- `render.yaml`
-- `.gitignore`
-- `.env.example`
-- `src/server.js`
-- `public/index.html`
-- `tests/runTests.js`
-- `README.md`
+- Dashboard fits better at 100% browser zoom.
+- Sidebar is narrower.
+- Top bar is more compact.
+- Scanner table is scrollable without pushing the whole layout off screen.
+- Chart and selected trade panels use compact heights.
+- Sound has Enable, Test and Mute controls.
+- Sound status is visible: LOCKED, ON or MUTED.
+- Every page now has useful interactive content:
+  - Scanner filters
+  - Positions and closed trades
+  - Journal
+  - Performance and equity curve
+  - Backtest runner and saved results
+  - Optimizer runner and best settings
+  - Risk/settings editor
+  - Health and error view
 
-## What works
-
-- Render-safe package
-- Live backend API
-- Yahoo chart data fetch
-- Safety decision layer
-- Market countdown
-- Next market open display
-- Auto-refresh countdown
-- Clickable sidebar pages
-- Clickable trade rows
-- Candlestick chart changes on trade click
-- Sound enable button
-- Sound test button
-- Voice test
-- Honest paper stats, no fake win rate
-- Honest alerts count
-- System health page
-
-## Render settings
+## Render
 
 Build Command:
 
@@ -46,7 +35,7 @@ Start Command:
 npm start
 ```
 
-## Local test
+## Local
 
 ```bash
 npm install
@@ -54,17 +43,4 @@ npm test
 npm start
 ```
 
-## Important
-
-This is now a strong functional foundation, not a fake static image.
-
-It is not yet a finished professional money-making system. To push it toward 8/10+ for live trading quality, the next stage must add:
-- persistent database
-- real paper trading entries/exits
-- trade journal storage
-- historical backtesting engine
-- strategy optimizer
-- slippage/spread modeling
-- earnings/news filters
-- broader universe scanner
-- proper broker integration only after long testing
+Sound note: browsers block audio until the user clicks. Press **Enable** first, then **Test**.
