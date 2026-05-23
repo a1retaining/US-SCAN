@@ -2,7 +2,7 @@ const { applyCosts, canEnter } = require("./risk");
 const { addAlert, addJournal } = require("../storage/db");
 
 function enterPaper(db, signal, source = "manual") {
-  const check = canEnter(db.paper, signal, db.settings);
+  const check = canEnter(db.paper, signal, db.settings, paperStats(db));
   if (!check.ok) {
     addJournal(db, "ENTRY_REJECTED", signal?.symbol || "-", check.reasons.join(" "), { signal });
     return { ok: false, reasons: check.reasons };

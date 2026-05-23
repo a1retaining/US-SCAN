@@ -1,12 +1,10 @@
-PASS auto paper always on
-PASS $5000 starting account
-PASS full-width non-compressed chart
-PASS full-width live scanner
-PASS stock heat map
-PASS clickable scanner detail
-PASS trade journal explanation
-PASS performance pie chart
-PASS backtest and optimizer
-PASS voice alerts and education
-PASS risk model and paper engine
+PASS 3-year historical data engine
+PASS local historical cache
+PASS auto 3-year backtest
+PASS historical edge scoring
+PASS proof-based trade detail
+PASS optimizer guardrails
+PASS daily loss and drawdown lockouts
+PASS UI historical evidence
+PASS voice education includes 3-year edge
 ALL TESTS PASSED
