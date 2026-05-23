@@ -1,15 +1,10 @@
-PASS package json
-PASS compact screen-fit layout
-PASS persistent database
-PASS paper entries and exits
-PASS trade journal
-PASS backtest engine
-PASS strategy optimizer
-PASS slippage/spread model
-PASS earnings/news filter shells
-PASS broker disabled safe mode
-PASS sound unlock, test and mute controls
-PASS clickable trade chart
-PASS useful interactive pages
-PASS APIs wired
+PASS auto paper always on
+PASS $5000 starting account
+PASS full-width chart
+PASS trade found sound/voice
+PASS spoken trade plan and education
+PASS optimizer can apply settings
+PASS backtest stores evidence
+PASS paper engine
+PASS UI wiring
 ALL TESTS PASSED

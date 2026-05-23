@@ -39,6 +39,9 @@ async function getUniverse(force = false) {
 
 async function buildState(force = false) {
   const db = readDb();
+  db.settings.autoPaper = true;
+  db.settings.startingCash = 5000;
+  if (!Number.isFinite(Number(db.paper.cash))) db.paper.cash = 5000;
   const universe = await getUniverse(force);
   const scanned = scanMarket(universe.barsBySymbol, db.settings);
 
@@ -122,7 +125,7 @@ app.get("/api/state", async (req, res) => {
 
 app.post("/api/settings", (req, res) => {
   const db = readDb();
-  db.settings = { ...db.settings, ...(req.body || {}) };
+  db.settings = { ...db.settings, ...(req.body || {}), autoPaper: true, startingCash: 5000 };
   addJournal(db, "SETTINGS_UPDATED", "-", "Settings updated", db.settings);
   writeDb(db);
   res.json({ ok: true, settings: db.settings });
@@ -188,6 +191,23 @@ app.post("/api/optimizer/run", async (req, res) => {
   } catch (error) {
     res.status(500).json({ ok: false, error: error.message });
   }
+});
+
+
+app.post("/api/optimizer/apply", (req, res) => {
+  const db = readDb();
+  const latest = db.optimizerRuns[0];
+  if (!latest || !latest.best || !latest.best.options) {
+    return res.status(400).json({ ok: false, error: "No optimizer result available to apply." });
+  }
+
+  const options = latest.best.options;
+  db.settings.minConfidence = Number(options.minConfidence || db.settings.minConfidence);
+  db.settings.minRiskReward = Number(options.minRiskReward || db.settings.minRiskReward);
+  db.settings.autoPaper = true;
+  addJournal(db, "OPTIMIZER_APPLIED", "-", "Optimizer best settings applied to scanner", db.settings);
+  writeDb(db);
+  res.json({ ok: true, settings: db.settings, applied: options });
 });
 
 app.post("/api/broker/order", (req, res) => {

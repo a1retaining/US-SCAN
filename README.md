@@ -1,25 +1,30 @@
-# TradingMint PRO v4.1
+# TradingMint PRO v4.2
 
-This version focuses on the issues raised after v4:
+## Changed from v4.1
 
-## Fixed
+- Auto paper trading is always ON.
+- Starting paper account is fixed at $5,000.
+- Dashboard chart is now full-width across the dashboard.
+- Trade-ready setups and paper entries trigger sound/voice after sound is enabled.
+- Voice reads:
+  - symbol
+  - action
+  - entry
+  - buy zone
+  - stop
+  - targets
+  - confidence
+  - risk/reward
+  - short education lesson
+- Selected trade panel also explains the setup.
+- Optimizer can now apply best settings to the scanner through `/api/optimizer/apply`.
+- Backtest stores evidence in the database.
+- Optimizer stores runs and can update scanner thresholds.
+- Auto paper cannot be disabled from settings.
 
-- Dashboard fits better at 100% browser zoom.
-- Sidebar is narrower.
-- Top bar is more compact.
-- Scanner table is scrollable without pushing the whole layout off screen.
-- Chart and selected trade panels use compact heights.
-- Sound has Enable, Test and Mute controls.
-- Sound status is visible: LOCKED, ON or MUTED.
-- Every page now has useful interactive content:
-  - Scanner filters
-  - Positions and closed trades
-  - Journal
-  - Performance and equity curve
-  - Backtest runner and saved results
-  - Optimizer runner and best settings
-  - Risk/settings editor
-  - Health and error view
+## Sound
+
+Browsers block audio until a click. Press **Enable**, then **Test**.
 
 ## Render
 
@@ -34,13 +39,3 @@ Start Command:
 ```bash
 npm start
 ```
-
-## Local
-
-```bash
-npm install
-npm test
-npm start
-```
-
-Sound note: browsers block audio until the user clicks. Press **Enable** first, then **Test**.

@@ -8,7 +8,7 @@ const defaultDb = {
   createdAt: new Date().toISOString(),
   settings: {
     startingCash: 5000,
-    autoPaper: false,
+    autoPaper: true,
     maxOpenPositions: 5,
     maxDailyEntries: 3,
     maxTradePct: 20,
@@ -59,7 +59,7 @@ function mergeDefaults(db) {
   return {
     ...merged,
     ...db,
-    settings: { ...merged.settings, ...(db.settings || {}) },
+    settings: { ...merged.settings, ...(db.settings || {}), autoPaper: true, startingCash: 5000 },
     paper: { ...merged.paper, ...(db.paper || {}) },
     journal: Array.isArray(db.journal) ? db.journal : [],
     alerts: Array.isArray(db.alerts) ? db.alerts : [],

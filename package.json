@@ -1,7 +1,7 @@
 {
   "name": "tradingmint-pro",
-  "version": "4.1.0",
-  "description": "TradingMint PRO v4.1 compact screen-fit terminal with sound settings and meaningful pages.",
+  "version": "4.2.0",
+  "description": "TradingMint PRO v4.2 auto-paper trading terminal with full-width charts, voice alerts, education, and optimizer feedback.",
   "main": "src/server.js",
   "type": "commonjs",
   "scripts": {
