@@ -1,0 +1,652 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TradingMint PRO</title>
+<style>
+:root{
+  --bg:#02070b;
+  --panel:#06131c;
+  --line:rgba(120,255,70,.18);
+  --line2:rgba(255,255,255,.08);
+  --text:#f2fff0;
+  --muted:#95a9b4;
+  --green:#6aff39;
+  --red:#ff455c;
+  --yellow:#ffd166;
+  --blue:#64b8ff;
+  --purple:#9b5cff;
+  --shadow:0 22px 70px rgba(0,0,0,.48),0 0 32px rgba(106,255,57,.06);
+}
+*{box-sizing:border-box}
+html,body{
+  margin:0;
+  min-height:100%;
+  font-family:Inter,Arial,Helvetica,sans-serif;
+  background:
+    radial-gradient(circle at 20% -10%,rgba(106,255,57,.13),transparent 420px),
+    radial-gradient(circle at 85% 0%,rgba(80,160,255,.08),transparent 420px),
+    linear-gradient(180deg,#02070b,#010306);
+  color:var(--text);
+}
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.14;
+  background-image:
+    linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);
+  background-size:36px 36px;
+}
+.app{position:relative;z-index:1;display:grid;grid-template-columns:276px 1fr;min-height:100vh}
+.sidebar{height:100vh;position:sticky;top:0;background:linear-gradient(180deg,#06121b,#02080d);border-right:1px solid var(--line);padding:14px 12px;overflow:auto}
+.logo{height:78px;display:flex;gap:13px;align-items:center;border-bottom:1px solid var(--line2);margin-bottom:12px}
+.logoMark{width:48px;height:48px;border:2px solid #00f0a0;border-radius:10px;display:grid;place-items:center;box-shadow:0 0 28px rgba(0,255,150,.28)}
+.logoMark:before{content:"✓";font-size:25px;color:#00f0a0;font-weight:900}
+.logoText b{display:block;font-size:25px;letter-spacing:7px;line-height:1.05}
+.pro{display:inline-block;font-size:15px;letter-spacing:1px;background:linear-gradient(135deg,#6f33ff,#b881ff);padding:2px 7px;border-radius:4px;margin-left:4px}
+.logoText span{display:block;margin-top:4px;color:var(--muted);font-size:11px;letter-spacing:3px}
+.nav{display:grid;gap:6px}
+.nav button{height:45px;background:transparent;color:#dae7ed;border:1px solid transparent;border-radius:8px;text-align:left;padding:0 12px;display:flex;gap:12px;align-items:center;cursor:pointer;font-weight:800;font-size:13px}
+.nav button:hover{background:rgba(106,255,57,.08);border-color:rgba(106,255,57,.25)}
+.nav button.active{background:linear-gradient(90deg,rgba(106,255,57,.24),rgba(106,255,57,.08));border-color:rgba(106,255,57,.75);color:var(--green);box-shadow:0 0 20px rgba(106,255,57,.22)}
+.nav i{font-style:normal;width:18px;text-align:center}
+.bubble{margin-left:auto;background:#6e32bd;color:white;min-width:22px;height:22px;border-radius:999px;display:grid;place-items:center}
+.sidePanel{border:1px solid var(--line);background:rgba(6,19,28,.84);border-radius:8px;padding:14px;margin-top:14px;box-shadow:var(--shadow)}
+.sidePanel h3{margin:0 0 11px;font-size:12px;text-transform:uppercase}
+.sideRow{display:flex;justify-content:space-between;margin:8px 0;font-size:12px;color:#dbe7eb}
+.sideRow b{color:var(--green)}
+.sessionCircle{width:112px;height:112px;border-radius:50%;margin:18px auto 6px;border:8px solid rgba(106,255,57,.35);border-right-color:var(--yellow);display:grid;place-items:center;text-align:center}
+.main{min-width:0;padding:10px 14px 44px}
+.topbar{height:70px;border:1px solid var(--line);border-radius:8px;background:rgba(6,19,28,.88);display:grid;grid-template-columns:1.15fr 1.05fr 1.1fr 1.25fr 1.3fr .75fr .95fr 1.2fr 190px;align-items:center;box-shadow:var(--shadow);overflow:hidden;margin-bottom:13px}
+.topbar div{height:100%;padding:13px 16px;border-right:1px solid var(--line2);display:flex;flex-direction:column;justify-content:center}
+.topbar small{font-size:11px;text-transform:uppercase;color:var(--muted)}
+.topbar b{font-size:13px}
+.ok{color:var(--green)}
+.bad{color:var(--red)}
+.warn{color:var(--yellow)}
+.icons{display:flex!important;flex-direction:row!important;gap:10px;align-items:center!important;justify-content:center!important;font-size:16px}
+.soundBtn{border:1px solid var(--line);background:rgba(106,255,57,.08);color:var(--green);border-radius:6px;padding:7px 9px;cursor:pointer}
+.page{display:none}
+.page.active{display:block}
+.regimeGrid{display:grid;grid-template-columns:1.05fr 1.05fr 1fr 1.05fr 1.2fr .95fr;gap:12px;margin-bottom:13px}
+.regime{height:118px;border:1px solid var(--line);background:rgba(6,19,28,.86);border-radius:8px;padding:14px;display:grid;grid-template-columns:70px 1fr;gap:12px;box-shadow:var(--shadow);overflow:hidden}
+.iconBig{font-size:50px;color:var(--green);filter:drop-shadow(0 0 18px rgba(106,255,57,.3));display:grid;place-items:center}
+.regime small{color:var(--muted);font-size:11px;text-transform:uppercase}
+.regime h2{margin:4px 0;color:var(--green);font-size:22px}
+.regime p{margin:0 0 4px;font-size:13px}
+.regime span{color:var(--green);font-size:12px}
+.dashboard{display:grid;grid-template-columns:1.24fr 1.02fr .65fr;gap:12px}
+.card{border:1px solid var(--line);background:rgba(6,19,28,.86);border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
+.head{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--line2)}
+.head h2{margin:0;font-size:15px;text-transform:uppercase}
+.head small{color:var(--muted);font-size:12px;text-transform:none}
+.head span{color:var(--green);font-size:12px}
+.tablewrap{overflow:auto;max-height:470px}
+.scanner{width:100%;border-collapse:collapse;min-width:920px}
+.scanner th,.scanner td{border-bottom:1px solid rgba(255,255,255,.055);padding:10px 13px;text-align:left;font-size:13px}
+.scanner th{font-size:11px;text-transform:uppercase;color:#c9d6da;background:rgba(0,0,0,.18);position:sticky;top:0}
+.scanner tr{cursor:pointer}
+.scanner tr:hover{background:rgba(106,255,57,.06)}
+.rank{color:var(--green);font-weight:900}
+.ticker{font-weight:900;font-size:16px}
+.conf{border:1px solid rgba(106,255,57,.5);background:rgba(106,255,57,.09);padding:4px 9px;border-radius:4px;color:var(--green)}
+.exp{color:var(--green);font-weight:900}
+.arrow{font-size:21px;color:var(--green)}
+.neutral{color:var(--yellow)}
+.view{border:1px solid var(--line2);background:#162431;color:white;border-radius:4px;padding:6px 9px;cursor:pointer}
+.view:hover{border-color:var(--green)}
+.chart{height:250px;padding:12px}
+.chart svg{width:100%;height:100%;display:block}
+.empty{height:250px;display:grid;place-items:center;text-align:center;color:var(--muted);padding:20px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line2)}
+.metric{padding:11px 14px;border-right:1px solid var(--line2);font-size:12px}
+.metric b{color:var(--green);margin-left:6px}
+.two{display:grid;grid-template-columns:.72fr 1fr;gap:12px;margin-top:12px}
+.systems,.alerts{padding:12px 14px}
+.sys,.alert,.miniRow{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.055);padding:8px 0;font-size:13px}
+.sys b,.alert b{color:var(--green)}
+.lower{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:12px}
+.lower.three{grid-template-columns:1.4fr 1fr 1fr}
+.mini{min-height:214px;border:1px solid var(--line);background:rgba(6,19,28,.86);border-radius:8px;padding:14px;box-shadow:var(--shadow)}
+.mini h3{margin:0 0 12px;font-size:13px;text-transform:uppercase}
+.barline{display:grid;grid-template-columns:110px 1fr 55px;gap:8px;align-items:center;margin:8px 0;font-size:12px}
+.track{height:10px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}
+.fill{height:100%;background:var(--green)}
+.fill.red{background:var(--red)}
+.heatmap{display:grid;grid-template-columns:2fr repeat(4,1fr);grid-template-rows:repeat(3,44px);gap:2px}
+.heat{background:rgba(106,255,57,.25);display:grid;place-items:center;font-size:12px}
+.heat.big{grid-row:span 2;font-size:21px;font-weight:900}
+.heat.red{background:rgba(255,69,92,.35)}
+.selectedPlan{padding:12px 14px}
+.selectedPlan h3{margin:0 0 12px;font-size:20px}
+.planGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 18px}
+.planGrid div{border-bottom:1px solid rgba(255,255,255,.055);padding:7px 0;color:var(--muted)}
+.planGrid b{float:right;color:white}
+.tickerbar{position:fixed;left:276px;right:0;bottom:0;height:38px;background:rgba(3,8,13,.97);border-top:1px solid var(--line);display:flex;align-items:center;gap:28px;padding:0 18px;font-size:13px;z-index:8;overflow:hidden}
+.tickerbar b{color:white}
+.tickerbar span{color:var(--green)}
+.pageGrid{display:grid;grid-template-columns:1.35fr 1fr;gap:12px}
+.pagePanel{min-height:300px;border:1px solid var(--line);background:rgba(6,19,28,.86);border-radius:8px;padding:18px;box-shadow:var(--shadow)}
+.pagePanel h2{margin-top:0}
+.pagePanel p{color:var(--muted);line-height:1.5}
+.wideTable{width:100%;border-collapse:collapse}
+.wideTable td,.wideTable th{padding:12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;text-align:left}
+.wideTable th{color:var(--muted);text-transform:uppercase;font-size:11px}
+@media(max-width:1450px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:relative;height:auto}
+  .tickerbar{left:0}
+  .topbar,.regimeGrid,.dashboard,.lower,.lower.three,.pageGrid{grid-template-columns:1fr}
+  .scanner{min-width:780px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="logo"><div class="logoMark"></div><div class="logoText"><b>TRADING<br>MINT<span class="pro">PRO</span></b><span>AUTOMATED TRADING SYSTEM</span></div></div>
+  <nav class="nav">
+    <button class="active" data-page="dashboard"><i>▥</i>DASHBOARD</button>
+    <button data-page="scanner"><i>⌕</i>LIVE SCANNER</button>
+    <button data-page="positions"><i>⚙</i>POSITIONS <span id="positionsCount" class="bubble">0</span></button>
+    <button data-page="journal"><i>▤</i>TRADE JOURNAL</button>
+    <button data-page="performance"><i>▥</i>PERFORMANCE</button>
+    <button data-page="backtest"><i>◌</i>BACKTEST ANALYTICS</button>
+    <button data-page="regime"><i>▱</i>MARKET REGIME</button>
+    <button data-page="sector"><i>▥</i>SECTOR ROTATION</button>
+    <button data-page="risk"><i>♢</i>RISK MANAGEMENT</button>
+    <button data-page="alertsPage"><i>♧</i>ALERTS <span id="alertsCount" class="bubble">0</span></button>
+    <button data-page="health"><i>⚙</i>SYSTEM HEALTH</button>
+    <button data-page="settings"><i>⚙</i>SETTINGS</button>
+  </nav>
+  <div class="sidePanel">
+    <h3>Quick Actions</h3>
+    <div class="sideRow"><span>Run Backtest</span><b>WAITING</b></div>
+    <div class="sideRow"><span>Optimize Strategies</span><b>LOCKED</b></div>
+    <div class="sideRow"><span>Paper Trading</span><b>READY</b></div>
+    <div class="sideRow"><span>Market Replay</span><b>NO DATA</b></div>
+  </div>
+  <div class="sidePanel">
+    <h3>Market Session</h3>
+    <div class="sideRow"><span id="sessionState">Checking</span><b></b></div>
+    <div class="sessionCircle"><div><b id="sessionClock">--:--:--</b><br><small id="sessionLabel">LOADING</small></div></div>
+    <div class="sideRow"><span>Next Open</span><b id="nextOpenText">--</b></div>
+  </div>
+</aside>
+
+<main class="main">
+  <section class="topbar">
+    <div><small>Market Regime</small><b id="topRegime">Loading</b></div>
+    <div><small>SPY Trend</small><b id="topSpy">Loading</b></div>
+    <div><small>Market Volatility</small><b id="topVol">Loading</b></div>
+    <div><small>Market Breadth</small><b id="topBreadth">Loading</b></div>
+    <div><small>Sector Leader</small><b id="topSector">Loading</b></div>
+    <div><small>Data Feed</small><b id="topFeed">Loading</b></div>
+    <div><small>Last Update</small><b id="lastUpdate">--</b></div>
+    <div><small>Next Backtest</small><b id="nextBacktest">--</b></div>
+    <div class="icons"><button class="soundBtn" id="soundBtn">Enable Sound</button><button class="soundBtn" id="testSoundBtn">Test</button></div>
+  </section>
+
+  <section id="dashboard" class="page active">
+    <div class="regimeGrid">
+      <div class="regime"><div class="iconBig">↗</div><div><small>Market Regime</small><h2 id="regimeBox">--</h2><p id="regimeSub">Loading</p><span id="regimeConf">--</span></div></div>
+      <div class="regime"><div class="iconBig">↗</div><div><small>SPY Trend</small><h2 id="spyBox">--</h2><p>Live SPY data</p><span id="spyPrice">--</span></div></div>
+      <div class="regime"><div class="iconBig">▥</div><div><small>Market Volatility</small><h2 id="volBox">--</h2><p id="vixText">VIX</p><span id="vixSub">--</span></div></div>
+      <div class="regime"><div class="iconBig">◉</div><div><small>Market Breadth</small><h2 id="breadthBox">--</h2><p>Scanner universe</p><span id="breadthSub">--</span></div></div>
+      <div class="regime"><div class="iconBig">▣</div><div><small>Sector Leader</small><h2>TECHNOLOGY</h2><p>Current focus</p><span>Calculated from scan universe</span></div></div>
+      <div class="regime"><div class="iconBig" id="confIcon">--</div><div><small>System Confidence</small><h2 id="sysConf">--</h2><p>Live confidence</p><span>Safety filters active</span></div></div>
+    </div>
+
+    <div class="dashboard">
+      <div class="card">
+        <div class="head"><h2>LIVE SCANNER <small>(Ranked by Confidence)</small></h2><span id="scanState">Loading</span></div>
+        <div class="tablewrap"><table class="scanner"><thead><tr><th>Rank</th><th>Ticker</th><th>Setup</th><th>Conf</th><th>Price</th><th>Change</th><th>R:R</th><th>Trend</th><th>Regime</th><th>Action</th></tr></thead><tbody id="scannerRows"></tbody></table></div>
+        <div class="head"><span id="scanCount">--</span><span id="refreshClock">Auto refresh in --s</span></div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="head"><h2 id="chartTitle">SELECTED CHART</h2><span id="chartSubtitle">Click a trade</span></div>
+          <div id="selectedChart" class="chart">Click a scanner row to view the graph.</div>
+          <div class="metrics"><div class="metric">Total Return <b id="totalReturn">--</b></div><div class="metric">Max Drawdown <b id="maxDrawdown">--</b></div><div class="metric">Profit Factor <b id="profitFactor">--</b></div></div>
+        </div>
+        <div class="two">
+          <div class="card"><div class="head"><h2>WIN RATE</h2></div><div class="empty" id="winRateBox">No closed paper trades yet.</div></div>
+          <div class="card"><div class="head"><h2>SELECTED TRADE</h2></div><div class="selectedPlan" id="selectedPlan">Click a scanner row.</div></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card"><div class="head"><h2>SYSTEM STATUS</h2><span>Real app state</span></div><div class="systems" id="systems"></div></div>
+        <div class="card" style="margin-top:12px"><div class="head"><h2>RECENT ALERTS</h2><span id="alertsLabel">0</span></div><div class="alerts" id="alerts"></div></div>
+      </div>
+    </div>
+
+    <div class="lower">
+      <div class="mini"><h3>MARKET INDICES</h3><div id="indices"></div></div>
+      <div class="mini"><h3>SECTOR STRENGTH</h3><div id="sectorBars"></div></div>
+      <div class="mini"><h3>UPCOMING EARNINGS</h3><div class="miniRow"><span>Data status</span><b class="warn">Not connected</b></div><p style="color:var(--muted);font-size:12px">Earnings calendar needs a data source before it should show dates.</p></div>
+      <div class="mini"><h3>SYSTEM PERFORMANCE</h3><div class="miniRow"><span>Total Trades</span><b id="perfTrades">0</b></div><div class="miniRow"><span>Win Rate</span><b id="perfWin">--</b></div><div class="miniRow"><span>Expectancy</span><b id="perfExp">--</b></div><div class="miniRow"><span>Profit Factor</span><b id="perfPf">--</b></div></div>
+      <div class="mini"><h3>MARKET BREADTH</h3><div class="empty" id="breadthGauge">Loading breadth.</div></div>
+    </div>
+
+    <div class="lower three">
+      <div class="mini"><h3>MARKET HEATMAP</h3><div class="heatmap" id="heatmap"></div></div>
+      <div class="mini"><h3>SECTOR ROTATION</h3><div class="miniRow"><span>Technology</span><b style="color:var(--green)">Leading</b></div><div class="miniRow"><span>Defensive sectors</span><b class="warn">Not ranked</b></div><p style="color:var(--muted);font-size:12px">Full sector rotation requires sector ETF scan.</p></div>
+      <div class="mini"><h3>TRADE DECISION STREAM</h3><div id="decisionStream"></div></div>
+    </div>
+  </section>
+
+  <section id="scanner" class="page"><div class="pageGrid"><div class="pagePanel"><h2>Live Scanner Full View</h2><table class="wideTable"><thead><tr><th>Rank</th><th>Ticker</th><th>Setup</th><th>Confidence</th><th>Price</th><th>Safety</th><th>Action</th></tr></thead><tbody id="scannerFullRows"></tbody></table></div><div class="pagePanel"><h2>Scanner Safety Rules</h2><p>Trade-ready requires bullish market regime, bullish trend, acceptable risk/reward, not overextended, and confidence above threshold. This is still a scanner, not financial advice.</p></div></div></section>
+  <section id="positions" class="page"><div class="pageGrid"><div class="pagePanel"><h2>Positions</h2><div id="positionsBox">No open paper positions.</div></div><div class="pagePanel"><h2>Risk Exposure</h2><p>Risk exposure will activate after paper entries are added.</p></div></div></section>
+  <section id="journal" class="page"><div class="pagePanel"><h2>Trade Journal</h2><p>No paper trade journal entries yet.</p></div></section>
+  <section id="performance" class="page"><div class="pagePanel"><h2>Performance</h2><p>No closed paper trades yet. Win rate, expectancy and profit factor are intentionally blank.</p></div></section>
+  <section id="backtest" class="page"><div class="pagePanel"><h2>Backtest Analytics</h2><p>Backtest engine status is waiting for the next implementation step. It should not display fake results.</p></div></section>
+  <section id="regime" class="page"><div class="pagePanel"><h2>Market Regime</h2><p id="regimePageText">Loading market regime.</p></div></section>
+  <section id="sector" class="page"><div class="pagePanel"><h2>Sector Rotation</h2><p>Sector rotation is partially wired. Full version needs ETF/sector universe scan.</p></div></section>
+  <section id="risk" class="page"><div class="pagePanel"><h2>Risk Management</h2><p>Position sizing, daily loss limit, drawdown protection and reduced-risk market modes.</p></div></section>
+  <section id="alertsPage" class="page"><div class="pagePanel"><h2>Alerts</h2><div id="alertsPageBody">No alerts yet.</div></div></section>
+  <section id="health" class="page"><div class="pagePanel"><h2>System Health</h2><div id="healthBody">Loading health.</div></div></section>
+  <section id="settings" class="page"><div class="pagePanel"><h2>Settings</h2><p>Settings page is ready for watchlist, risk and alert configuration.</p></div></section>
+</main>
+</div>
+
+<div class="tickerbar" id="tickerbar">Loading live ticker...</div>
+
+<script>
+let STATE = null;
+let selectedSymbol = null;
+let refreshLeft = 30;
+let audioUnlocked = false;
+let audioCtx = null;
+
+const money = value => Number.isFinite(Number(value)) ? "$" + Number(value).toFixed(2) : "--";
+const pct = value => Number.isFinite(Number(value)) ? (Number(value) >= 0 ? "▲ " : "▼ ") + Math.abs(Number(value)).toFixed(2) + "%" : "--";
+const cls = value => Number(value) >= 0 ? "var(--green)" : "var(--red)";
+
+function unlockAudio() {
+  try {
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    audioCtx.resume();
+    audioUnlocked = true;
+    document.getElementById("soundBtn").textContent = "Sound On";
+    beep(880, 0.12);
+    speak("Trading Mint Pro sound enabled.");
+  } catch (error) {
+    alert("Audio failed: " + error.message);
+  }
+}
+
+function beep(freq = 760, dur = 0.12) {
+  if (!audioUnlocked || !audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.frequency.value = freq;
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.16, audioCtx.currentTime + 0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+  osc.start();
+  osc.stop(audioCtx.currentTime + dur);
+}
+
+function speak(text) {
+  try {
+    if (!audioUnlocked) return;
+    speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    speechSynthesis.speak(utterance);
+  } catch (error) {}
+}
+
+function marketCountdown() {
+  const now = new Date();
+  const ny = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+  const day = ny.getDay();
+
+  const open = new Date(ny);
+  open.setHours(9, 30, 0, 0);
+
+  const close = new Date(ny);
+  close.setHours(16, 0, 0, 0);
+
+  function nextOpenFrom(date) {
+    const next = new Date(date);
+    next.setHours(9, 30, 0, 0);
+    while (next.getDay() === 0 || next.getDay() === 6) next.setDate(next.getDate() + 1);
+    return next;
+  }
+
+  let target, label, state, nextOpen;
+  if (day === 0 || day === 6) {
+    const next = new Date(ny);
+    next.setDate(next.getDate() + (day === 6 ? 2 : 1));
+    target = nextOpenFrom(next);
+    label = "UNTIL OPEN";
+    state = "MARKET CLOSED";
+    nextOpen = target;
+  } else if (ny < open) {
+    target = open;
+    label = "UNTIL OPEN";
+    state = "PRE-MARKET";
+    nextOpen = open;
+  } else if (ny < close) {
+    target = close;
+    label = "UNTIL CLOSE";
+    state = "MARKET OPEN";
+    nextOpen = open;
+  } else {
+    const next = new Date(ny);
+    next.setDate(next.getDate() + 1);
+    target = nextOpenFrom(next);
+    label = "UNTIL OPEN";
+    state = "AFTER-HOURS";
+    nextOpen = target;
+  }
+
+  let ms = Math.max(0, target - ny);
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor(ms % 3600000 / 60000);
+  const s = Math.floor(ms % 60000 / 1000);
+
+  document.getElementById("sessionClock").textContent =
+    `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  document.getElementById("sessionLabel").textContent = label;
+  document.getElementById("sessionState").textContent = "● " + state;
+  document.getElementById("nextOpenText").textContent = nextOpen.toLocaleString("en-US", {
+    weekday: "short",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short"
+  });
+
+  const backtest = new Date(now);
+  backtest.setHours(2, 0, 0, 0);
+  if (backtest < now) backtest.setDate(backtest.getDate() + 1);
+  ms = backtest - now;
+  document.getElementById("nextBacktest").textContent =
+    `in ${Math.floor(ms / 3600000)}h ${Math.floor(ms % 3600000 / 60000)}m`;
+}
+
+function candleChart(signal) {
+  const bars = (signal.bars || []).slice(-60);
+  if (!bars.length) return "No chart data.";
+
+  const levels = [signal.entry, signal.buyLow, signal.buyHigh, signal.stop, signal.target1, signal.target2].filter(Number.isFinite);
+  const values = bars.flatMap(bar => [bar.high, bar.low, bar.open, bar.close]).concat(levels);
+  const min = Math.min(...values) * 0.995;
+  const max = Math.max(...values) * 1.005;
+
+  const width = 700;
+  const height = 245;
+  const left = 40;
+  const right = 80;
+  const top = 15;
+  const bottom = 28;
+  const chartWidth = width - left - right;
+  const chartHeight = height - top - bottom;
+  const step = chartWidth / bars.length;
+
+  const y = value => top + chartHeight - ((value - min) / (max - min)) * chartHeight;
+  const x = index => left + index * step + step / 2;
+
+  let svg = `<svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none"><rect x="0" y="0" width="${width}" height="${height}" fill="transparent"/>`;
+
+  for (let i = 0; i <= 4; i++) {
+    const gridY = top + chartHeight * i / 4;
+    svg += `<line x1="${left}" y1="${gridY}" x2="${width - right}" y2="${gridY}" stroke="rgba(255,255,255,.08)"/>`;
+  }
+
+  function levelLine(value, color, label) {
+    if (!Number.isFinite(value)) return;
+    const lineY = y(value);
+    svg += `<line x1="${left}" y1="${lineY}" x2="${width - right}" y2="${lineY}" stroke="${color}" stroke-dasharray="5 5"/><text x="${width - right + 6}" y="${lineY + 4}" fill="${color}" font-size="10">${label}</text>`;
+  }
+
+  bars.forEach((bar, index) => {
+    const xx = x(index);
+    const openY = y(bar.open);
+    const closeY = y(bar.close);
+    const highY = y(bar.high);
+    const lowY = y(bar.low);
+    const color = bar.close >= bar.open ? "#6aff39" : "#ff455c";
+    svg += `<line x1="${xx}" y1="${highY}" x2="${xx}" y2="${lowY}" stroke="${color}" stroke-width="1"/>`;
+    svg += `<rect x="${xx - step * 0.32}" y="${Math.min(openY, closeY)}" width="${Math.max(2, step * 0.64)}" height="${Math.max(1, Math.abs(closeY - openY))}" fill="${color}"/>`;
+  });
+
+  levelLine(signal.buyLow, "#ffd166", "BUY LOW");
+  levelLine(signal.buyHigh, "#ffd166", "BUY HIGH");
+  levelLine(signal.stop, "#ff455c", "STOP");
+  levelLine(signal.target1, "#6aff39", "T1");
+  levelLine(signal.target2, "#64b8ff", "T2");
+  levelLine(signal.entry, "#ffffff", "NOW");
+
+  svg += `<text x="15" y="22" fill="#f2fff0" font-size="16" font-weight="700">${signal.symbol}</text></svg>`;
+  return svg;
+}
+
+function renderRows(signals) {
+  const rowHtml = signals.map(signal => `
+    <tr data-symbol="${signal.symbol}">
+      <td class="rank">${signal.rank}</td>
+      <td class="ticker">${signal.symbol}</td>
+      <td>${signal.setup}</td>
+      <td><span class="conf">${signal.confidence}</span></td>
+      <td>${money(signal.price)}</td>
+      <td style="color:${cls(signal.changePct)}">${pct(signal.changePct)}</td>
+      <td>${signal.rr}</td>
+      <td class="${signal.trend === "UP" ? "arrow" : "neutral"}">${signal.trend === "UP" ? "↗" : "→"}</td>
+      <td style="color:${signal.regime === "Bullish" ? "var(--green)" : "var(--yellow)"}">${signal.regime}</td>
+      <td><button class="view">${signal.action}</button></td>
+    </tr>
+  `).join("");
+
+  document.getElementById("scannerRows").innerHTML = rowHtml;
+  document.getElementById("scannerFullRows").innerHTML = signals.map(signal => `
+    <tr data-symbol="${signal.symbol}">
+      <td>${signal.rank}</td>
+      <td>${signal.symbol}</td>
+      <td>${signal.setup}</td>
+      <td>${signal.confidence}</td>
+      <td>${money(signal.price)}</td>
+      <td>${signal.safety}</td>
+      <td>${signal.action}</td>
+    </tr>
+  `).join("");
+
+  document.querySelectorAll("[data-symbol]").forEach(row => {
+    row.addEventListener("click", () => selectTrade(row.dataset.symbol, true));
+  });
+}
+
+function selectTrade(symbol, fromClick = false) {
+  selectedSymbol = symbol;
+  const signal = STATE.signals.find(item => item.symbol === symbol);
+  if (!signal) return;
+
+  document.getElementById("chartTitle").textContent = signal.symbol + " CHART";
+  document.getElementById("chartSubtitle").textContent = signal.setup + " | " + signal.action;
+  document.getElementById("selectedChart").innerHTML = candleChart(signal);
+
+  document.getElementById("selectedPlan").innerHTML = `
+    <h3>${signal.symbol} <span class="${signal.action === "LONG" ? "ok" : signal.action === "WATCH" ? "warn" : "bad"}">${signal.action}</span></h3>
+    <div class="planGrid">
+      <div>Entry <b>${money(signal.entry)}</b></div>
+      <div>Buy Low <b>${money(signal.buyLow)}</b></div>
+      <div>Buy High <b>${money(signal.buyHigh)}</b></div>
+      <div>Stop <b>${money(signal.stop)}</b></div>
+      <div>Target 1 <b>${money(signal.target1)}</b></div>
+      <div>Target 2 <b>${money(signal.target2)}</b></div>
+      <div>RSI <b>${signal.rsi ?? "--"}</b></div>
+      <div>Rel Strength <b>${signal.relativeStrength ?? "--"}</b></div>
+    </div>
+    <div style="margin-top:10px;color:var(--muted);font-size:12px">
+      <b>Reasons:</b> ${(signal.reasons || []).join(" ") || "--"}<br>
+      <b>Warnings:</b> ${(signal.warnings || []).join(" ") || "None"}
+    </div>
+  `;
+
+  if (fromClick) {
+    beep(700, 0.08);
+    speak(`${signal.symbol} selected. ${signal.action}. Confidence ${signal.confidence}.`);
+  }
+}
+
+function renderState(data) {
+  STATE = data;
+  const market = data.market;
+
+  document.getElementById("topRegime").textContent = market.regime;
+  document.getElementById("topRegime").className = market.regime === "BULLISH" ? "ok" : market.regime === "BEARISH" ? "bad" : "warn";
+  document.getElementById("topSpy").textContent = market.spyTrend;
+  document.getElementById("topSpy").className = market.spyTrend === "BULLISH" ? "ok" : "warn";
+  document.getElementById("topVol").textContent = market.volatility;
+  document.getElementById("topVol").className = market.volatility === "LOW" ? "ok" : market.volatility === "MEDIUM" ? "warn" : "bad";
+  document.getElementById("topBreadth").textContent = market.breadth;
+  document.getElementById("topSector").textContent = market.sectorLeader;
+  document.getElementById("topFeed").textContent = data.mode === "LIVE_DATA" ? "● LIVE" : "● PARTIAL";
+  document.getElementById("topFeed").className = data.mode === "LIVE_DATA" ? "ok" : "warn";
+  document.getElementById("lastUpdate").textContent = new Date(data.updatedAt).toLocaleTimeString();
+
+  document.getElementById("regimeBox").textContent = market.regime;
+  document.getElementById("regimeSub").textContent = market.regime === "BULLISH" ? "Risk-on trend conditions" : "Mixed or defensive conditions";
+  document.getElementById("regimeConf").textContent = "Confidence: " + market.confidence + "%";
+  document.getElementById("spyBox").textContent = market.spyTrend;
+
+  const spy = data.indices.find(item => item.symbol === "SPY");
+  document.getElementById("spyPrice").textContent = spy ? `${money(spy.price)} ${pct(spy.changePct)}` : "--";
+
+  document.getElementById("volBox").textContent = market.volatility;
+  document.getElementById("vixText").textContent = "VIX: " + (market.vix ?? "--");
+  document.getElementById("vixSub").textContent = market.volatility === "LOW" ? "Risk supportive" : "Risk elevated";
+  document.getElementById("breadthBox").textContent = market.breadth;
+  document.getElementById("breadthSub").textContent = market.breadthScore + "% above scanner trend filter";
+  document.getElementById("confIcon").textContent = market.confidence;
+  document.getElementById("sysConf").textContent = market.confidence >= 70 ? "HIGH" : market.confidence >= 50 ? "MEDIUM" : "LOW";
+
+  renderRows(data.signals);
+
+  document.getElementById("scanState").textContent = data.mode === "LIVE_DATA" ? "Live data ●" : "Partial live data ●";
+  document.getElementById("scanCount").textContent = `Showing ${data.signals.length} scanned symbols`;
+
+  if (!selectedSymbol && data.signals[0]) selectTrade(data.signals[0].symbol, false);
+  else if (selectedSymbol) selectTrade(selectedSymbol, false);
+
+  const stats = data.stats;
+  document.getElementById("totalReturn").textContent = stats.totalTrades ? "+0.00%" : "--";
+  document.getElementById("maxDrawdown").textContent = stats.maxDrawdown ?? "--";
+  document.getElementById("profitFactor").textContent = stats.profitFactor ?? "--";
+  document.getElementById("perfTrades").textContent = stats.totalTrades;
+  document.getElementById("perfWin").textContent = stats.winRate ?? "--";
+  document.getElementById("perfExp").textContent = stats.expectancy ?? "--";
+  document.getElementById("perfPf").textContent = stats.profitFactor ?? "--";
+  document.getElementById("winRateBox").innerHTML = stats.totalTrades ? `<b>${stats.winRate}%</b>` : "No closed paper trades yet.";
+
+  document.getElementById("systems").innerHTML = data.systems.map(system => `
+    <div class="sys">
+      <span>● ${system.name}</span>
+      <b class="${system.state.includes("WAITING") || system.state.includes("NO ") || system.state.includes("PARTIAL") ? "warn" : "ok"}" title="${system.detail || ""}">${system.state}</b>
+    </div>
+  `).join("");
+
+  document.getElementById("healthBody").innerHTML = data.systems.map(system => `
+    <div class="miniRow"><span>${system.name}</span><b>${system.state}</b></div>
+  `).join("") + `<p style="color:var(--muted)">Uptime: ${data.uptimeSeconds}s<br>Data quality: ${data.dataQuality}<br>Errors: ${data.errors.length}</p>`;
+
+  const alerts = data.alerts || [];
+  document.getElementById("alertsCount").textContent = alerts.length;
+  document.getElementById("alertsLabel").textContent = alerts.length;
+  document.getElementById("alerts").innerHTML = alerts.length
+    ? alerts.map(alert => `<div class="alert"><span>${new Date(alert.time).toLocaleTimeString()}</span><span>${alert.symbol}</span><b>${alert.type}</b></div>`).join("")
+    : "<div class='alert'><span>No alerts yet</span><b>0</b></div>";
+  document.getElementById("alertsPageBody").innerHTML = alerts.length ? document.getElementById("alerts").innerHTML : "No alerts yet. Count is honest.";
+
+  document.getElementById("positionsCount").textContent = data.paper.open.length;
+  document.getElementById("positionsBox").innerHTML = data.paper.open.length ? "Open positions found." : "No open paper positions.";
+
+  document.getElementById("indices").innerHTML = data.indices.map(index => `
+    <div class="miniRow"><span>${index.symbol}</span><b>${money(index.price)} <span style="color:${cls(index.changePct)}">${pct(index.changePct)}</span></b></div>
+  `).join("");
+
+  document.getElementById("tickerbar").innerHTML = "<b>LIVE TICKER</b>" + data.indices.map(index =>
+    `<b>${index.symbol}</b> ${money(index.price)} <span style="color:${cls(index.changePct)}">${pct(index.changePct)}</span>`
+  ).join("");
+
+  document.getElementById("breadthGauge").innerHTML = `
+    <div style="width:116px;height:116px;border-radius:50%;border:18px solid var(--green);border-right-color:var(--red);display:grid;place-items:center;text-align:center">
+      <b style="font-size:30px">${market.breadth}</b><br><span style="color:var(--green)">${market.regime}</span>
+    </div>
+  `;
+
+  document.getElementById("heatmap").innerHTML = data.signals.slice(0, 10).map((signal, index) =>
+    `<div class="heat ${index === 0 ? "big" : ""} ${signal.changePct < 0 ? "red" : ""}">${signal.symbol}<br>${pct(signal.changePct)}</div>`
+  ).join("");
+
+  document.getElementById("decisionStream").innerHTML = data.signals.slice(0, 4).map(signal =>
+    `<div class="miniRow"><span>${signal.symbol} ${signal.action === "LONG" ? "approved" : signal.action === "WATCH" ? "watching" : "rejected"}</span><b>${signal.action}</b></div>`
+  ).join("");
+
+  document.getElementById("sectorBars").innerHTML = [
+    ["Technology", "+ live", 90, "green"],
+    ["Momentum", "+ scan", 72, "green"],
+    ["Breadth", market.breadth, Number(market.breadthScore) || 50, "green"],
+    ["Risk", "VIX " + (market.vix ?? "--"), market.volatility === "LOW" ? 25 : 75, market.volatility === "LOW" ? "green" : "red"]
+  ].map(item => `
+    <div class="barline">
+      <span>${item[0]}</span>
+      <div class="track"><div class="fill ${item[3] === "red" ? "red" : ""}" style="width:${item[2]}%"></div></div>
+      <b style="color:${item[3] === "red" ? "var(--red)" : "var(--green)"}">${item[1]}</b>
+    </div>
+  `).join("");
+
+  document.getElementById("regimePageText").textContent =
+    `Regime is ${market.regime}. SPY trend is ${market.spyTrend}. Breadth is ${market.breadth}. Volatility is ${market.volatility}.`;
+}
+
+async function loadState() {
+  try {
+    const response = await fetch("/api/state", { cache: "no-store" });
+    const data = await response.json();
+    renderState(data);
+    refreshLeft = 30;
+  } catch (error) {
+    document.getElementById("scanState").textContent = "API error";
+    document.getElementById("systems").innerHTML = `<div class="sys"><span>API</span><b class="bad">${error.message}</b></div>`;
+  }
+}
+
+document.querySelectorAll(".nav button").forEach(button => {
+  button.addEventListener("click", () => {
+    document.querySelectorAll(".nav button").forEach(item => item.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(page => page.classList.remove("active"));
+    button.classList.add("active");
+    document.getElementById(button.dataset.page)?.classList.add("active");
+  });
+});
+
+document.getElementById("soundBtn").addEventListener("click", unlockAudio);
+document.getElementById("testSoundBtn").addEventListener("click", () => {
+  if (!audioUnlocked) unlockAudio();
+  beep(920, 0.16);
+  setTimeout(() => beep(1220, 0.16), 180);
+  speak("Trading Mint Pro audio test successful.");
+});
+
+setInterval(() => {
+  marketCountdown();
+  refreshLeft = Math.max(0, refreshLeft - 1);
+  document.getElementById("refreshClock").textContent = `Auto refresh in ${refreshLeft}s`;
+  if (refreshLeft === 0) loadState();
+}, 1000);
+
+marketCountdown();
+loadState();
+</script>
+</body>
+</html>

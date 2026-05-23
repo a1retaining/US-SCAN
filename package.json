@@ -1,0 +1,17 @@
+{
+  "name": "tradingmint-pro",
+  "version": "3.0.0",
+  "description": "TradingMint PRO automated trading scanner terminal with live data, charts, sound settings, and tested UI.",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node tests/runTests.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
