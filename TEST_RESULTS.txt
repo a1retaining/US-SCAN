@@ -1,9 +1,10 @@
-PASS max available history range
-PASS fallback to 10y 5y 3y
-PASS historical metadata cache
-PASS max-history backtest journal
-PASS stronger historical edge weighting
-PASS heatmap classification
-PASS UI shows bar count and first date
-PASS auto paper still protected
+PASS max history proof engine retained
+PASS walk-forward testing added
+PASS self-training engine added
+PASS sector/correlation limits added
+PASS paper reports added
+PASS trade replay added
+PASS SQLite adapter with JSON fallback added
+PASS frontend pages added
+PASS APIs wired
 ALL TESTS PASSED
