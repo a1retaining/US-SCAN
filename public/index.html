@@ -1,204 +1,209 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TradingMint Pro</title>
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TradingMint PRO</title>
 <style>
-body{
-    margin:0;
-    background:#050816;
-    color:white;
-    font-family:Arial;
+:root{
+  --bg:#02070b;
+  --panel:#06131c;
+  --panel2:#081926;
+  --panel3:#0b202f;
+  --stroke:rgba(120,255,70,.18);
+  --stroke2:rgba(255,255,255,.08);
+  --text:#f2fff0;
+  --muted:#95a9b4;
+  --green:#6aff39;
+  --green2:#adff4f;
+  --red:#ff455c;
+  --yellow:#ffd166;
+  --blue:#64b8ff;
+  --purple:#9b5cff;
+  --shadow:0 22px 70px rgba(0,0,0,.48),0 0 32px rgba(106,255,57,.06);
 }
-
-.sidebar{
-    position:fixed;
-    left:0;
-    top:0;
-    width:240px;
-    height:100vh;
-    background:#081120;
-    border-right:1px solid #1cff73;
-    padding:20px;
-}
-
-.logo{
-    color:#1cff73;
-    font-size:28px;
-    font-weight:bold;
-    margin-bottom:40px;
-}
-
-.menu{
-    display:flex;
-    flex-direction:column;
-    gap:15px;
-}
-
-.menu button{
-    background:#101b2d;
-    border:1px solid #1cff73;
-    color:white;
-    padding:15px;
-    border-radius:10px;
-    cursor:pointer;
-    font-size:16px;
-}
-
-.main{
-    margin-left:260px;
-    padding:20px;
-}
-
-.top{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:20px;
-}
-
-.card{
-    background:#0d1728;
-    border:1px solid #1cff73;
-    border-radius:14px;
-    padding:20px;
-}
-
-.big{
-    font-size:30px;
-    color:#1cff73;
-}
-
-.table{
-    margin-top:20px;
-    background:#0d1728;
-    border:1px solid #1cff73;
-    border-radius:14px;
-    overflow:hidden;
-}
-
-.row{
-    display:grid;
-    grid-template-columns:1fr 1fr 1fr 1fr;
-    padding:15px;
-    border-bottom:1px solid #1d2d46;
-}
-
-.header{
-    background:#101f36;
-    font-weight:bold;
-}
-
-.trade-popup{
-    position:fixed;
-    bottom:20px;
-    right:20px;
-    width:320px;
-    background:#0d1728;
-    border:2px solid #8b5cf6;
-    border-radius:16px;
-    padding:20px;
-    box-shadow:0 0 20px #8b5cf6;
-}
-
-.green{
-    color:#1cff73;
-}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,Arial,Helvetica,sans-serif;background:
+radial-gradient(circle at 20% -10%,rgba(106,255,57,.13),transparent 420px),
+radial-gradient(circle at 85% 0%,rgba(80,160,255,.08),transparent 420px),
+linear-gradient(180deg,#02070b,#010306);color:var(--text)}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.14;background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px);background-size:36px 36px}
+.app{position:relative;z-index:1;display:grid;grid-template-columns:276px 1fr;min-height:100vh}
+.sidebar{height:100vh;position:sticky;top:0;background:linear-gradient(180deg,#06121b,#02080d);border-right:1px solid var(--stroke);padding:14px 12px;overflow:auto}
+.logo{height:78px;display:flex;gap:13px;align-items:center;border-bottom:1px solid var(--stroke2);margin-bottom:12px}
+.logoMark{width:48px;height:48px;border:2px solid #00f0a0;border-radius:10px;display:grid;place-items:center;box-shadow:0 0 28px rgba(0,255,150,.28)}
+.logoMark:before{content:"✓";font-size:25px;color:#00f0a0;font-weight:900}
+.logoText b{display:block;font-size:25px;letter-spacing:7px;line-height:1.05}
+.pro{display:inline-block;font-size:15px;letter-spacing:1px;background:linear-gradient(135deg,#6f33ff,#b881ff);padding:2px 7px;border-radius:4px;margin-left:4px}
+.logoText span{display:block;margin-top:4px;color:var(--muted);font-size:11px;letter-spacing:3px}
+.nav{display:grid;gap:6px}
+.nav button{height:45px;background:transparent;color:#dae7ed;border:1px solid transparent;border-radius:8px;text-align:left;padding:0 12px;display:flex;gap:12px;align-items:center;cursor:pointer;font-weight:800;font-size:13px}
+.nav button:hover{background:rgba(106,255,57,.08);border-color:rgba(106,255,57,.25)}
+.nav button.active{background:linear-gradient(90deg,rgba(106,255,57,.24),rgba(106,255,57,.08));border-color:rgba(106,255,57,.75);color:var(--green);box-shadow:0 0 20px rgba(106,255,57,.22)}
+.nav i{font-style:normal;width:18px;text-align:center}.bubble{margin-left:auto;background:#6e32bd;color:white;min-width:22px;height:22px;border-radius:999px;display:grid;place-items:center}
+.sidePanel{border:1px solid var(--stroke);background:rgba(6,19,28,.84);border-radius:8px;padding:14px;margin-top:14px;box-shadow:var(--shadow)}
+.sidePanel h3{margin:0 0 11px;font-size:12px;text-transform:uppercase}.sideRow{display:flex;justify-content:space-between;margin:8px 0;font-size:12px;color:#dbe7eb}.sideRow b{color:var(--green)}
+.sessionCircle{width:112px;height:112px;border-radius:50%;margin:18px auto 6px;border:8px solid rgba(106,255,57,.35);border-right-color:var(--yellow);display:grid;place-items:center;text-align:center}
+.main{min-width:0;padding:10px 14px 44px}
+.topbar{height:70px;border:1px solid var(--stroke);border-radius:8px;background:rgba(6,19,28,.88);display:grid;grid-template-columns:1.15fr 1.05fr 1.1fr 1.25fr 1.3fr .7fr .95fr 1.2fr 150px;align-items:center;box-shadow:var(--shadow);overflow:hidden;margin-bottom:13px}
+.topbar div{height:100%;padding:13px 16px;border-right:1px solid var(--stroke2);display:flex;flex-direction:column;justify-content:center}
+.topbar small{font-size:11px;text-transform:uppercase;color:var(--muted)}.topbar b{font-size:13px}.ok{color:var(--green)}.icons{display:flex!important;flex-direction:row!important;gap:18px;align-items:center!important;justify-content:center!important;font-size:20px}
+.page{display:none}.page.active{display:block}
+.regimeGrid{display:grid;grid-template-columns:1.05fr 1.05fr 1fr 1.05fr 1.2fr .95fr;gap:12px;margin-bottom:13px}
+.regime{height:118px;border:1px solid var(--stroke);background:rgba(6,19,28,.86);border-radius:8px;padding:14px;display:grid;grid-template-columns:70px 1fr;gap:12px;box-shadow:var(--shadow);overflow:hidden}
+.iconBig{font-size:50px;color:var(--green);filter:drop-shadow(0 0 18px rgba(106,255,57,.3));display:grid;place-items:center}.regime small{color:var(--muted);font-size:11px;text-transform:uppercase}.regime h2{margin:4px 0;color:var(--green);font-size:22px}.regime p{margin:0 0 4px;font-size:13px}.regime span{color:var(--green);font-size:12px}
+.dashboard{display:grid;grid-template-columns:1.24fr 1.02fr .65fr;gap:12px}
+.card{border:1px solid var(--stroke);background:rgba(6,19,28,.86);border-radius:8px;box-shadow:var(--shadow);overflow:hidden}
+.head{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid var(--stroke2)}
+.head h2{margin:0;font-size:15px;text-transform:uppercase}.head small{color:var(--muted);font-size:12px;text-transform:none}.head span{color:var(--green);font-size:12px}
+.tablewrap{overflow:auto}.scanner{width:100%;border-collapse:collapse;min-width:750px}.scanner th,.scanner td{border-bottom:1px solid rgba(255,255,255,.055);padding:10px 13px;text-align:left;font-size:13px}.scanner th{font-size:11px;text-transform:uppercase;color:#c9d6da;background:rgba(0,0,0,.18)}.rank{color:var(--green);font-weight:900}.ticker{font-weight:900;font-size:16px}.conf{border:1px solid rgba(106,255,57,.5);background:rgba(106,255,57,.09);padding:4px 9px;border-radius:4px;color:var(--green)}.exp{color:var(--green);font-weight:900}.arrow{font-size:21px;color:var(--green)}.neutral{color:var(--yellow)}.view{border:1px solid var(--stroke2);background:#162431;color:white;border-radius:4px;padding:6px 9px;cursor:pointer}
+.chart{height:250px;padding:12px}.chart svg{width:100%;height:100%;display:block}.metrics{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--stroke2)}.metric{padding:11px 14px;border-right:1px solid var(--stroke2);font-size:12px}.metric b{color:var(--green);margin-left:6px}
+.two{display:grid;grid-template-columns:.7fr 1fr;gap:12px;margin-top:12px}
+.systems,.alerts{padding:12px 14px}.sys,.alert,.miniRow{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid rgba(255,255,255,.055);padding:8px 0;font-size:13px}.sys b,.alert b{color:var(--green)}
+.lower{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:12px}.lower.three{grid-template-columns:1.4fr 1fr 1fr}.mini{min-height:214px;border:1px solid var(--stroke);background:rgba(6,19,28,.86);border-radius:8px;padding:14px;box-shadow:var(--shadow)}.mini h3{margin:0 0 12px;font-size:13px;text-transform:uppercase}
+.barline{display:grid;grid-template-columns:110px 1fr 55px;gap:8px;align-items:center;margin:8px 0;font-size:12px}.track{height:10px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}.fill{height:100%;background:var(--green)}.fill.red{background:var(--red)}
+.heatmap{display:grid;grid-template-columns:2fr repeat(4,1fr);grid-template-rows:repeat(3,44px);gap:2px}.heat{background:rgba(106,255,57,.25);display:grid;place-items:center;font-size:12px}.heat.big{grid-row:span 2;font-size:21px;font-weight:900}.heat.red{background:rgba(255,69,92,.35)}
+.popup{position:fixed;right:24px;bottom:74px;width:610px;background:linear-gradient(180deg,rgba(8,18,28,.98),rgba(3,8,13,.98));border:2px solid var(--purple);border-radius:14px;box-shadow:0 0 45px rgba(155,92,255,.48),var(--shadow);z-index:20;padding:20px}.popupTop{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--stroke2);padding-bottom:12px}.popupTop h2{margin:0;color:var(--green);font-size:21px}.close{background:transparent;color:white;border:0;font-size:24px;cursor:pointer}.popupMain{display:grid;grid-template-columns:90px 1fr 100px;gap:16px;align-items:center;padding:15px 0}.nvlogo{height:54px;background:var(--green);color:#031207;display:grid;place-items:center;font-weight:900}.popTicker{font-size:34px;font-weight:900}.long{border:1px solid rgba(106,255,57,.5);color:var(--green);border-radius:6px;padding:10px 22px;text-align:center}.popupGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 40px}.popupLine{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.055);padding:6px 0;color:var(--muted)}.popupLine b{color:white}.popupLine b.risk{color:var(--red)}.progress{height:4px;background:rgba(106,255,57,.15);margin-top:18px;border-radius:99px;overflow:hidden}.progress div{height:100%;width:42%;background:var(--green)}
+.tickerbar{position:fixed;left:276px;right:0;bottom:0;height:38px;background:rgba(3,8,13,.97);border-top:1px solid var(--stroke);display:flex;align-items:center;gap:28px;padding:0 18px;font-size:13px;z-index:8}.tickerbar b{color:white}.tickerbar span{color:var(--green)}
+.pageGrid{display:grid;grid-template-columns:1.35fr 1fr;gap:12px}.pagePanel{min-height:300px;border:1px solid var(--stroke);background:rgba(6,19,28,.86);border-radius:8px;padding:18px;box-shadow:var(--shadow)}.pagePanel h2{margin-top:0}.pagePanel p{color:var(--muted);line-height:1.5}.wideTable{width:100%;border-collapse:collapse}.wideTable td,.wideTable th{padding:12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;text-align:left}.wideTable th{color:var(--muted);text-transform:uppercase;font-size:11px}
+@media(max-width:1450px){.app{grid-template-columns:1fr}.sidebar{position:relative;height:auto}.tickerbar{left:0}.topbar,.regimeGrid,.dashboard,.lower,.lower.three,.pageGrid{grid-template-columns:1fr}.popup{left:12px;right:12px;width:auto}}
 </style>
 </head>
-
 <body>
+<div class="app">
+<aside class="sidebar">
+  <div class="logo"><div class="logoMark"></div><div class="logoText"><b>TRADING<br>MINT<span class="pro">PRO</span></b><span>AUTOMATED TRADING SYSTEM</span></div></div>
+  <nav class="nav">
+    <button class="active" data-page="dashboard"><i>▥</i>DASHBOARD</button>
+    <button data-page="scanner"><i>⌕</i>LIVE SCANNER</button>
+    <button data-page="positions"><i>⚙</i>POSITIONS <span class="bubble">4</span></button>
+    <button data-page="journal"><i>▤</i>TRADE JOURNAL</button>
+    <button data-page="performance"><i>▥</i>PERFORMANCE</button>
+    <button data-page="backtest"><i>◌</i>BACKTEST ANALYTICS</button>
+    <button data-page="regime"><i>▱</i>MARKET REGIME</button>
+    <button data-page="sector"><i>▥</i>SECTOR ROTATION</button>
+    <button data-page="risk"><i>♢</i>RISK MANAGEMENT</button>
+    <button data-page="alertsPage"><i>♧</i>ALERTS <span class="bubble">7</span></button>
+    <button data-page="health"><i>⚙</i>SYSTEM HEALTH</button>
+    <button data-page="settings"><i>⚙</i>SETTINGS</button>
+  </nav>
+  <div class="sidePanel"><h3>Quick Actions</h3><div class="sideRow"><span>Run Backtest</span><b>READY</b></div><div class="sideRow"><span>Optimize Strategies</span><b>ON</b></div><div class="sideRow"><span>Paper Trading</span><b>LIVE</b></div><div class="sideRow"><span>Market Replay</span><b>READY</b></div></div>
+  <div class="sidePanel"><h3>Market Session</h3><div class="sideRow"><span>● MARKET OPEN</span><b></b></div><div class="sessionCircle"><div><b>01:31:45</b><br><small>UNTIL CLOSE</small></div></div></div>
+</aside>
+<main class="main">
+  <section class="topbar">
+    <div><small>Market Regime</small><b class="ok">BULLISH</b></div>
+    <div><small>SPY Trend</small><b class="ok">BULLISH</b></div>
+    <div><small>Market Volatility</small><b class="ok">LOW</b></div>
+    <div><small>Market Breadth</small><b class="ok">STRONG</b></div>
+    <div><small>Sector Leader</small><b class="ok">TECHNOLOGY</b></div>
+    <div><small>Data Feed</small><b class="ok">● LIVE</b></div>
+    <div><small>Last Update</small><b>08:28:15 AM</b></div>
+    <div><small>Next Backtest</small><b>Tonight 2:00 AM</b></div>
+    <div class="icons"><span>🔔</span><span>⚙</span><span>⏻</span></div>
+  </section>
 
-<div class="sidebar">
+  <section id="dashboard" class="page active">
+    <div class="regimeGrid">
+      <div class="regime"><div class="iconBig">↗</div><div><small>Market Regime</small><h2>BULLISH</h2><p>Strong Uptrend</p><span>Confidence: 78%</span></div></div>
+      <div class="regime"><div class="iconBig">↗</div><div><small>SPY Trend</small><h2>BULLISH</h2><p>Above 200 EMA</p><span>535.42 +0.78%</span></div></div>
+      <div class="regime"><div class="iconBig">▥</div><div><small>Market Volatility</small><h2>LOW</h2><p>VIX: 14.82</p><span>-6.21%</span></div></div>
+      <div class="regime"><div class="iconBig">◉</div><div><small>Market Breadth</small><h2>STRONG</h2><p>78% Above 50 MA</p><span>Adv/Dec 3.2:1</span></div></div>
+      <div class="regime"><div class="iconBig">▣</div><div><small>Sector Leader</small><h2>TECHNOLOGY</h2><p>Strength: 82/100</p><span>4Wk Rank: 1/11</span></div></div>
+      <div class="regime"><div class="iconBig">76</div><div><small>System Confidence</small><h2>HIGH</h2><p>Confidence</p><span>Environment</span></div></div>
+    </div>
 
-<div class="logo">
-TRADING<br>MINT PRO
+    <div class="dashboard">
+      <div class="card">
+        <div class="head"><h2>LIVE SCANNER <small>(Ranked by Expectancy)</small></h2><span>Auto-Updated ●</span></div>
+        <div class="tablewrap"><table class="scanner"><thead><tr><th>Rank</th><th>Ticker</th><th>Setup</th><th>Conf</th><th>Win Rate</th><th>Expectancy</th><th>R:R</th><th>Trend</th><th>Regime</th><th>Action</th></tr></thead><tbody id="scannerRows"></tbody></table></div>
+        <div class="head"><span>Showing top 8 of 412 opportunities</span><span>Auto refresh in 18s ⟳</span></div>
+      </div>
+      <div>
+        <div class="card">
+          <div class="head"><h2>EQUITY CURVE <small>(Paper Trading)</small></h2><span>1 Year⌄</span></div>
+          <div class="chart"><svg viewBox="0 0 600 260" preserveAspectRatio="none"><defs><linearGradient id="eq" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#6aff39" stop-opacity=".35"/><stop offset="100%" stop-color="#6aff39" stop-opacity="0"/></linearGradient></defs><path d="M0 220 L50 200 L100 178 L150 160 L200 120 L250 98 L300 74 L350 92 L400 70 L450 46 L500 35 L550 25 L600 8 L600 260 L0 260 Z" fill="url(#eq)"/><polyline points="0,220 50,200 100,178 150,160 200,120 250,98 300,74 350,92 400,70 450,46 500,35 550,25 600,8" stroke="#6aff39" stroke-width="3" fill="none"/></svg></div>
+          <div class="metrics"><div class="metric">Total Return <b>+26.47%</b></div><div class="metric">Max Drawdown <b style="color:var(--red)">-3.21%</b></div><div class="metric">Sharpe Ratio <b>2.18</b></div></div>
+        </div>
+        <div class="two">
+          <div class="card"><div class="head"><h2>WIN RATE</h2></div><div style="height:150px;display:grid;place-items:center"><div style="width:108px;height:108px;border-radius:50%;border:20px solid var(--green);border-left-color:var(--red);display:grid;place-items:center;font-size:28px;font-weight:900">62%</div></div></div>
+          <div class="card"><div class="head"><h2>EXPECTANCY DISTRIBUTION</h2></div><div class="chart"><svg viewBox="0 0 400 180"><rect x="40" y="140" width="38" height="15" fill="#ff455c"/><rect x="110" y="105" width="38" height="50" fill="#6aff39"/><rect x="180" y="78" width="38" height="77" fill="#6aff39"/><rect x="250" y="48" width="38" height="107" fill="#6aff39"/><rect x="320" y="95" width="38" height="60" fill="#6aff39"/></svg></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="card"><div class="head"><h2>SYSTEM STATUS</h2></div><div class="systems" id="systems"></div></div>
+        <div class="card" style="margin-top:12px"><div class="head"><h2>RECENT ALERTS</h2></div><div class="alerts" id="alerts"></div></div>
+      </div>
+    </div>
+
+    <div class="lower">
+      <div class="mini"><h3>MARKET INDICES</h3><div class="miniRow"><span>SPY</span><b>535.42 <span style="color:var(--green)">+0.78%</span></b></div><div class="miniRow"><span>QQQ</span><b>467.81 <span style="color:var(--green)">+1.12%</span></b></div><div class="miniRow"><span>DIA</span><b>399.12 <span style="color:var(--green)">+0.51%</span></b></div><div class="miniRow"><span>VIX</span><b>14.82 <span style="color:var(--red)">-6.21%</span></b></div></div>
+      <div class="mini"><h3>SECTOR STRENGTH</h3><div id="sectorBars"></div></div>
+      <div class="mini"><h3>UPCOMING EARNINGS</h3><div class="miniRow"><span>NVDA</span><b>May 22</b></div><div class="miniRow"><span>AMZN</span><b>May 23</b></div><div class="miniRow"><span>META</span><b>May 29</b></div><div class="miniRow"><span>AVGO</span><b>Jun 4</b></div></div>
+      <div class="mini"><h3>SYSTEM PERFORMANCE</h3><div class="miniRow"><span>Total Trades</span><b>342</b></div><div class="miniRow"><span>Win Rate</span><b style="color:var(--green)">61.7%</b></div><div class="miniRow"><span>Expectancy</span><b style="color:var(--green)">1.42R</b></div><div class="miniRow"><span>Profit Factor</span><b style="color:var(--green)">2.18</b></div></div>
+      <div class="mini"><h3>MARKET BREADTH</h3><div style="height:150px;display:grid;place-items:center"><div style="width:116px;height:116px;border-radius:50%;border:18px solid var(--green);border-right-color:var(--red);display:grid;place-items:center;text-align:center"><b style="font-size:30px">78%</b><br><span style="color:var(--green)">STRONG</span></div></div></div>
+    </div>
+
+    <div class="lower three">
+      <div class="mini"><h3>MARKET HEATMAP</h3><div class="heatmap"><div class="heat big">NVDA<br>+2.35%</div><div class="heat">AAPL<br>+1.25%</div><div class="heat">MSFT<br>+0.92%</div><div class="heat">AMZN<br>+1.32%</div><div class="heat">GOOGL<br>+0.84%</div><div class="heat">META<br>+1.18%</div><div class="heat red">TSLA<br>-1.46%</div><div class="heat">AVGO<br>+1.98%</div><div class="heat">AMD<br>+1.36%</div><div class="heat red">PLTR<br>-2.01%</div></div></div>
+      <div class="mini"><h3>SECTOR ROTATION</h3><div class="miniRow"><span>1 Technology</span><b style="color:var(--green)">82</b></div><div class="miniRow"><span>2 Communications</span><b style="color:var(--green)">74</b></div><div class="miniRow"><span>3 Consumer Cyclical</span><b style="color:var(--green)">68</b></div><div class="miniRow"><span>8 Energy</span><b style="color:var(--red)">28</b></div></div>
+      <div class="mini"><h3>TRADE DECISION STREAM</h3><div class="miniRow"><span>NVDA approved</span><b>LONG</b></div><div class="miniRow"><span>AMD waiting pullback</span><b>WAIT</b></div><div class="miniRow"><span>VIX risk low</span><b>OK</b></div><div class="miniRow"><span>Tech leading</span><b>STRONG</b></div></div>
+    </div>
+  </section>
+
+  <section id="scanner" class="page"><div class="pageGrid"><div class="pagePanel"><h2>Live Scanner</h2><table class="wideTable"><thead><tr><th>Ticker</th><th>Setup</th><th>Confidence</th><th>Action</th></tr></thead><tbody><tr><td>NVDA</td><td>Breakout</td><td>89</td><td>LONG</td></tr><tr><td>AVGO</td><td>Breakout</td><td>86</td><td>LONG</td></tr><tr><td>AMD</td><td>Pullback</td><td>82</td><td>LONG</td></tr></tbody></table></div><div class="pagePanel"><h2>Scanner Filters</h2><p>Setup type, confidence, risk/reward, expectancy, sector, trend and market regime filters will live here.</p></div></div></section>
+  <section id="positions" class="page"><div class="pageGrid"><div class="pagePanel"><h2>Positions</h2><table class="wideTable"><tr><th>Symbol</th><th>Entry</th><th>Stop</th><th>Target</th><th>P/L</th></tr><tr><td>NVDA</td><td>$946.12</td><td>$932.45</td><td>$965.00</td><td style="color:var(--green)">+1.2%</td></tr></table></div><div class="pagePanel"><h2>Risk Exposure</h2><p>Current exposure, risk per trade, open risk, max drawdown and account protection rules.</p></div></div></section>
+  <section id="journal" class="page"><div class="pagePanel"><h2>Trade Journal</h2><p>Every paper trade, entry reason, exit reason, setup type and screenshot notes will show here.</p></div></section>
+  <section id="performance" class="page"><div class="pagePanel"><h2>Performance</h2><p>Equity curve, win rate, profit factor, expectancy, drawdown and trade distribution.</p></div></section>
+  <section id="backtest" class="page"><div class="pagePanel"><h2>Backtest Analytics</h2><p>Automatic strategy testing, historical performance, setup win rates and optimizer output.</p></div></section>
+  <section id="regime" class="page"><div class="pagePanel"><h2>Market Regime</h2><p>SPY trend, QQQ trend, volatility, breadth, sector leadership and risk-on/risk-off state.</p></div></section>
+  <section id="sector" class="page"><div class="pagePanel"><h2>Sector Rotation</h2><p>Sector heatmaps, rankings, relative strength vs SPY and 4-week rotation scores.</p></div></section>
+  <section id="risk" class="page"><div class="pagePanel"><h2>Risk Management</h2><p>Position sizing, daily loss limit, drawdown protection and reduced-risk market modes.</p></div></section>
+  <section id="alertsPage" class="page"><div class="pagePanel"><h2>Alerts</h2><p>Trade popups, system messages, rejected trades and scanner alerts.</p></div></section>
+  <section id="health" class="page"><div class="pagePanel"><h2>System Health</h2><p>Data feed, backtester, scanner, alert engine and paper trader status.</p></div></section>
+  <section id="settings" class="page"><div class="pagePanel"><h2>Settings</h2><p>Watchlists, scanner rules, risk settings, market regime thresholds and notification settings.</p></div></section>
+</main>
 </div>
 
-<div class="menu">
-<button>Dashboard</button>
-<button>Live Scanner</button>
-<button>Positions</button>
-<button>Performance</button>
-<button>Backtests</button>
-<button>Alerts</button>
-<button>Settings</button>
+<div class="popup" id="tradePopup">
+  <div class="popupTop"><h2>🚀 TRADE TAKEN</h2><button class="close" onclick="document.getElementById('tradePopup').style.display='none'">×</button></div>
+  <div class="popupMain"><div class="nvlogo">NVIDIA</div><div><div class="popTicker">NVDA</div><div style="color:var(--muted)">NVIDIA Corporation</div></div><div class="long">LONG</div></div>
+  <div class="popupGrid">
+    <div class="popupLine"><span>Entry Price</span><b>$946.12</b></div><div class="popupLine"><span>Setup</span><b>Breakout</b></div>
+    <div class="popupLine"><span>Stop Loss</span><b>$932.45</b></div><div class="popupLine"><span>Confidence</span><b>89/100</b></div>
+    <div class="popupLine"><span>Target 1</span><b>$965.00</b></div><div class="popupLine"><span>Win Rate</span><b>63%</b></div>
+    <div class="popupLine"><span>Target 2</span><b>$982.00</b></div><div class="popupLine"><span>Expectancy</span><b>1.85R</b></div>
+    <div class="popupLine"><span>Position Size</span><b>150 shares</b></div><div class="popupLine"><span>Risk / Reward</span><b class="risk">2.34 : 1</b></div>
+  </div>
+  <div class="progress"><div></div></div><div style="text-align:right;color:var(--green);font-size:12px;margin-top:8px">Auto close in 00:57</div>
 </div>
 
-</div>
+<div class="tickerbar"><b>LIVE TICKER</b><b>SPY</b> 535.42 <span>▲ 0.78%</span><b>QQQ</b>467.81 <span>▲ 1.12%</span><b>DIA</b>399.12 <span>▲ 0.51%</span><b>VIX</b>14.82 <span style="color:var(--red)">▼ -6.21%</span><b>NEWS</b> Fed Officials Signal Rate Cut Later This Year</div>
 
-<div class="main">
-
-<div class="top">
-
-<div class="card">
-<div>Market Regime</div>
-<div class="big">BULLISH</div>
-</div>
-
-<div class="card">
-<div>SPY Trend</div>
-<div class="big">STRONG</div>
-</div>
-
-<div class="card">
-<div>Market Breadth</div>
-<div class="big">78%</div>
-</div>
-
-<div class="card">
-<div>AI Confidence</div>
-<div class="big">82</div>
-</div>
-
-</div>
-
-<div class="table">
-
-<div class="row header">
-<div>Ticker</div>
-<div>Setup</div>
-<div>Confidence</div>
-<div>Action</div>
-</div>
-
-<div class="row">
-<div>NVDA</div>
-<div>Breakout</div>
-<div class="green">89</div>
-<div class="green">LONG</div>
-</div>
-
-<div class="row">
-<div>AMD</div>
-<div>Pullback</div>
-<div class="green">82</div>
-<div class="green">LONG</div>
-</div>
-
-<div class="row">
-<div>META</div>
-<div>Momentum</div>
-<div>79</div>
-<div>WATCH</div>
-</div>
-
-</div>
-
-</div>
-
-<div class="trade-popup">
-<h2 class="green">TRADE TAKEN</h2>
-
-<p><strong>NVDA</strong></p>
-
-<p>Entry: $946</p>
-<p>Stop: $932</p>
-<p>Target: $965</p>
-
-<p class="green">Confidence 89%</p>
-</div>
-
+<script>
+const rows=[
+["1","NVDA","Breakout","89","63%","1.85R","2.34:1","↗","Bullish"],
+["2","AVGO","Breakout","86","61%","1.72R","2.18:1","↗","Bullish"],
+["3","AMD","Pullback","82","58%","1.48R","1.92:1","↗","Bullish"],
+["4","META","Breakout","79","55%","1.35R","1.88:1","↗","Bullish"],
+["5","PLTR","Breakout","76","57%","1.28R","1.67:1","↗","Bullish"],
+["6","TSLA","Pullback","72","54%","1.19R","1.58:1","↗","Bullish"],
+["7","CRWD","Breakout","70","53%","1.11R","1.52:1","→","Neutral"],
+["8","AMZN","Pullback","68","52%","1.05R","1.48:1","↗","Bullish"]
+];
+document.getElementById("scannerRows").innerHTML=rows.map(r=>`<tr><td class="rank">${r[0]}</td><td class="ticker">${r[1]}</td><td>${r[2]}</td><td><span class="conf">${r[3]}</span></td><td>${r[4]}</td><td class="exp">${r[5]}</td><td>${r[6]}</td><td class="${r[7]==='→'?'neutral':'arrow'}">${r[7]}</td><td style="color:${r[8]==='Neutral'?'var(--yellow)':'var(--green)'}">${r[8]}</td><td><button class="view">VIEW</button></td></tr>`).join("");
+document.getElementById("systems").innerHTML=["Data Collector","Backtest Engine","Strategy Optimizer","Market Regime Engine","Risk Manager","Alert Engine","Paper Trader","Performance Analytics"].map(x=>`<div class="sys"><span>● ${x}</span><b>RUNNING</b></div>`).join("")+`<div class="sys"><span>● ALL SYSTEMS OPERATIONAL</span><b></b></div>`;
+document.getElementById("alerts").innerHTML=[["08:27 AM","NVDA","Breakout"],["08:26 AM","AVGO","Breakout"],["08:24 AM","AMD","Pullback"],["08:22 AM","META","Breakout"],["08:20 AM","PLTR","Breakout"]].map(x=>`<div class="alert"><span>${x[0]}</span><span>${x[1]}</span><span>${x[2]}</span><b>LONG</b></div>`).join("")+`<div style="text-align:center;color:var(--muted);font-size:12px;margin-top:8px">Auto-cleared after 60s</div>`;
+document.getElementById("sectorBars").innerHTML=[["Technology","+2.41%",90,"green"],["Communication","+1.83%",72,"green"],["Consumer Cyclical","+1.21%",61,"green"],["Industrials","+0.78%",48,"green"],["Energy","-0.41%",20,"red"],["Utilities","-0.62%",26,"red"]].map(s=>`<div class="barline"><span>${s[0]}</span><div class="track"><div class="fill ${s[3]==='red'?'red':''}" style="width:${s[2]}%"></div></div><b style="color:${s[3]==='red'?'var(--red)':'var(--green)'}">${s[1]}</b></div>`).join("");
+document.querySelectorAll(".nav button").forEach(button=>{
+  button.addEventListener("click",()=>{
+    document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+    button.classList.add("active");
+    const target=document.getElementById(button.dataset.page);
+    if(target) target.classList.add("active");
+  });
+});
+</script>
 </body>
 </html>

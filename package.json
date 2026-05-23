@@ -1,10 +1,12 @@
 {
   "name": "tradingmint-pro",
-  "version": "1.0.0",
-  "description": "TradingMint Pro AI Scanner",
+  "version": "1.2.0",
+  "description": "TradingMint PRO automated trading terminal with clickable pages.",
   "main": "src/server.js",
+  "type": "commonjs",
   "scripts": {
-    "start": "node src/server.js"
+    "start": "node src/server.js",
+    "test": "node tests/runTests.js"
   },
   "engines": {
     "node": ">=18"
