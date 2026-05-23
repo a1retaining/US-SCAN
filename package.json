@@ -1,2 +1,15 @@
-PORT=10000
-NODE_ENV=production
+{
+  "name": "tradingmint-pro",
+  "version": "1.0.0",
+  "description": "TradingMint Pro AI Scanner",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
