@@ -1,10 +1,275 @@
+const express = require("express");
+const path = require("path");
 
-"use strict";
-const I=require("./indicators");
-function makeMarketRegime(indexBars={}){const spy=indexBars.SPY||[],qqq=indexBars.QQQ||[],iwm=indexBars.IWM||[];const sc=I.closes(spy),qc=I.closes(qqq);let score=50;const reasons=[],warnings=[];const sl=sc.at(-1),ql=qc.at(-1),ss=I.sma(sc,200)||I.sma(sc,100),qs=I.sma(qc,200)||I.sma(qc,100);if(sl&&ss&&sl>ss){score+=12;reasons.push("SPY above long-term trend")}else{score-=12;warnings.push("SPY weak")}if(ql&&qs&&ql>qs){score+=10;reasons.push("QQQ above long-term trend")}else{score-=10;warnings.push("QQQ weak")}if(I.ema(sc,20)>I.ema(sc,50))score+=8;else score-=8;if(I.ema(qc,20)>I.ema(qc,50))score+=8;else score-=8;score+=I.moveOver(spy,21)>0?5:-5;score+=I.moveOver(qqq,21)>0?5:-5;if(I.moveOver(iwm,21)>0)reasons.push("Small caps participating");else warnings.push("Small caps weak");score=Math.round(I.clamp(score));let regime="CHOPPY_NEUTRAL",riskMode="NORMAL";if(score>=75)regime="TRENDING_BULL";else if(score>=62)regime="RISK_ON";else if(score>=45){regime="CHOPPY_NEUTRAL";riskMode="REDUCED"}else if(score>=30){regime="RISK_OFF";riskMode="MINIMAL"}else{regime="TRENDING_BEAR";riskMode="NO_NEW_LONGS"}return {regime,riskMode,marketScore:score,reasons,warnings}}
-function metrics(symbol,bars,indexBars={}){const c=I.closes(bars),v=I.volumes(bars),last=bars.at(-1)||{},price=I.n(last.close),avgVol20=I.sma(v,20),volume=I.n(last.volume)||0;return{symbol,price,volume,avgVol20,rvol:avgVol20?volume/avgVol20:null,ema20:I.ema(c,20),ema50:I.ema(c,50),sma200:I.sma(c,200)||I.sma(c,100),rsi14:I.rsi(c,14),atr14:I.atr(bars,14),high20:I.high(bars,20),low20:I.low(bars,20),stock21:I.moveOver(bars,21),spy21:I.moveOver(indexBars.SPY||[],21),qqq21:I.moveOver(indexBars.QQQ||[],21),bars}}
-function detectSetup(m){let setupType="NO_CLEAN_SETUP",setupScore=0;const reasons=[],warnings=[];const emaStack=m.ema20&&m.ema50&&m.sma200&&m.ema20>m.ema50&&m.ema50>m.sma200;const near20=m.price&&m.ema20&&m.price>=m.ema20*.992&&m.price<=m.ema20*1.025;const nearHigh=m.price&&m.high20&&m.price>=m.high20*.985;const okVol=m.rvol!==null&&m.rvol>=1.2;const healthy=m.rsi14!==null&&m.rsi14>=50&&m.rsi14<=68;const extended=m.price&&m.ema20&&m.price>m.ema20*1.06;if(emaStack&&near20&&healthy){setupType="TREND_PULLBACK";setupScore+=35;reasons.push("Clean trend pullback into EMA20 area")}if(emaStack&&nearHigh&&okVol&&!extended){if(setupScore<32){setupType="BREAKOUT_CONTINUATION";setupScore=32}reasons.push("Near 20-day breakout with volume support")}if(m.price&&m.sma200&&m.price>m.sma200)setupScore+=8;else warnings.push("Below or near long-term trend");if(m.price&&m.ema20&&m.price>m.ema20)setupScore+=5;if(m.price&&m.ema50&&m.price>m.ema50)setupScore+=5;if(m.stock21-m.spy21>2){setupScore+=12;reasons.push("Relative strength versus SPY")}if(m.stock21-m.qqq21>2){setupScore+=8;reasons.push("Relative strength versus QQQ")}if(m.rvol!==null&&m.rvol>=1.8){setupScore+=12;reasons.push(`Strong relative volume ${I.round(m.rvol,2)}x`)}else if(okVol){setupScore+=6;reasons.push(`Acceptable relative volume ${I.round(m.rvol,2)}x`)}else warnings.push("Volume confirmation weak");if(m.rsi14!==null&&m.rsi14>72){setupScore-=10;warnings.push("RSI stretched")}if(extended){setupScore-=12;warnings.push("Extended from EMA20")}return{setupType,setupScore:Math.round(I.clamp(setupScore)),reasons,warnings}}
-function tradePlan(m,setup,riskDollars=100){const price=m.price,atr=m.atr14||(price?price*.035:null);if(!price||!atr)return{valid:false,reason:"Missing price or ATR"};let buyZoneLow,buyZoneHigh;if(setup.setupType==="TREND_PULLBACK"&&m.ema20){buyZoneLow=m.ema20*.992;buyZoneHigh=m.ema20*1.018}else if(setup.setupType==="BREAKOUT_CONTINUATION"){buyZoneLow=price*.992;buyZoneHigh=price*1.005}else{buyZoneLow=m.ema20?m.ema20*.99:price*.97;buyZoneHigh=m.ema20?m.ema20*1.02:price*.995}buyZoneHigh=Math.min(buyZoneHigh,price*1.01);const insideBuyZone=price>=buyZoneLow&&price<=buyZoneHigh,aboveBuyZone=price>buyZoneHigh,belowBuyZone=price<buyZoneLow;const stop=Math.max(.01,Math.min(price-atr*1.65,(m.low20||price-atr*2)-atr*.15));const risk=price-stop,target1=price+risk*2,target2=price+risk*3,rr=risk>0?(target1-price)/risk:0;return{valid:true,price:I.round(price),buyZoneLow:I.round(buyZoneLow),buyZoneHigh:I.round(buyZoneHigh),insideBuyZone,aboveBuyZone,belowBuyZone,stopLoss:I.round(stop),target1:I.round(target1),target2:I.round(target2),riskPerShare:I.round(risk),riskReward:I.round(rr,2),suggestedShares:Math.max(1,Math.floor(riskDollars/Math.max(.01,risk)))}}
-function evaluateSymbol({symbol,bars,indexBars={},riskDollars=100,expectancy=null,options={}}){if(!Array.isArray(bars)||bars.length<80)return{symbol,decision:"AVOID",score:0,warnings:["Insufficient history"],reasons:[],audit:["Reject: insufficient history"]};const market=makeMarketRegime(indexBars),m=metrics(symbol,bars,indexBars),setup=detectSetup(m),plan=tradePlan(m,setup,riskDollars);let rejects=[];if(market.riskMode==="NO_NEW_LONGS")rejects.push("Market blocks new longs");if(setup.setupScore<45)rejects.push("No clean setup detected");if(!plan.valid)rejects.push(plan.reason);if(plan.valid&&plan.riskReward<1.8)rejects.push("Risk/reward below 1.8:1");if((m.avgVol20||0)<500000)rejects.push("Average volume too low");let trend=0;if(m.price&&m.sma200&&m.price>m.sma200)trend+=20;if(m.ema20&&m.ema50&&m.ema20>m.ema50)trend+=18;if(m.price&&m.ema20&&m.price>m.ema20)trend+=8;if(m.rsi14>=50&&m.rsi14<=68)trend+=10;if(m.rvol>=1.2)trend+=8;if(m.stock21-m.spy21>0)trend+=10;if(m.stock21-m.qqq21>0)trend+=6;trend=Math.round(I.clamp(trend));let entry=setup.setupScore;if(plan.insideBuyZone)entry+=18;if(plan.aboveBuyZone)entry-=12;if(market.regime==="TRENDING_BULL")entry+=8;if(market.regime==="RISK_ON")entry+=4;if(market.regime==="CHOPPY_NEUTRAL")entry-=6;if(market.regime==="RISK_OFF")entry-=15;entry=Math.round(I.clamp(entry));let riskScore=100;if(plan.riskReward<2)riskScore-=20;if(market.riskMode==="REDUCED")riskScore-=10;if(market.riskMode==="MINIMAL")riskScore-=25;if(plan.aboveBuyZone)riskScore-=15;riskScore=Math.round(I.clamp(riskScore));const expR=expectancy&&Number.isFinite(Number(expectancy.expectancyR))?Number(expectancy.expectancyR):null;const win=expectancy&&Number.isFinite(Number(expectancy.winRate))?Number(expectancy.winRate):null;const boost=(expR!==null?I.clamp((expR-.3)*16,-10,14):0)+(win!==null?I.clamp((win-50)*.35,-8,10):0);const total=Math.round(I.clamp(trend*.27+setup.setupScore*.23+entry*.23+riskScore*.17+10+boost));let decision="AVOID";if(rejects.length)decision="AVOID";else if(total>=84&&entry>=78&&plan.insideBuyZone)decision="ENTER_NOW";else if(total>=76&&plan.aboveBuyZone)decision="WAIT_FOR_PULLBACK";else if(total>=70)decision="WATCH_LONG";const reasons=[...market.reasons,...setup.reasons];const warnings=[...market.warnings,...setup.warnings,...rejects];const summary=decision==="ENTER_NOW"?`${symbol} passes the decision engine and is inside the buy zone`:decision==="WAIT_FOR_PULLBACK"?`${symbol} is strong but should not be chased`:decision==="WATCH_LONG"?`${symbol} is worth watching but not ready yet`:`${symbol} rejected by the decision engine`;return{symbol,decision,tradeDecision:decision,action:decision,setupType:setup.setupType,setup:setup.setupType,score:total,totalScore:total,entryScore:entry,strengthScore:trend,trendScore:trend,setupScore:setup.setupScore,riskScore,rankScore:total,marketRegime:market.regime,marketRiskMode:market.riskMode,marketScore:market.marketScore,price:I.round(m.price),currentPrice:I.round(m.price),entry:I.round(m.price),buyZoneLow:plan.buyZoneLow,buyZoneHigh:plan.buyZoneHigh,buyLow:plan.buyZoneLow,buyHigh:plan.buyZoneHigh,entryStatus:!plan.valid?"Invalid plan":plan.insideBuyZone?"Inside buy zone":plan.aboveBuyZone?"Above buy zone":"Below buy zone",support:I.round(m.low20),resistance:I.round(m.high20),stopLoss:plan.stopLoss,stop:plan.stopLoss,target1:plan.target1,targetPrice:plan.target1,target2:plan.target2,riskPerShare:plan.riskPerShare,riskReward:plan.riskReward,suggestedShares:plan.suggestedShares,summary,plainEnglish:summary,actionPlan:`Entry zone ${plan.buyZoneLow} to ${plan.buyZoneHigh}. Stop ${plan.stopLoss}. Target ${plan.target1}.`,reasons,warnings,audit:[...reasons,...warnings],expectancy:expectancy||null,metrics:{ema20:I.round(m.ema20),ema50:I.round(m.ema50),sma200:I.round(m.sma200),rsi14:I.round(m.rsi14),atr14:I.round(m.atr14),volumeRatio:I.round(m.rvol,2),relativeStrengthSpy:I.round(m.stock21-m.spy21,2),relativeStrengthQqq:I.round(m.stock21-m.qqq21,2)},bars:bars.slice(-180)}}
-function evaluateBatch({symbols=[],barsBySymbol={},indexBars={},riskDollars=100,expectancyBySetup={}}){return symbols.map(symbol=>{let exp=null;try{const base=detectSetup(metrics(symbol,barsBySymbol[symbol]||[],indexBars));exp=expectancyBySetup[base.setupType]||null}catch(e){}return evaluateSymbol({symbol,bars:barsBySymbol[symbol],indexBars,riskDollars,expectancy:exp})}).sort((a,b)=>((a.decision==="AVOID")-(b.decision==="AVOID"))||b.rankScore-a.rankScore)}
-module.exports={evaluateSymbol,evaluateBatch,makeMarketRegime,metrics,detectSetup,tradePlan};
+const app = express();
+const PORT = process.env.PORT || 10000;
+
+app.use(express.json());
+app.use(express.static(path.join(__dirname, "../public")));
+
+const VERSION = "2.1.0-tested";
+const SYMBOLS = ["SPY","QQQ","DIA","IWM","VIX","NVDA","AVGO","AMD","META","PLTR","TSLA","CRWD","AMZN","AAPL","MSFT","GOOGL","NFLX","COST","LLY","JPM","AVXL","SMCI","MSTR","COIN","HOOD"];
+const cache = new Map();
+
+const paperAccount = {
+  startingCash: 5000,
+  cash: 5000,
+  open: [],
+  closed: [],
+  alerts: []
+};
+
+function round(n, d = 2) {
+  const x = Number(n);
+  return Number.isFinite(x) ? Number(x.toFixed(d)) : null;
+}
+function sma(values, period) {
+  if (!Array.isArray(values) || values.length < period) return null;
+  const s = values.slice(-period);
+  return s.reduce((a,b)=>a+b,0) / s.length;
+}
+function ema(values, period) {
+  if (!Array.isArray(values) || values.length < period) return null;
+  const clean = values.filter(Number.isFinite);
+  if (clean.length < period) return null;
+  const k = 2 / (period + 1);
+  let current = clean.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
+  for (let i = period; i < clean.length; i++) current = clean[i] * k + current * (1 - k);
+  return current;
+}
+function rsi(values, period = 14) {
+  if (!Array.isArray(values) || values.length <= period) return null;
+  let gains = 0, losses = 0;
+  for (let i = values.length - period; i < values.length; i++) {
+    const change = values[i] - values[i - 1];
+    if (change >= 0) gains += change; else losses -= change;
+  }
+  if (losses === 0) return 100;
+  const rs = gains / losses;
+  return 100 - (100 / (1 + rs));
+}
+function atr(bars, period = 14) {
+  if (!Array.isArray(bars) || bars.length <= period) return null;
+  const trs = [];
+  for (let i = 1; i < bars.length; i++) {
+    const h = bars[i].high, l = bars[i].low, pc = bars[i-1].close;
+    trs.push(Math.max(h - l, Math.abs(h - pc), Math.abs(l - pc)));
+  }
+  return sma(trs, period);
+}
+async function getBars(symbol) {
+  const key = symbol.toUpperCase();
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.time < 180000) return cached.bars;
+
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(key)}?range=1y&interval=1d&includePrePost=false`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json"
+      }
+    });
+    if (!res.ok) throw new Error(`${key} HTTP ${res.status}`);
+    const data = await res.json();
+    const result = data?.chart?.result?.[0];
+    const quote = result?.indicators?.quote?.[0];
+    if (!result?.timestamp || !quote) throw new Error(`${key} missing chart data`);
+
+    const bars = result.timestamp.map((t, i) => ({
+      date: new Date(t * 1000).toISOString().slice(0,10),
+      open: Number(quote.open?.[i]),
+      high: Number(quote.high?.[i]),
+      low: Number(quote.low?.[i]),
+      close: Number(quote.close?.[i]),
+      volume: Number(quote.volume?.[i] || 0)
+    })).filter(b => Number.isFinite(b.close) && Number.isFinite(b.high) && Number.isFinite(b.low));
+
+    if (bars.length < 40) throw new Error(`${key} not enough bars`);
+    cache.set(key, { time: Date.now(), bars });
+    return bars;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+function pct(now, prev) {
+  if (!Number.isFinite(now) || !Number.isFinite(prev) || prev === 0) return 0;
+  return ((now - prev) / prev) * 100;
+}
+function buildSignal(symbol, bars, spyMove = 0, marketBias = "NEUTRAL") {
+  const closes = bars.map(b => b.close);
+  const volumes = bars.map(b => b.volume || 0);
+  const last = bars[bars.length - 1];
+  const prev = bars[bars.length - 2] || last;
+  const price = last.close;
+  const ema20 = ema(closes, 20);
+  const ema50 = ema(closes, 50);
+  const sma200 = sma(closes, Math.min(200, closes.length));
+  const rsi14 = rsi(closes, 14);
+  const atr14 = atr(bars, 14);
+  const avgVol20 = sma(volumes, 20);
+  const volumeRatio = avgVol20 ? last.volume / avgVol20 : null;
+  const move1 = pct(price, prev.close);
+  const move21 = closes.length > 22 ? pct(closes[closes.length - 1], closes[closes.length - 22]) : 0;
+  const relative = move21 - spyMove;
+  const high20 = Math.max(...bars.slice(-20).map(b => b.high));
+  const low20 = Math.min(...bars.slice(-20).map(b => b.low));
+  const trendBull = price > ema20 && price > ema50 && price > sma200;
+  const setup = price >= high20 * 0.985 ? "Breakout" : price > ema20 ? "Pullback" : "Watch";
+
+  let strength = 0;
+  if (price > ema20) strength += 15;
+  if (price > ema50) strength += 15;
+  if (price > sma200) strength += 14;
+  if (ema20 > ema50) strength += 12;
+  if (relative > 0) strength += 12;
+  if (rsi14 >= 50 && rsi14 <= 70) strength += 10;
+  if (volumeRatio && volumeRatio >= 1.15) strength += 8;
+  if (setup === "Breakout") strength += 8;
+  if (marketBias === "BULLISH") strength += 6;
+  if (marketBias === "BEARISH") strength -= 12;
+
+  const stretched = rsi14 > 74 || (ema20 && price > ema20 * 1.08);
+  if (stretched) strength -= 12;
+  const confidence = Math.max(1, Math.min(99, Math.round(strength)));
+
+  const safeAtr = Number.isFinite(atr14) && atr14 > 0 ? atr14 : price * 0.035;
+  const stop = round(Math.max(0.01, Math.min(low20 * 0.985, price - safeAtr * 1.45)));
+  const risk = Math.max(0.01, price - stop);
+  const target1 = round(price + risk * 1.8);
+  const target2 = round(price + risk * 2.6);
+  const rrNumber = round((target1 - price) / risk, 2);
+
+  let safety = "WAIT";
+  const reasons = [];
+  const warnings = [];
+  if (!trendBull) warnings.push("Trend filter is not fully bullish.");
+  if (marketBias !== "BULLISH") warnings.push("Market regime is not strongly bullish.");
+  if (stretched) warnings.push("Price may be extended; avoid chasing.");
+  if (rrNumber < 1.8) warnings.push("Risk/reward is below 1.8.");
+  if (confidence >= 82 && trendBull && marketBias === "BULLISH" && rrNumber >= 1.8 && !stretched) safety = "TRADE_READY";
+  else if (confidence >= 68) safety = "WATCHLIST";
+  else safety = "REJECT";
+
+  if (price > ema20) reasons.push("Price is above EMA20.");
+  if (price > ema50) reasons.push("Price is above EMA50.");
+  if (price > sma200) reasons.push("Price is above long-term trend.");
+  if (relative > 0) reasons.push("Relative strength is better than SPY.");
+  if (setup === "Breakout") reasons.push("Price is near a 20-day breakout area.");
+
+  return {
+    symbol,
+    price: round(price),
+    changePct: round(move1, 2),
+    setup,
+    confidence,
+    winRate: null,
+    expectancy: null,
+    rr: `${rrNumber}:1`,
+    rrNumber,
+    trend: trendBull ? "UP" : "NEUTRAL",
+    regime: trendBull ? "Bullish" : "Neutral",
+    action: safety === "TRADE_READY" ? "LONG" : safety === "WATCHLIST" ? "WATCH" : "IGNORE",
+    safety,
+    entry: round(price),
+    buyLow: round(price * 0.992),
+    buyHigh: round(price * 1.006),
+    stop,
+    target1,
+    target2,
+    rsi: round(rsi14),
+    relativeStrength: round(relative, 2),
+    volumeRatio: round(volumeRatio, 2),
+    reasons,
+    warnings,
+    bars: bars.slice(-120)
+  };
+}
+async function buildState() {
+  const errors = [];
+  const barsBySymbol = {};
+  for (const s of SYMBOLS) {
+    try {
+      barsBySymbol[s] = await getBars(s);
+    } catch (e) {
+      errors.push({ symbol: s, error: e.message });
+    }
+  }
+
+  const spyBars = barsBySymbol.SPY || [];
+  const spyCloses = spyBars.map(b => b.close);
+  const spyMove21 = spyCloses.length > 22 ? pct(spyCloses[spyCloses.length - 1], spyCloses[spyCloses.length - 22]) : 0;
+
+  let provisional = Object.keys(barsBySymbol)
+    .filter(s => !["DIA","IWM","VIX"].includes(s))
+    .map(s => buildSignal(s, barsBySymbol[s], spyMove21, "NEUTRAL"));
+  const breadth0 = provisional.length ? Math.round((provisional.filter(s => s.trend === "UP").length / provisional.length) * 100) : 0;
+  const marketBias = breadth0 >= 60 ? "BULLISH" : breadth0 >= 45 ? "NEUTRAL" : "BEARISH";
+
+  const signals = Object.keys(barsBySymbol)
+    .filter(s => !["DIA","IWM","VIX"].includes(s))
+    .map(s => buildSignal(s, barsBySymbol[s], spyMove21, marketBias))
+    .sort((a,b) => b.confidence - a.confidence)
+    .map((s, i) => ({ rank: i + 1, ...s }));
+
+  const spySignal = signals.find(s => s.symbol === "SPY");
+  const qqqSignal = signals.find(s => s.symbol === "QQQ");
+  const vix = barsBySymbol.VIX?.at(-1)?.close;
+  const breadth = signals.length ? Math.round((signals.filter(s => s.trend === "UP").length / signals.length) * 100) : 0;
+  const market = {
+    regime: marketBias,
+    spyTrend: spySignal?.trend === "UP" ? "BULLISH" : "NEUTRAL",
+    qqqTrend: qqqSignal?.trend === "UP" ? "BULLISH" : "NEUTRAL",
+    volatility: Number.isFinite(vix) ? (vix < 18 ? "LOW" : vix < 25 ? "MEDIUM" : "HIGH") : "UNKNOWN",
+    vix: round(vix),
+    breadth: `${breadth}%`,
+    breadthScore: breadth,
+    sectorLeader: "TECHNOLOGY",
+    confidence: Math.round((breadth + (spySignal?.confidence || 50)) / 2)
+  };
+
+  return {
+    ok: true,
+    version: VERSION,
+    mode: errors.length ? "PARTIAL_LIVE_DATA" : "LIVE_DATA",
+    dataQuality: errors.length ? "PARTIAL" : "LIVE",
+    market,
+    signals,
+    indices: ["SPY","QQQ","DIA","IWM","VIX"].map(s => {
+      const b = barsBySymbol[s] || [];
+      const last = b.at(-1);
+      const prev = b.at(-2);
+      return { symbol: s, price: round(last?.close), changePct: round(pct(last?.close, prev?.close), 2), bars: b.slice(-30) };
+    }),
+    systems: [
+      { name: "Data Collector", state: errors.length ? "PARTIAL" : "RUNNING", detail: errors.length ? `${errors.length} symbols failed` : "Live Yahoo chart data" },
+      { name: "Backtest Engine", state: "WAITING", detail: "Needs paper/history module" },
+      { name: "Strategy Optimizer", state: "WAITING", detail: "Needs backtest results" },
+      { name: "Market Regime Engine", state: "RUNNING", detail: "Live breadth and SPY filters" },
+      { name: "Risk Manager", state: "RUNNING", detail: "Stops/targets calculated" },
+      { name: "Alert Engine", state: "READY", detail: "Audio unlocked by user click" },
+      { name: "Paper Trader", state: "NO POSITIONS", detail: "No paper entries yet" },
+      { name: "Performance Analytics", state: "NO CLOSED TRADES", detail: "No fake win rate shown" }
+    ],
+    paper: paperAccount,
+    stats: { totalTrades: paperAccount.closed.length, winRate: null, expectancy: null, profitFactor: null, maxDrawdown: null, equityCurve: [] },
+    alerts: paperAccount.alerts,
+    errors,
+    updatedAt: new Date().toISOString(),
+    uptimeSeconds: Math.round(process.uptime())
+  };
+}
+
+app.get("/api/health", (req, res) => {
+  res.json({ ok: true, version: VERSION, app: "TradingMint PRO", uptimeSeconds: Math.round(process.uptime()), time: new Date().toISOString() });
+});
+app.get("/api/state", async (req, res) => {
+  try { res.json(await buildState()); } catch (e) { res.status(500).json({ ok: false, error: e.message, time: new Date().toISOString() }); }
+});
+app.get("*", (req, res) => res.sendFile(path.join(__dirname, "../public/index.html")));
+
+app.listen(PORT, () => console.log(`TradingMint PRO ${VERSION} running on port ${PORT}`));

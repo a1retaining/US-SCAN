@@ -1,6 +1,17 @@
-services:
-  - type: web
-    name: tradingmint-pro
-    env: node
-    buildCommand: npm install
-    startCommand: npm start
+{
+  "name": "tradingmint-pro",
+  "version": "2.1.0",
+  "description": "TradingMint PRO tested functional trading scanner terminal.",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "node tests/runTests.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
