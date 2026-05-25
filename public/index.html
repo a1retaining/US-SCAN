@@ -3,21 +3,23 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>US Scan - PDT Safe Swing Scanner</title>
+<title>US Scan - Live PDT Safe Swing Scanner</title>
 
 <style>
 :root{
-  --bg:#050707;
-  --card:#0b1010;
-  --card2:#111717;
+  --bg:#050708;
+  --panel:#0d1114;
+  --panel2:#12181d;
+  --panel3:#171d23;
   --line:rgba(0,255,136,.28);
   --line2:rgba(255,255,255,.09);
-  --text:#e7fff0;
-  --muted:#9fe9ba;
+  --text:#ecfff3;
+  --muted:#9fb7aa;
   --green:#00ff88;
+  --green2:#8dffb5;
   --yellow:#ffd166;
   --red:#ff5577;
-  --blue:#6ab7ff;
+  --blue:#65b9ff;
   --orange:#ff9f43;
   --gray:#cbd5e1;
 }
@@ -40,18 +42,18 @@ body{overflow:auto}
   min-height:100vh;
   padding:12px;
   background:
-    radial-gradient(circle at top left,rgba(0,255,136,.13),transparent 420px),
-    radial-gradient(circle at top right,rgba(87,166,255,.08),transparent 360px),
-    #050707;
+    radial-gradient(circle at 0% 0%,rgba(0,255,136,.13),transparent 420px),
+    radial-gradient(circle at 100% 0%,rgba(101,185,255,.09),transparent 380px),
+    linear-gradient(180deg,#050708,#020303);
 }
 
 .card{
-  background:linear-gradient(180deg,rgba(13,20,20,.98),rgba(4,8,8,.98));
+  background:linear-gradient(180deg,rgba(17,24,29,.98),rgba(7,11,12,.98));
   border:1px solid var(--line);
-  border-radius:16px;
-  padding:12px;
+  border-radius:18px;
+  padding:14px;
   margin-bottom:12px;
-  box-shadow:0 0 22px rgba(0,255,136,.04);
+  box-shadow:0 0 24px rgba(0,255,136,.045);
 }
 
 .topbar{
@@ -59,38 +61,61 @@ body{overflow:auto}
   top:0;
   z-index:50;
   display:grid;
-  grid-template-columns:minmax(240px,1.4fr) repeat(6,minmax(110px,.55fr)) auto auto;
+  grid-template-columns:minmax(230px,1.3fr) repeat(6,minmax(110px,.55fr)) auto auto;
   gap:8px;
   align-items:center;
-  background:rgba(6,12,12,.98);
+  background:rgba(7,12,13,.98);
   border:1px solid var(--line);
-  border-radius:16px;
+  border-radius:18px;
   padding:10px;
   margin-bottom:12px;
-  backdrop-filter:blur(8px);
+  backdrop-filter:blur(10px);
 }
 
 h1,h2,h3{
   margin:0 0 8px;
-  color:#9dffbc;
+  color:var(--green2);
 }
 
 h1{font-size:22px}
-h2{font-size:14px;text-transform:uppercase;letter-spacing:.3px}
-h3{font-size:12px;text-transform:uppercase;letter-spacing:.3px}
+h2{font-size:14px;text-transform:uppercase;letter-spacing:.35px}
+h3{font-size:12px;text-transform:uppercase;letter-spacing:.35px}
 
 p{
   margin:5px 0;
   color:var(--muted);
   font-size:13px;
-  line-height:1.42;
+  line-height:1.45;
+}
+
+label{
+  display:block;
+  color:#9dffbc;
+  font-size:10px;
+  text-transform:uppercase;
+  margin:8px 0 4px;
+}
+
+input,textarea,select{
+  width:100%;
+  background:#020303;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:8px;
+  font-size:12px;
+}
+
+textarea{
+  min-height:90px;
+  resize:vertical;
 }
 
 button{
   border:1px solid var(--green);
   background:#001d10;
   color:#9dffbc;
-  border-radius:10px;
+  border-radius:11px;
   padding:9px 12px;
   font-weight:900;
   cursor:pointer;
@@ -99,30 +124,10 @@ button{
 }
 
 button:hover{filter:brightness(1.12)}
-button.yellow{border-color:var(--yellow);background:#211900;color:var(--yellow)}
+button.yellow{border-color:var(--yellow);background:#231a00;color:var(--yellow)}
 button.danger{border-color:var(--red);background:#2c0010;color:#ffb8c7}
 button.icon{width:42px;height:42px;border-radius:50%;padding:0;font-size:20px}
 button.active{background:var(--green);color:#00190c}
-
-input,textarea,select{
-  width:100%;
-  background:#000;
-  color:var(--text);
-  border:1px solid var(--line);
-  border-radius:10px;
-  padding:8px;
-  font-size:12px;
-}
-
-textarea{min-height:90px;resize:vertical}
-
-label{
-  display:block;
-  color:#8bffb7;
-  font-size:10px;
-  text-transform:uppercase;
-  margin:8px 0 4px;
-}
 
 .dot{
   width:12px;
@@ -138,10 +143,10 @@ label{
 .dot.work{background:var(--yellow);box-shadow:0 0 14px var(--yellow)}
 
 .level{
-  background:#020505;
+  background:#030606;
   border:1px solid var(--line2);
-  border-radius:12px;
-  padding:8px;
+  border-radius:13px;
+  padding:9px;
 }
 
 .level span{
@@ -162,7 +167,7 @@ label{
 }
 
 .pdt{
-  border-color:rgba(255,209,102,.45);
+  border-color:rgba(255,209,102,.48);
 }
 
 .pdt strong{color:var(--yellow)}
@@ -194,22 +199,28 @@ label{
 
 .layout{
   display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(390px,.6fr);
+  grid-template-columns:minmax(0,1fr) minmax(400px,.6fr);
+  gap:12px;
+}
+
+.dashboard-main{
+  display:grid;
+  grid-template-columns:minmax(0,1.25fr) minmax(360px,.75fr);
   gap:12px;
 }
 
 .signal-card{
-  background:#17191d;
+  background:linear-gradient(135deg,#1b2027,#101519);
   border:1px solid rgba(255,255,255,.1);
   border-left:5px solid var(--orange);
-  border-radius:16px;
-  padding:14px;
-  margin-bottom:12px;
+  border-radius:18px;
+  padding:16px;
+  min-height:195px;
 }
 
 .signal-top{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:space-between;
   gap:10px;
   flex-wrap:wrap;
@@ -224,15 +235,21 @@ label{
 
 .signal-symbol{
   color:var(--orange);
-  font-size:19px;
+  font-size:22px;
   font-weight:900;
 }
 
 .signal-headline{
-  margin:12px 0;
+  margin:14px 0;
   color:#f5f7fa;
-  font-size:18px;
+  font-size:20px;
   line-height:1.35;
+}
+
+.signal-meta{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
 }
 
 .chip{
@@ -256,9 +273,10 @@ label{
 .best-card{
   background:#020505;
   border:1px solid var(--line);
-  border-radius:14px;
+  border-radius:16px;
   padding:12px;
   cursor:pointer;
+  min-height:128px;
 }
 
 .best-card:hover{
@@ -283,10 +301,18 @@ label{
 .best-card.pullback{border-color:rgba(255,209,102,.7)}
 .best-card.breakout{border-color:rgba(87,166,255,.7)}
 
+.market-card{
+  background:#020505;
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:16px;
+  padding:12px;
+  min-height:195px;
+}
+
 .table-wrap{
   background:#000;
   border:1px solid var(--line);
-  border-radius:14px;
+  border-radius:16px;
   overflow:auto;
   max-height:50vh;
 }
@@ -354,7 +380,7 @@ tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
 .note{
   background:#000;
   border:1px solid rgba(0,255,136,.2);
-  border-radius:12px;
+  border-radius:13px;
   padding:10px;
   font-size:13px;
   line-height:1.5;
@@ -385,17 +411,17 @@ tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
 
 #chart{
   width:100%;
-  height:680px;
+  height:690px;
   display:block;
   background:#000;
   border:1px solid var(--line);
-  border-radius:14px;
+  border-radius:16px;
 }
 
 .calc-result{
   background:#000;
   border:1px solid var(--line2);
-  border-radius:12px;
+  border-radius:13px;
   padding:10px;
 }
 
@@ -416,7 +442,7 @@ tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
 .holding{
   background:#000;
   border:1px solid rgba(0,255,136,.2);
-  border-radius:12px;
+  border-radius:13px;
   padding:10px;
   margin-top:8px;
   font-size:12px;
@@ -443,7 +469,7 @@ tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
 .log{
   background:#000;
   border:1px solid rgba(0,255,136,.25);
-  border-radius:10px;
+  border-radius:11px;
   padding:8px;
   max-height:180px;
   overflow:auto;
@@ -475,15 +501,15 @@ tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
   display:none;
   align-items:center;
   justify-content:center;
-  background:rgba(0,0,0,.6);
+  background:rgba(0,0,0,.64);
   padding:18px;
 }
 
 .trade-pop{
-  width:min(640px,96vw);
+  width:min(660px,96vw);
   background:#00190d;
   border:2px solid var(--green);
-  border-radius:20px;
+  border-radius:22px;
   padding:18px;
   box-shadow:0 0 42px rgba(0,255,136,.28);
 }
@@ -504,7 +530,7 @@ tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
 .trade-lines{
   background:#000;
   border:1px solid rgba(0,255,136,.2);
-  border-radius:12px;
+  border-radius:13px;
   padding:12px;
   line-height:1.55;
   font-size:14px;
@@ -538,7 +564,7 @@ details summary{
 }
 
 @media(max-width:1200px){
-  .topbar,.grid8,.grid6,.grid4,.grid3,.layout,.bottom-grid{
+  .topbar,.grid8,.grid6,.grid4,.grid3,.layout,.bottom-grid,.dashboard-main,.signal-meta{
     grid-template-columns:1fr;
   }
 
@@ -554,7 +580,7 @@ details summary{
   <div class="topbar">
     <div>
       <h1>US Scan</h1>
-      <p><span id="statusDot" class="dot"></span><span id="status">Loading scanner...</span></p>
+      <p><span id="statusDot" class="dot"></span><span id="status">Loading live scanner...</span></p>
     </div>
 
     <div class="level"><span>Local Time</span><strong id="localTime">--:--</strong></div>
@@ -571,42 +597,50 @@ details summary{
   <section class="grid8">
     <div class="level"><span>Connection</span><strong id="connection">Loading</strong></div>
     <div class="level"><span>Updated</span><strong id="updated">-</strong></div>
-    <div class="level"><span>Signals</span><strong id="signalCount">0</strong></div>
-    <div class="level"><span>Top</span><strong id="topSignal">-</strong></div>
-    <div class="level"><span>Discovery</span><strong id="discoveryText">Expanded</strong></div>
+    <div class="level"><span>Live Signals</span><strong id="signalCount">0</strong></div>
+    <div class="level"><span>Top Symbol</span><strong id="topSignal">-</strong></div>
+    <div class="level"><span>Discovery</span><strong id="discoveryText">Loading</strong></div>
     <div class="level"><span>Cash</span><strong id="cashKpi">$5,000.00</strong></div>
     <div class="level"><span>Daily P/L</span><strong id="dailyPnlKpi">$0.00</strong></div>
     <div class="level"><span>Unrealised P/L</span><strong id="unrealisedKpi">$0.00</strong></div>
   </section>
 
-  <div id="topSignalCard" class="signal-card">
-    <div class="signal-top">
-      <div class="signal-title">
-        <span class="signal-symbol">WAITING</span>
-        <span class="chip gray">NO SIGNAL YET</span>
-        <span class="chip yellow">PDT SAFE</span>
-        <span class="chip blue">SWING</span>
+  <div class="dashboard-main">
+    <div id="topSignalCard" class="signal-card">
+      <div class="signal-top">
+        <div class="signal-title">
+          <span class="signal-symbol">WAITING</span>
+          <span class="chip gray">NO LIVE SIGNAL YET</span>
+          <span class="chip yellow">PDT SAFE</span>
+          <span class="chip blue">SWING</span>
+        </div>
+        <p>Waiting for first live scan.</p>
       </div>
-      <p>Waiting for first scan.</p>
+      <div class="signal-headline">The selected live trade summary will appear here.</div>
+      <div class="note">No fake figures are displayed. This card fills only after live backend data is returned.</div>
     </div>
-    <div class="signal-headline">The selected trade summary will appear here.</div>
+
+    <div class="market-card">
+      <h2>Live Market Context</h2>
+      <p id="marketHealthText">Waiting for scan.</p>
+      <div id="marketHealthBox" class="note">Market context will appear after live data returns.</div>
+    </div>
   </div>
 
   <div class="card">
     <h2>Best Trades Right Now</h2>
-    <p>Highest-ranked live results. Best is first, then working down.</p>
+    <p>Highest-ranked live scanner results. Best is first, then working down.</p>
     <div id="wakeWarning" class="note wake-warning"></div>
     <div id="bestTrades" class="grid3">
-      <div class="best-card"><strong>-</strong><span>Waiting for scan.</span></div>
-      <div class="best-card"><strong>-</strong><span>Waiting for scan.</span></div>
-      <div class="best-card"><strong>-</strong><span>Waiting for scan.</span></div>
+      <div class="best-card"><strong>-</strong><span>Waiting for live scan.</span></div>
+      <div class="best-card"><strong>-</strong><span>Waiting for live scan.</span></div>
+      <div class="best-card"><strong>-</strong><span>Waiting for live scan.</span></div>
     </div>
-    <div id="marketHealthBox" class="note">Market health loading.</div>
   </div>
 
   <div class="card">
-    <h2>Ranked Signals</h2>
-    <p>This is a stock-only swing scanner. No options, no fake pro stats, no day-trading focus.</p>
+    <h2>Ranked Live Signals</h2>
+    <p>Stock-only swing scanner. No options, no day-trading language, no fake pro stats.</p>
     <div class="table-wrap">
       <table>
         <thead>
@@ -625,7 +659,7 @@ details summary{
           </tr>
         </thead>
         <tbody id="rows">
-          <tr><td colspan="11" style="text-align:center;padding:22px;color:#9fe9ba">Scanner starting...</td></tr>
+          <tr><td colspan="11" style="text-align:center;padding:24px;color:#9fe9ba">Waiting for live scanner data...</td></tr>
         </tbody>
       </table>
     </div>
@@ -644,13 +678,13 @@ details summary{
     </div>
     <div id="details" class="note">Waiting for scanner.</div>
     <div id="warnings" class="note warn">Warnings will show here.</div>
-    <div id="education" class="note">Select a trade to see why the scanner ranked it.</div>
+    <div id="education" class="note">Select a live signal to see why the scanner ranked it.</div>
   </div>
 
   <div class="card">
     <div class="chart-head">
       <div>
-        <h2>Clear Candlestick Chart</h2>
+        <h2>Live Candlestick Chart</h2>
         <p>Daily candles with current, buy zone, support, resistance, stop and target.</p>
       </div>
       <div class="timeframe-buttons">
@@ -665,7 +699,7 @@ details summary{
 
   <div class="card">
     <h2>Stock Trade Calculator</h2>
-    <p>Stock-only calculator for the selected setup. It uses position size, stop, target and risk/reward.</p>
+    <p>Stock-only calculator using the selected live setup. No options, no strike, no expiry.</p>
     <div class="grid4">
       <div><label>Entry</label><input id="calcEntry" type="number" step="0.01"></div>
       <div><label>Shares</label><input id="calcShares" type="number" step="1"></div>
@@ -682,6 +716,7 @@ details summary{
 
   <div class="card">
     <h2>$5,000 Paper Account</h2>
+    <p>This is the real browser-saved paper account state. It starts at $5,000 unless you reset it.</p>
     <div class="grid8">
       <div class="level"><span>Open Paper</span><strong id="paperCount">0</strong></div>
       <div class="level"><span>Open Value</span><strong id="openValueKpi">$0.00</strong></div>
@@ -1103,9 +1138,9 @@ function renderBestTrades(){
 
   if(!top.length){
     box.innerHTML =
-      "<div class='best-card'><strong>-</strong><span>Waiting for scan.</span></div>" +
-      "<div class='best-card'><strong>-</strong><span>Waiting for scan.</span></div>" +
-      "<div class='best-card'><strong>-</strong><span>Waiting for scan.</span></div>";
+      "<div class='best-card'><strong>-</strong><span>Waiting for live scan.</span></div>" +
+      "<div class='best-card'><strong>-</strong><span>Waiting for live scan.</span></div>" +
+      "<div class='best-card'><strong>-</strong><span>Waiting for live scan.</span></div>";
     return;
   }
 
@@ -1131,19 +1166,29 @@ function renderBestTrades(){
 
 function renderMarketHealth(){
   var box = el("marketHealthBox");
+  var textBox = el("marketHealthText");
   if(!box)return;
+
   var entries = RESULTS.filter(function(r){return /ENTER_NOW/i.test(String(r.decision));}).length;
   var pullbacks = RESULTS.filter(function(r){return /PULLBACK/i.test(String(r.decision));}).length;
   var breakouts = RESULTS.filter(function(r){return /BREAKOUT/i.test(String(r.decision));}).length;
 
-  var text = "<b>Market health:</b> "+escapeHtml(MARKET_HEALTH)+"<br>" +
+  if(textBox){
+    textBox.textContent = "Market context is returned by the live backend scan.";
+  }
+
+  var text = "<b>Market:</b> "+escapeHtml(MARKET_HEALTH)+"<br>" +
+    "<b>Live results:</b> "+RESULTS.length+"<br>" +
     "ENTER_NOW: "+entries+" | Pullbacks: "+pullbacks+" | Breakout watches: "+breakouts+"<br>";
 
-  if(MARKET_HEALTH !== "Bullish"){
+  if(!RESULTS.length){
+    text += "<span style='color:#ffd166'>No live scanner results yet.</span>";
+  }else if(MARKET_HEALTH !== "Bullish"){
     text += "<span style='color:#ffd166'>Market is not strongly bullish, so auto paper should be more selective.</span>";
   }else{
     text += "<span style='color:#00ff88'>Market is supportive for long swing setups, but PDT-safe rules still apply.</span>";
   }
+
   box.innerHTML = text;
 }
 
@@ -1256,7 +1301,7 @@ function resetAccount(){
 
 function selfCheck(){
   apiJson("/api/health").then(function(data){
-    status("Connected. Auto scanner active.","good");
+    status("Connected. Live scanner active.","good");
     setText("discoveryText",(data.discoveryCount||"?")+" tickers");
     log("HEALTH OK version "+(data.version||"?"));
   }).catch(function(error){
@@ -1279,7 +1324,7 @@ function scan(){
     return;
   }
 
-  status("Scanning live data...","work");
+  status("Scanning live backend data...","work");
 
   var risk = el("risk") ? el("risk").value : "100";
   var symbols = getSymbols();
@@ -1330,10 +1375,10 @@ function scan(){
     setText("topSignal",RESULTS[0]?RESULTS[0].symbol:"-");
 
     if(errors.length){
-      status("Scan complete with warning. "+RESULTS.length+" results.","good");
+      status("Live scan complete with warning. "+RESULTS.length+" results.","good");
       log(errors.join(" | "));
     }else{
-      status("Scan complete. "+RESULTS.length+" results.","good");
+      status("Live scan complete. "+RESULTS.length+" results.","good");
     }
 
     if(RESULTS.length)selectTrade(0,false);
@@ -1345,7 +1390,7 @@ function scan(){
     renderMarketHealth();
     scheduleLoop();
   }).catch(function(error){
-    status("Scan failed: "+error.message,"bad");
+    status("Live scan failed: "+error.message,"bad");
     log("SCAN ERROR: "+error.message);
     showAlert("Scan failed",error.message,"bad");
     scheduleLoop();
@@ -1357,7 +1402,7 @@ function renderRows(){
   if(!tbody)return;
 
   if(!RESULTS.length){
-    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:22px;color:#9fe9ba">No results returned.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:24px;color:#9fe9ba">No live results returned yet.</td></tr>';
     renderBestTrades();
     renderMarketHealth();
     renderTopSignalCard(null);
@@ -1401,11 +1446,12 @@ function renderTopSignalCard(r){
     box.innerHTML =
       '<div class="signal-top"><div class="signal-title">'+
       '<span class="signal-symbol">WAITING</span>'+
-      '<span class="chip gray">NO SIGNAL YET</span>'+
+      '<span class="chip gray">NO LIVE SIGNAL YET</span>'+
       '<span class="chip yellow">PDT SAFE</span>'+
       '<span class="chip blue">SWING</span>'+
-      '</div><p>Waiting for first scan.</p></div>'+
-      '<div class="signal-headline">The selected trade summary will appear here.</div>';
+      '</div><p>Waiting for first live scan.</p></div>'+
+      '<div class="signal-headline">The selected live trade summary will appear here.</div>'+
+      '<div class="note">No fake figures are displayed. This card fills only after live backend data is returned.</div>';
     return;
   }
 
@@ -1417,16 +1463,15 @@ function renderTopSignalCard(r){
     '<div class="signal-top">'+
       '<div class="signal-title">'+
         '<span class="signal-symbol">'+escapeHtml(r.symbol)+'</span>'+
-        '<span class="chip green">BULLISH</span>'+
+        '<span class="chip '+chipClassForStage(stage)+'">'+escapeHtml(stage)+'</span>'+
         '<span class="chip yellow">PDT SAFE</span>'+
         '<span class="chip blue">SWING</span>'+
-        '<span class="chip '+chipClassForStage(stage)+'">'+escapeHtml(stage)+'</span>'+
         chaseBadge(r)+
       '</div>'+
       '<p>Updated '+escapeHtml(new Date().toLocaleTimeString())+'</p>'+
     '</div>'+
     '<div class="signal-headline">'+escapeHtml(headline)+'</div>'+
-    '<div class="grid8">'+
+    '<div class="signal-meta">'+
       '<div class="level"><span>Price</span><strong>'+money(r.price)+'</strong></div>'+
       '<div class="level"><span>Buy Zone</span><strong>'+money(r.buyLow)+' to '+money(r.buyHigh)+'</strong></div>'+
       '<div class="level"><span>Support</span><strong>'+money(sr.support)+'</strong></div>'+
@@ -1625,7 +1670,7 @@ function drawCandlestickChart(r){
 
   ctx.fillStyle="#9fe9ba";
   ctx.font=(14*dpr)+"px Arial";
-  ctx.fillText("Daily candles. Stock-only swing levels.",left,h-20*dpr);
+  ctx.fillText("Daily candles. Stock-only swing levels from live scan data.",left,h-20*dpr);
 }
 
 function fillCalculator(r){
