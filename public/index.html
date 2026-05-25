@@ -1315,7 +1315,7 @@ function scan(){
     });
 
     RESULTS=Object.keys(seen).map(function(k){return seen[k];})
-      .filter(function(r){return Number(r.score||0)>=58&&!/AVOID/i.test(String(r.decision));})
+     .filter(function(r){return r && r.symbol && r.symbol !== "-";})
       .sort(function(a,b){return Number(b.rank||b.score||0)-Number(a.rank||a.score||0);});
 
     renderRows();
