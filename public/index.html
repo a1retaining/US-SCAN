@@ -3,25 +3,25 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>US Scan - Live PDT Safe Swing Scanner</title>
+<title>US Scan - Live PDT Safe Scanner</title>
 
 <style>
 :root{
-  --bg:#050708;
-  --panel:#0d1114;
-  --panel2:#12181d;
-  --panel3:#171d23;
-  --line:rgba(0,255,136,.28);
-  --line2:rgba(255,255,255,.09);
-  --text:#ecfff3;
-  --muted:#9fb7aa;
+  --bg:#05070b;
+  --panel:#0c1117;
+  --panel2:#101822;
+  --panel3:#141f2b;
+  --line:rgba(89,255,178,.22);
+  --line2:rgba(255,255,255,.08);
+  --text:#effff5;
+  --muted:#9ab5a8;
   --green:#00ff88;
-  --green2:#8dffb5;
+  --green2:#9dffbc;
   --yellow:#ffd166;
   --red:#ff5577;
-  --blue:#65b9ff;
+  --blue:#64b5ff;
   --orange:#ff9f43;
-  --gray:#cbd5e1;
+  --purple:#b78cff;
 }
 
 *{box-sizing:border-box}
@@ -36,50 +36,166 @@ html,body{
   font-family:Arial,Helvetica,sans-serif;
 }
 
-body{overflow:auto}
+body{
+  overflow:auto;
+}
 
 #app{
   min-height:100vh;
-  padding:12px;
+  display:grid;
+  grid-template-columns:260px 1fr;
   background:
-    radial-gradient(circle at 0% 0%,rgba(0,255,136,.13),transparent 420px),
-    radial-gradient(circle at 100% 0%,rgba(101,185,255,.09),transparent 380px),
-    linear-gradient(180deg,#050708,#020303);
+    radial-gradient(circle at 0% 0%,rgba(0,255,136,.16),transparent 420px),
+    radial-gradient(circle at 100% 0%,rgba(100,181,255,.10),transparent 380px),
+    linear-gradient(180deg,#05070b,#020304);
 }
 
-.card{
-  background:linear-gradient(180deg,rgba(17,24,29,.98),rgba(7,11,12,.98));
-  border:1px solid var(--line);
-  border-radius:18px;
+.sidebar{
+  position:sticky;
+  top:0;
+  height:100vh;
+  padding:16px;
+  background:rgba(6,10,14,.92);
+  border-right:1px solid var(--line2);
+  overflow:auto;
+}
+
+.brand{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.logo{
+  width:40px;
+  height:40px;
+  border-radius:12px;
+  background:linear-gradient(135deg,var(--green),#006b3a);
+  box-shadow:0 0 22px rgba(0,255,136,.25);
+}
+
+.brand h1{
+  margin:0;
+  font-size:21px;
+  color:#fff;
+}
+
+.brand p{
+  margin:2px 0 0;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.nav{
+  display:grid;
+  gap:7px;
+  margin:14px 0 18px;
+}
+
+.nav button{
+  width:100%;
+  text-align:left;
+  background:transparent;
+  color:#c9d8d0;
+  border:1px solid transparent;
+  padding:10px 11px;
+  border-radius:12px;
+  font-weight:800;
+  cursor:pointer;
+}
+
+.nav button.active,
+.nav button:hover{
+  background:rgba(0,255,136,.08);
+  border-color:var(--line);
+  color:var(--green2);
+}
+
+.side-card{
+  background:rgba(255,255,255,.035);
+  border:1px solid var(--line2);
+  border-radius:15px;
+  padding:12px;
+  margin-bottom:10px;
+}
+
+.side-card span{
+  display:block;
+  color:var(--muted);
+  font-size:10px;
+  text-transform:uppercase;
+  margin-bottom:4px;
+}
+
+.side-card strong{
+  display:block;
+  color:#fff;
+  font-size:15px;
+}
+
+.main{
+  min-width:0;
   padding:14px;
-  margin-bottom:12px;
-  box-shadow:0 0 24px rgba(0,255,136,.045);
 }
 
 .topbar{
   position:sticky;
   top:0;
-  z-index:50;
+  z-index:40;
   display:grid;
-  grid-template-columns:minmax(230px,1.3fr) repeat(6,minmax(110px,.55fr)) auto auto;
-  gap:8px;
+  grid-template-columns:minmax(240px,1fr) repeat(5,minmax(115px,.45fr)) auto auto;
+  gap:9px;
   align-items:center;
-  background:rgba(7,12,13,.98);
+  background:rgba(5,8,12,.94);
   border:1px solid var(--line);
   border-radius:18px;
   padding:10px;
-  margin-bottom:12px;
-  backdrop-filter:blur(10px);
+  margin-bottom:14px;
+  backdrop-filter:blur(12px);
 }
 
-h1,h2,h3{
+.status-line{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+
+.dot{
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:var(--red);
+  box-shadow:0 0 14px var(--red);
+  flex:0 0 auto;
+}
+
+.dot.good{
+  background:var(--green);
+  box-shadow:0 0 14px var(--green);
+}
+
+.dot.work{
+  background:var(--yellow);
+  box-shadow:0 0 14px var(--yellow);
+}
+
+h2,h3{
   margin:0 0 8px;
   color:var(--green2);
 }
 
-h1{font-size:22px}
-h2{font-size:14px;text-transform:uppercase;letter-spacing:.35px}
-h3{font-size:12px;text-transform:uppercase;letter-spacing:.35px}
+h2{
+  font-size:14px;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+}
+
+h3{
+  font-size:12px;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+}
 
 p{
   margin:5px 0;
@@ -88,107 +204,64 @@ p{
   line-height:1.45;
 }
 
-label{
-  display:block;
-  color:#9dffbc;
-  font-size:10px;
-  text-transform:uppercase;
-  margin:8px 0 4px;
-}
-
-input,textarea,select{
-  width:100%;
-  background:#020303;
-  color:var(--text);
+.card{
+  background:linear-gradient(180deg,rgba(16,24,34,.96),rgba(8,12,17,.96));
   border:1px solid var(--line);
-  border-radius:11px;
-  padding:8px;
-  font-size:12px;
+  border-radius:18px;
+  padding:14px;
+  margin-bottom:14px;
+  box-shadow:0 0 25px rgba(0,255,136,.04);
 }
 
-textarea{
-  min-height:90px;
-  resize:vertical;
-}
-
-button{
-  border:1px solid var(--green);
-  background:#001d10;
-  color:#9dffbc;
-  border-radius:11px;
-  padding:9px 12px;
-  font-weight:900;
-  cursor:pointer;
-  text-transform:uppercase;
-  font-size:12px;
-}
-
-button:hover{filter:brightness(1.12)}
-button.yellow{border-color:var(--yellow);background:#231a00;color:var(--yellow)}
-button.danger{border-color:var(--red);background:#2c0010;color:#ffb8c7}
-button.icon{width:42px;height:42px;border-radius:50%;padding:0;font-size:20px}
-button.active{background:var(--green);color:#00190c}
-
-.dot{
-  width:12px;
-  height:12px;
-  border-radius:50%;
-  background:var(--red);
-  box-shadow:0 0 14px var(--red);
-  display:inline-block;
-  margin-right:7px;
-}
-
-.dot.good{background:var(--green);box-shadow:0 0 14px var(--green)}
-.dot.work{background:var(--yellow);box-shadow:0 0 14px var(--yellow)}
-
-.level{
-  background:#030606;
+.stat{
+  background:#05090d;
   border:1px solid var(--line2);
-  border-radius:13px;
-  padding:9px;
+  border-radius:14px;
+  padding:10px;
 }
 
-.level span{
+.stat span{
   display:block;
-  color:#8aa895;
+  color:var(--muted);
   font-size:10px;
   text-transform:uppercase;
 }
 
-.level strong{
+.stat strong{
   display:block;
+  margin-top:5px;
   color:#fff;
-  margin-top:4px;
-  font-size:14px;
+  font-size:15px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
 .pdt{
-  border-color:rgba(255,209,102,.48);
+  border-color:rgba(255,209,102,.35);
 }
 
-.pdt strong{color:var(--yellow)}
+.pdt strong{
+  color:var(--yellow);
+}
 
 .grid8{
   display:grid;
-  grid-template-columns:repeat(8,minmax(110px,1fr));
-  gap:8px;
-  margin-bottom:12px;
+  grid-template-columns:repeat(8,minmax(105px,1fr));
+  gap:10px;
+  margin-bottom:14px;
 }
 
 .grid6{
   display:grid;
   grid-template-columns:repeat(6,1fr);
-  gap:8px;
+  gap:10px;
 }
 
 .grid4{
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:8px;
+  gap:10px;
 }
 
 .grid3{
@@ -197,31 +270,26 @@ button.active{background:var(--green);color:#00190c}
   gap:10px;
 }
 
-.layout{
+.dash-grid{
   display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(400px,.6fr);
-  gap:12px;
-}
-
-.dashboard-main{
-  display:grid;
-  grid-template-columns:minmax(0,1.25fr) minmax(360px,.75fr);
-  gap:12px;
+  grid-template-columns:minmax(0,1.35fr) minmax(350px,.65fr);
+  gap:14px;
+  margin-bottom:14px;
 }
 
 .signal-card{
-  background:linear-gradient(135deg,#1b2027,#101519);
-  border:1px solid rgba(255,255,255,.1);
+  min-height:230px;
+  background:linear-gradient(135deg,#1c2632,#0e141b);
+  border:1px solid rgba(255,255,255,.10);
   border-left:5px solid var(--orange);
-  border-radius:18px;
+  border-radius:20px;
   padding:16px;
-  min-height:195px;
 }
 
 .signal-top{
   display:flex;
-  align-items:flex-start;
   justify-content:space-between;
+  align-items:flex-start;
   gap:10px;
   flex-wrap:wrap;
 }
@@ -235,15 +303,15 @@ button.active{background:var(--green);color:#00190c}
 
 .signal-symbol{
   color:var(--orange);
-  font-size:22px;
+  font-size:24px;
   font-weight:900;
 }
 
 .signal-headline{
-  margin:14px 0;
-  color:#f5f7fa;
+  margin:15px 0;
+  color:#fff;
   font-size:20px;
-  line-height:1.35;
+  line-height:1.36;
 }
 
 .signal-meta{
@@ -254,29 +322,44 @@ button.active{background:var(--green);color:#00190c}
 
 .chip{
   display:inline-block;
-  border-radius:7px;
-  padding:4px 8px;
+  border-radius:999px;
+  padding:5px 9px;
   font-size:11px;
   font-weight:900;
   text-transform:uppercase;
   background:rgba(255,255,255,.08);
   color:#d7dae0;
-  border:1px solid rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.12);
 }
 
-.chip.green{background:rgba(0,255,136,.14);color:var(--green);border-color:rgba(0,255,136,.25)}
-.chip.yellow{background:rgba(255,209,102,.13);color:var(--yellow);border-color:rgba(255,209,102,.25)}
-.chip.red{background:rgba(255,85,119,.13);color:#ff9aae;border-color:rgba(255,85,119,.3)}
-.chip.blue{background:rgba(87,166,255,.13);color:#a8d5ff;border-color:rgba(87,166,255,.3)}
+.chip.green{background:rgba(0,255,136,.13);color:var(--green);border-color:rgba(0,255,136,.28)}
+.chip.yellow{background:rgba(255,209,102,.13);color:var(--yellow);border-color:rgba(255,209,102,.28)}
+.chip.red{background:rgba(255,85,119,.13);color:#ff9aae;border-color:rgba(255,85,119,.32)}
+.chip.blue{background:rgba(100,181,255,.13);color:#add9ff;border-color:rgba(100,181,255,.3)}
 .chip.gray{background:rgba(156,163,175,.13);color:#d0d7df;border-color:rgba(156,163,175,.25)}
 
+.market-card{
+  min-height:230px;
+  background:linear-gradient(180deg,#111a23,#070b10);
+  border:1px solid var(--line2);
+  border-radius:20px;
+  padding:14px;
+}
+
+.market-card .big{
+  font-size:31px;
+  color:#fff;
+  font-weight:900;
+  margin:8px 0 4px;
+}
+
 .best-card{
-  background:#020505;
+  background:#05090d;
   border:1px solid var(--line);
-  border-radius:16px;
-  padding:12px;
+  border-radius:17px;
+  padding:13px;
   cursor:pointer;
-  min-height:128px;
+  min-height:135px;
 }
 
 .best-card:hover{
@@ -292,29 +375,21 @@ button.active{background:var(--green);color:#00190c}
 
 .best-card span{
   display:block;
-  margin-top:4px;
+  margin-top:5px;
   color:var(--muted);
   font-size:12px;
 }
 
-.best-card.enter{border-color:rgba(0,255,136,.7)}
-.best-card.pullback{border-color:rgba(255,209,102,.7)}
-.best-card.breakout{border-color:rgba(87,166,255,.7)}
-
-.market-card{
-  background:#020505;
-  border:1px solid rgba(255,255,255,.09);
-  border-radius:16px;
-  padding:12px;
-  min-height:195px;
-}
+.best-card.enter{border-color:rgba(0,255,136,.72)}
+.best-card.pullback{border-color:rgba(255,209,102,.72)}
+.best-card.breakout{border-color:rgba(100,181,255,.72)}
 
 .table-wrap{
-  background:#000;
+  background:#020303;
   border:1px solid var(--line);
-  border-radius:16px;
+  border-radius:17px;
   overflow:auto;
-  max-height:50vh;
+  max-height:52vh;
 }
 
 table{
@@ -324,8 +399,8 @@ table{
 }
 
 th,td{
-  border-bottom:1px solid rgba(0,255,136,.13);
-  padding:9px;
+  border-bottom:1px solid rgba(0,255,136,.11);
+  padding:10px;
   text-align:left;
   vertical-align:top;
   font-size:13px;
@@ -334,19 +409,25 @@ th,td{
 th{
   position:sticky;
   top:0;
-  z-index:3;
-  background:#03110a;
+  z-index:2;
+  background:#07120d;
   color:#9dffbc;
   text-transform:uppercase;
   font-size:10px;
 }
 
-tbody tr{cursor:pointer}
-tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
+tbody tr{
+  cursor:pointer;
+}
 
-.row-enter{background:rgba(0,255,136,.07)}
-.row-pullback{background:rgba(255,209,102,.055)}
-.row-breakout{background:rgba(87,166,255,.055)}
+tbody tr:hover,
+tbody tr.selected{
+  background:rgba(0,255,136,.09);
+}
+
+.row-enter{background:rgba(0,255,136,.06)}
+.row-pullback{background:rgba(255,209,102,.05)}
+.row-breakout{background:rgba(100,181,255,.05)}
 .row-watch{background:rgba(156,163,175,.035)}
 
 .badge{
@@ -364,11 +445,11 @@ tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
 
 .badge.enter{background:rgba(0,255,136,.16);color:var(--green);border-color:rgba(0,255,136,.45)}
 .badge.exit{background:rgba(255,85,119,.16);color:var(--red);border-color:rgba(255,85,119,.45)}
-.badge.avoid{background:rgba(156,163,175,.16);color:var(--gray);border-color:rgba(156,163,175,.4)}
+.badge.avoid{background:rgba(156,163,175,.16);color:#cbd5e1;border-color:rgba(156,163,175,.4)}
 
 .do-not-chase{
   display:inline-block;
-  margin-top:5px;
+  margin-top:6px;
   border:1px solid rgba(255,85,119,.55);
   color:#ff9aae;
   border-radius:999px;
@@ -378,17 +459,24 @@ tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
 }
 
 .note{
-  background:#000;
-  border:1px solid rgba(0,255,136,.2);
-  border-radius:13px;
-  padding:10px;
+  background:#020303;
+  border:1px solid rgba(0,255,136,.18);
+  border-radius:14px;
+  padding:11px;
   font-size:13px;
   line-height:1.5;
   margin-top:8px;
 }
 
-.warn{border-color:rgba(255,85,119,.45)}
-.wake-warning{display:none;border-color:rgba(255,209,102,.7);color:var(--yellow)}
+.warn{
+  border-color:rgba(255,85,119,.45);
+}
+
+.wake-warning{
+  display:none;
+  border-color:rgba(255,209,102,.7);
+  color:var(--yellow);
+}
 
 .chart-head{
   display:flex;
@@ -413,16 +501,16 @@ tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
   width:100%;
   height:690px;
   display:block;
-  background:#000;
+  background:#020303;
   border:1px solid var(--line);
-  border-radius:16px;
+  border-radius:17px;
 }
 
 .calc-result{
-  background:#000;
+  background:#020303;
   border:1px solid var(--line2);
-  border-radius:13px;
-  padding:10px;
+  border-radius:14px;
+  padding:11px;
 }
 
 .calc-result span{
@@ -434,65 +522,78 @@ tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
 
 .calc-result b{
   display:block;
-  margin-top:4px;
+  margin-top:5px;
   color:#fff;
   font-size:15px;
 }
 
 .holding{
-  background:#000;
-  border:1px solid rgba(0,255,136,.2);
-  border-radius:13px;
-  padding:10px;
+  background:#020303;
+  border:1px solid rgba(0,255,136,.20);
+  border-radius:14px;
+  padding:11px;
   margin-top:8px;
   font-size:12px;
-  line-height:1.45;
+  line-height:1.46;
 }
 
 .holding.good{border-color:rgba(0,255,136,.55)}
 .holding.bad{border-color:rgba(255,85,119,.55)}
 
 .activity-feed{
-  max-height:230px;
+  max-height:235px;
   overflow:auto;
 }
 
 .feed-item{
-  border-bottom:1px solid rgba(0,255,136,.12);
-  padding:7px 0;
+  border-bottom:1px solid rgba(0,255,136,.11);
+  padding:8px 0;
   color:var(--muted);
   font-size:12px;
 }
 
-.feed-item b{color:#fff}
+.feed-item b{
+  color:#fff;
+}
 
 .log{
-  background:#000;
-  border:1px solid rgba(0,255,136,.25);
-  border-radius:11px;
+  background:#020303;
+  border:1px solid rgba(0,255,136,.22);
+  border-radius:12px;
   padding:8px;
-  max-height:180px;
+  max-height:190px;
   overflow:auto;
   white-space:pre-wrap;
   font-size:12px;
 }
 
-.alert{
-  position:fixed;
-  top:76px;
-  right:18px;
-  z-index:1000;
-  display:none;
-  max-width:460px;
-  background:#00190d;
-  border:2px solid var(--green);
-  border-radius:16px;
-  padding:14px;
-  box-shadow:0 0 32px rgba(0,255,136,.25);
+input,textarea,select{
+  width:100%;
+  background:#020303;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:11px;
+  padding:8px;
+  font-size:12px;
 }
 
-.alert.bad{border-color:var(--red)}
-.alert.warn{border-color:var(--yellow)}
+button{
+  border:1px solid var(--green);
+  background:#001d10;
+  color:#9dffbc;
+  border-radius:11px;
+  padding:9px 12px;
+  font-weight:900;
+  cursor:pointer;
+  text-transform:uppercase;
+  font-size:12px;
+}
+
+button:hover{filter:brightness(1.12)}
+button.yellow{border-color:var(--yellow);background:#231a00;color:var(--yellow)}
+button.danger{border-color:var(--red);background:#2c0010;color:#ffb8c7}
+button.icon{width:42px;height:42px;border-radius:50%;padding:0;font-size:20px}
+button.active{background:var(--green);color:#00190c}
 
 .trade-pop-wrap{
   position:fixed;
@@ -501,22 +602,22 @@ tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
   display:none;
   align-items:center;
   justify-content:center;
-  background:rgba(0,0,0,.64);
+  background:rgba(0,0,0,.66);
   padding:18px;
 }
 
 .trade-pop{
-  width:min(660px,96vw);
-  background:#00190d;
+  width:min(670px,96vw);
+  background:#08130d;
   border:2px solid var(--green);
   border-radius:22px;
   padding:18px;
-  box-shadow:0 0 42px rgba(0,255,136,.28);
+  box-shadow:0 0 48px rgba(0,255,136,.25);
 }
 
 .trade-pop.bad{
   border-color:var(--red);
-  box-shadow:0 0 42px rgba(255,85,119,.22);
+  box-shadow:0 0 48px rgba(255,85,119,.22);
 }
 
 .trade-pop h2{
@@ -525,18 +626,22 @@ tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
   color:#9dffbc;
 }
 
-.trade-pop.bad h2{color:#ff9aae}
+.trade-pop.bad h2{
+  color:#ff9aae;
+}
 
 .trade-lines{
-  background:#000;
+  background:#020303;
   border:1px solid rgba(0,255,136,.2);
-  border-radius:13px;
+  border-radius:14px;
   padding:12px;
   line-height:1.55;
   font-size:14px;
 }
 
-.trade-lines b{color:#fff}
+.trade-lines b{
+  color:#fff;
+}
 
 .trade-actions{
   display:flex;
@@ -563,13 +668,50 @@ details summary{
   gap:12px;
 }
 
-@media(max-width:1200px){
-  .topbar,.grid8,.grid6,.grid4,.grid3,.layout,.bottom-grid,.dashboard-main,.signal-meta{
+.alert{
+  position:fixed;
+  top:76px;
+  right:18px;
+  z-index:1000;
+  display:none;
+  max-width:460px;
+  background:#08130d;
+  border:2px solid var(--green);
+  border-radius:16px;
+  padding:14px;
+  box-shadow:0 0 32px rgba(0,255,136,.25);
+}
+
+.alert.bad{border-color:var(--red)}
+.alert.warn{border-color:var(--yellow)}
+
+@media(max-width:1250px){
+  #app{
     grid-template-columns:1fr;
   }
 
-  #chart{height:460px}
-  table{min-width:1050px}
+  .sidebar{
+    position:relative;
+    height:auto;
+    border-right:0;
+    border-bottom:1px solid var(--line2);
+  }
+
+  .nav{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .topbar,.grid8,.grid6,.grid4,.grid3,.dash-grid,.layout,.bottom-grid,.signal-meta{
+    grid-template-columns:1fr;
+  }
+
+  #chart{
+    height:460px;
+  }
+
+  table{
+    min-width:1050px;
+  }
 }
 </style>
 </head>
@@ -577,249 +719,294 @@ details summary{
 <body>
 <div id="app">
 
-  <div class="topbar">
-    <div>
-      <h1>US Scan</h1>
-      <p><span id="statusDot" class="dot"></span><span id="status">Loading live scanner...</span></p>
-    </div>
-
-    <div class="level"><span>Local Time</span><strong id="localTime">--:--</strong></div>
-    <div class="level"><span>US Market</span><strong id="marketState">Checking</strong></div>
-    <div class="level"><span>Market Countdown</span><strong id="marketCountdown">Checking</strong></div>
-    <div class="level"><span>Refresh Countdown</span><strong id="nextScan">1:00</strong></div>
-    <div class="level"><span>Equity</span><strong id="topEquity">$5,000.00</strong></div>
-    <div class="level pdt"><span>Mode</span><strong>PDT Safe Swing</strong></div>
-
-    <button id="muteBtn" class="icon" type="button">🔊</button>
-    <button id="pauseBtn" class="yellow" type="button">Pause</button>
-  </div>
-
-  <section class="grid8">
-    <div class="level"><span>Connection</span><strong id="connection">Loading</strong></div>
-    <div class="level"><span>Updated</span><strong id="updated">-</strong></div>
-    <div class="level"><span>Live Signals</span><strong id="signalCount">0</strong></div>
-    <div class="level"><span>Top Symbol</span><strong id="topSignal">-</strong></div>
-    <div class="level"><span>Discovery</span><strong id="discoveryText">Loading</strong></div>
-    <div class="level"><span>Cash</span><strong id="cashKpi">$5,000.00</strong></div>
-    <div class="level"><span>Daily P/L</span><strong id="dailyPnlKpi">$0.00</strong></div>
-    <div class="level"><span>Unrealised P/L</span><strong id="unrealisedKpi">$0.00</strong></div>
-  </section>
-
-  <div class="dashboard-main">
-    <div id="topSignalCard" class="signal-card">
-      <div class="signal-top">
-        <div class="signal-title">
-          <span class="signal-symbol">WAITING</span>
-          <span class="chip gray">NO LIVE SIGNAL YET</span>
-          <span class="chip yellow">PDT SAFE</span>
-          <span class="chip blue">SWING</span>
-        </div>
-        <p>Waiting for first live scan.</p>
-      </div>
-      <div class="signal-headline">The selected live trade summary will appear here.</div>
-      <div class="note">No fake figures are displayed. This card fills only after live backend data is returned.</div>
-    </div>
-
-    <div class="market-card">
-      <h2>Live Market Context</h2>
-      <p id="marketHealthText">Waiting for scan.</p>
-      <div id="marketHealthBox" class="note">Market context will appear after live data returns.</div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Best Trades Right Now</h2>
-    <p>Highest-ranked live scanner results. Best is first, then working down.</p>
-    <div id="wakeWarning" class="note wake-warning"></div>
-    <div id="bestTrades" class="grid3">
-      <div class="best-card"><strong>-</strong><span>Waiting for live scan.</span></div>
-      <div class="best-card"><strong>-</strong><span>Waiting for live scan.</span></div>
-      <div class="best-card"><strong>-</strong><span>Waiting for live scan.</span></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Ranked Live Signals</h2>
-    <p>Stock-only swing scanner. No options, no day-trading language, no fake pro stats.</p>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Symbol</th>
-            <th>Decision</th>
-            <th>Setup</th>
-            <th>Entry Score</th>
-            <th>Strength</th>
-            <th>Price</th>
-            <th>Buy Zone</th>
-            <th>Stop</th>
-            <th>Target</th>
-            <th>R/R</th>
-            <th>Reason</th>
-          </tr>
-        </thead>
-        <tbody id="rows">
-          <tr><td colspan="11" style="text-align:center;padding:24px;color:#9fe9ba">Waiting for live scanner data...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>Selected Trade Plan</h2>
-    <p>Selected: <b id="selectedName">-</b></p>
-    <div class="grid6">
-      <div class="level"><span>Price</span><strong id="dPrice">-</strong></div>
-      <div class="level"><span>Buy Zone</span><strong id="dBuy">-</strong></div>
-      <div class="level"><span>Support</span><strong id="dSupport">-</strong></div>
-      <div class="level"><span>Resistance</span><strong id="dResistance">-</strong></div>
-      <div class="level"><span>Stop</span><strong id="dStop">-</strong></div>
-      <div class="level"><span>Target</span><strong id="dTarget">-</strong></div>
-    </div>
-    <div id="details" class="note">Waiting for scanner.</div>
-    <div id="warnings" class="note warn">Warnings will show here.</div>
-    <div id="education" class="note">Select a live signal to see why the scanner ranked it.</div>
-  </div>
-
-  <div class="card">
-    <div class="chart-head">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"></div>
       <div>
-        <h2>Live Candlestick Chart</h2>
-        <p>Daily candles with current, buy zone, support, resistance, stop and target.</p>
-      </div>
-      <div class="timeframe-buttons">
-        <button id="tf1m" type="button">1M</button>
-        <button id="tf3m" type="button">3M</button>
-        <button id="tf6m" type="button">6M</button>
-        <button id="tf1y" type="button" class="active">1Y</button>
+        <h1>US Scan</h1>
+        <p>Live PDT-safe swing scanner</p>
       </div>
     </div>
-    <canvas id="chart"></canvas>
-  </div>
 
-  <div class="card">
-    <h2>Stock Trade Calculator</h2>
-    <p>Stock-only calculator using the selected live setup. No options, no strike, no expiry.</p>
-    <div class="grid4">
-      <div><label>Entry</label><input id="calcEntry" type="number" step="0.01"></div>
-      <div><label>Shares</label><input id="calcShares" type="number" step="1"></div>
-      <div><label>Stop</label><input id="calcStop" type="number" step="0.01"></div>
-      <div><label>Target</label><input id="calcTarget" type="number" step="0.01"></div>
-    </div>
-    <div class="grid4" style="margin-top:8px">
-      <div class="calc-result"><span>Position Size</span><b id="calcPosition">-</b></div>
-      <div class="calc-result"><span>Risk</span><b id="calcRisk">-</b></div>
-      <div class="calc-result"><span>Potential Profit</span><b id="calcProfit">-</b></div>
-      <div class="calc-result"><span>Risk/Reward</span><b id="calcRR">-</b></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>$5,000 Paper Account</h2>
-    <p>This is the real browser-saved paper account state. It starts at $5,000 unless you reset it.</p>
-    <div class="grid8">
-      <div class="level"><span>Open Paper</span><strong id="paperCount">0</strong></div>
-      <div class="level"><span>Open Value</span><strong id="openValueKpi">$0.00</strong></div>
-      <div class="level"><span>Realised P/L</span><strong id="realisedKpi">$0.00</strong></div>
-      <div class="level"><span>Win Rate</span><strong id="winRateKpi">0%</strong></div>
-      <div class="level"><span>Closed Trades</span><strong id="closedCountKpi">0</strong></div>
-      <div class="level"><span>New Entries Today</span><strong id="entriesTodayKpi">0</strong></div>
-      <div class="level"><span>Auto Paper</span><strong id="topAuto">On</strong></div>
-      <div class="level"><span>Keepalive</span><strong id="keepalive">Starting</strong></div>
+    <div class="nav">
+      <button class="active" type="button" onclick="jumpTo('dashboard')">Dashboard</button>
+      <button type="button" onclick="jumpTo('scanner')">Live Scanner</button>
+      <button type="button" onclick="jumpTo('trade')">Trade Plan</button>
+      <button type="button" onclick="jumpTo('chartCard')">Chart</button>
+      <button type="button" onclick="jumpTo('paper')">Paper Trader</button>
+      <button type="button" onclick="jumpTo('settings')">Settings</button>
     </div>
 
-    <div class="grid6">
-      <div><label>Manual Symbol</label><input id="paperSymbol" placeholder="NVDA"></div>
-      <div><label>Manual Entry</label><input id="paperEntry" type="number" step="0.01"></div>
-      <div><label>Shares</label><input id="paperShares" type="number" step="0.0001"></div>
-      <button id="addPaperBtn" type="button">Add Manual</button>
-      <button id="scanPaperBtn" type="button">Scan Paper</button>
-      <button id="exportLogBtn" type="button">Export Log</button>
+    <div class="side-card">
+      <span>Connection</span>
+      <strong id="sideConnection">Loading</strong>
     </div>
-  </div>
-
-  <div class="card">
-    <h2>Auto Paper Activity Feed</h2>
-    <div id="activityFeed" class="activity-feed">
-      <div class="feed-item">Waiting for scanner activity.</div>
+    <div class="side-card">
+      <span>Refresh</span>
+      <strong id="sideRefresh">1:00</strong>
     </div>
-  </div>
+    <div class="side-card">
+      <span>Live Signals</span>
+      <strong id="sideSignals">0</strong>
+    </div>
+    <div class="side-card">
+      <span>Paper Equity</span>
+      <strong id="sideEquity">$5,000.00</strong>
+    </div>
+  </aside>
 
-  <div class="layout">
-    <div class="card">
-      <h2>Open Paper Positions</h2>
-      <div id="paperBox"><p>No open paper trades yet.</p></div>
+  <main class="main">
+
+    <section class="topbar">
+      <div>
+        <div class="status-line">
+          <span id="statusDot" class="dot"></span>
+          <strong id="status">Loading live scanner...</strong>
+        </div>
+        <p>No fake stats. Data comes from backend scan results and paper account history only.</p>
+      </div>
+
+      <div class="stat"><span>Local Time</span><strong id="localTime">--:--</strong></div>
+      <div class="stat"><span>US Market</span><strong id="marketState">Checking</strong></div>
+      <div class="stat"><span>Market Countdown</span><strong id="marketCountdown">Checking</strong></div>
+      <div class="stat"><span>Refresh Countdown</span><strong id="nextScan">1:00</strong></div>
+      <div class="stat"><span>Equity</span><strong id="topEquity">$5,000.00</strong></div>
+      <div class="stat pdt"><span>Mode</span><strong>PDT Safe Swing</strong></div>
+
+      <button id="muteBtn" class="icon" type="button">🔊</button>
+      <button id="pauseBtn" class="yellow" type="button">Pause</button>
+    </section>
+
+    <section id="dashboard">
+      <div class="grid8">
+        <div class="stat"><span>Updated</span><strong id="updated">-</strong></div>
+        <div class="stat"><span>Live Signals</span><strong id="signalCount">0</strong></div>
+        <div class="stat"><span>Top Symbol</span><strong id="topSignal">-</strong></div>
+        <div class="stat"><span>Discovery</span><strong id="discoveryText">Loading</strong></div>
+        <div class="stat"><span>Cash</span><strong id="cashKpi">$5,000.00</strong></div>
+        <div class="stat"><span>Open Value</span><strong id="openValueKpi">$0.00</strong></div>
+        <div class="stat"><span>Daily P/L</span><strong id="dailyPnlKpi">$0.00</strong></div>
+        <div class="stat"><span>Unrealised P/L</span><strong id="unrealisedKpi">$0.00</strong></div>
+      </div>
+
+      <div class="dash-grid">
+        <div id="topSignalCard" class="signal-card">
+          <div class="signal-top">
+            <div class="signal-title">
+              <span class="signal-symbol">WAITING</span>
+              <span class="chip gray">NO LIVE SIGNAL YET</span>
+              <span class="chip yellow">PDT SAFE</span>
+              <span class="chip blue">SWING</span>
+            </div>
+            <p>Waiting for first live scan.</p>
+          </div>
+          <div class="signal-headline">The selected live trade summary will appear here.</div>
+          <div class="note">This card fills only after live backend data returns.</div>
+        </div>
+
+        <div class="market-card">
+          <h2>Live Market Context</h2>
+          <p>Returned by the backend scanner.</p>
+          <div class="big" id="marketBig">Waiting</div>
+          <div id="marketHealthBox" class="note">Market context will appear after live data returns.</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Best Trades Right Now</h2>
+        <p>Highest-ranked live scanner results. Best is first, then working down.</p>
+        <div id="wakeWarning" class="note wake-warning"></div>
+        <div id="bestTrades" class="grid3">
+          <div class="best-card"><strong>-</strong><span>Waiting for live scan.</span></div>
+          <div class="best-card"><strong>-</strong><span>Waiting for live scan.</span></div>
+          <div class="best-card"><strong>-</strong><span>Waiting for live scan.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="scanner" class="card">
+      <h2>Ranked Live Signals</h2>
+      <p>Stock-only swing scanner. No options, no day-trading labels, no fake performance stats.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Symbol</th>
+              <th>Decision</th>
+              <th>Setup</th>
+              <th>Entry Score</th>
+              <th>Strength</th>
+              <th>Price</th>
+              <th>Buy Zone</th>
+              <th>Stop</th>
+              <th>Target</th>
+              <th>R/R</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody id="rows">
+            <tr><td colspan="11" style="text-align:center;padding:24px;color:#9fe9ba">Waiting for live scanner data...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="trade" class="card">
+      <h2>Selected Trade Plan</h2>
+      <p>Selected: <b id="selectedName">-</b></p>
+      <div class="grid6">
+        <div class="stat"><span>Price</span><strong id="dPrice">-</strong></div>
+        <div class="stat"><span>Buy Zone</span><strong id="dBuy">-</strong></div>
+        <div class="stat"><span>Support</span><strong id="dSupport">-</strong></div>
+        <div class="stat"><span>Resistance</span><strong id="dResistance">-</strong></div>
+        <div class="stat"><span>Stop</span><strong id="dStop">-</strong></div>
+        <div class="stat"><span>Target</span><strong id="dTarget">-</strong></div>
+      </div>
+      <div id="details" class="note">Waiting for scanner.</div>
+      <div id="warnings" class="note warn">Warnings will show here.</div>
+      <div id="education" class="note">Select a live signal to see why the scanner ranked it.</div>
+    </section>
+
+    <section id="chartCard" class="card">
+      <div class="chart-head">
+        <div>
+          <h2>Live Candlestick Chart</h2>
+          <p>Daily candles with current, buy zone, support, resistance, stop and target.</p>
+        </div>
+        <div class="timeframe-buttons">
+          <button id="tf1m" type="button">1M</button>
+          <button id="tf3m" type="button">3M</button>
+          <button id="tf6m" type="button">6M</button>
+          <button id="tf1y" type="button" class="active">1Y</button>
+        </div>
+      </div>
+      <canvas id="chart"></canvas>
+    </section>
+
+    <section class="card">
+      <h2>Stock Trade Calculator</h2>
+      <p>Uses the selected live setup. No options, no strike, no expiry.</p>
+      <div class="grid4">
+        <div><label>Entry</label><input id="calcEntry" type="number" step="0.01"></div>
+        <div><label>Shares</label><input id="calcShares" type="number" step="1"></div>
+        <div><label>Stop</label><input id="calcStop" type="number" step="0.01"></div>
+        <div><label>Target</label><input id="calcTarget" type="number" step="0.01"></div>
+      </div>
+      <div class="grid4" style="margin-top:8px">
+        <div class="calc-result"><span>Position Size</span><b id="calcPosition">-</b></div>
+        <div class="calc-result"><span>Risk</span><b id="calcRisk">-</b></div>
+        <div class="calc-result"><span>Potential Profit</span><b id="calcProfit">-</b></div>
+        <div class="calc-result"><span>Risk/Reward</span><b id="calcRR">-</b></div>
+      </div>
+    </section>
+
+    <section id="paper" class="card">
+      <h2>$5,000 Paper Account</h2>
+      <p>This is browser-saved paper state. It starts at $5,000 unless you reset it.</p>
+      <div class="grid8">
+        <div class="stat"><span>Open Paper</span><strong id="paperCount">0</strong></div>
+        <div class="stat"><span>Realised P/L</span><strong id="realisedKpi">$0.00</strong></div>
+        <div class="stat"><span>Win Rate</span><strong id="winRateKpi">0%</strong></div>
+        <div class="stat"><span>Closed Trades</span><strong id="closedCountKpi">0</strong></div>
+        <div class="stat"><span>New Entries Today</span><strong id="entriesTodayKpi">0</strong></div>
+        <div class="stat"><span>Auto Paper</span><strong id="topAuto">On</strong></div>
+        <div class="stat"><span>Keepalive</span><strong id="keepalive">Starting</strong></div>
+        <div class="stat"><span>Connection</span><strong id="connection">Loading</strong></div>
+      </div>
+
+      <div class="grid6">
+        <div><label>Manual Symbol</label><input id="paperSymbol" placeholder="NVDA"></div>
+        <div><label>Manual Entry</label><input id="paperEntry" type="number" step="0.01"></div>
+        <div><label>Shares</label><input id="paperShares" type="number" step="0.0001"></div>
+        <button id="addPaperBtn" type="button">Add Manual</button>
+        <button id="scanPaperBtn" type="button">Scan Paper</button>
+        <button id="exportLogBtn" type="button">Export Log</button>
+      </div>
+    </section>
+
+    <div class="layout">
+      <section class="card">
+        <h2>Open Paper Positions</h2>
+        <div id="paperBox"><p>No open paper trades yet.</p></div>
+      </section>
+
+      <section class="card">
+        <h2>Closed Paper Trade Log</h2>
+        <button id="clearClosedBtn" class="danger" type="button">Clear Closed Log</button>
+        <div id="closedBox"><p>No closed trades yet.</p></div>
+      </section>
     </div>
 
-    <div class="card">
-      <h2>Closed Paper Trade Log</h2>
-      <button id="clearClosedBtn" class="danger" type="button">Clear Closed Log</button>
-      <div id="closedBox"><p>No closed trades yet.</p></div>
-    </div>
-  </div>
+    <section class="card">
+      <h2>Auto Paper Activity Feed</h2>
+      <div id="activityFeed" class="activity-feed">
+        <div class="feed-item">Waiting for scanner activity.</div>
+      </div>
+    </section>
 
-  <div class="bottom-grid">
-    <details class="card">
-      <summary>Scanner Settings</summary>
+    <section id="settings" class="bottom-grid">
+      <details class="card">
+        <summary>Scanner Settings</summary>
 
-      <label>Mode</label>
-      <select id="mode">
-        <option value="swing" selected>PDT-safe Swing</option>
-      </select>
+        <label>Mode</label>
+        <select id="mode">
+          <option value="swing" selected>PDT-safe Swing</option>
+        </select>
 
-      <label>Watchlist</label>
-      <textarea id="symbols">SPY,QQQ,NVDA,TSLA,AAPL,MSFT,META,AMD,PLTR,COST,LLY,UNH,JPM,AVGO</textarea>
+        <label>Watchlist</label>
+        <textarea id="symbols">SPY,QQQ,NVDA,TSLA,AAPL,MSFT,META,AMD,PLTR,COST,LLY,UNH,JPM,AVGO</textarea>
 
-      <label>Discovery scan size</label>
-      <select id="scanLimit">
-        <option value="60">Fast: 60 extra tickers</option>
-        <option value="100" selected>Balanced: 100 extra tickers</option>
-        <option value="140">Wide: 140 extra tickers</option>
-      </select>
+        <label>Discovery scan size</label>
+        <select id="scanLimit">
+          <option value="60">Fast: 60 extra tickers</option>
+          <option value="100" selected>Balanced: 100 extra tickers</option>
+          <option value="140">Wide: 140 extra tickers</option>
+        </select>
 
-      <label>Refresh minutes</label>
-      <input id="refresh" type="number" value="1" min="1">
+        <label>Refresh minutes</label>
+        <input id="refresh" type="number" value="1" min="1">
 
-      <label>Risk $</label>
-      <input id="risk" type="number" value="100">
-    </details>
+        <label>Risk $</label>
+        <input id="risk" type="number" value="100">
+      </details>
 
-    <details class="card">
-      <summary>Auto Paper Rules</summary>
-      <p>Auto paper: <b id="autoState">On</b></p>
-      <button id="autoBtn" class="yellow" type="button">Turn Auto Paper Off</button>
+      <details class="card">
+        <summary>Auto Paper Rules</summary>
+        <p>Auto paper: <b id="autoState">On</b></p>
+        <button id="autoBtn" class="yellow" type="button">Turn Auto Paper Off</button>
 
-      <label>Paper account size</label>
-      <input id="accountSize" type="number" value="5000" min="100">
+        <label>Paper account size</label>
+        <input id="accountSize" type="number" value="5000" min="100">
 
-      <label>Max one trade %</label>
-      <input id="maxTradePct" type="number" value="20" min="1" max="100">
+        <label>Max one trade %</label>
+        <input id="maxTradePct" type="number" value="20" min="1" max="100">
 
-      <label>Max open trades</label>
-      <input id="maxOpenTrades" type="number" value="5" min="1" max="20">
+        <label>Max open trades</label>
+        <input id="maxOpenTrades" type="number" value="5" min="1" max="20">
 
-      <label>Max new entries per day</label>
-      <input id="maxDailyEntries" type="number" value="3" min="1" max="20">
+        <label>Max new entries per day</label>
+        <input id="maxDailyEntries" type="number" value="3" min="1" max="20">
 
-      <label>Minimum score to auto-enter</label>
-      <input id="autoMinScore" type="number" value="82" min="50" max="100">
+        <label>Minimum score to auto-enter</label>
+        <input id="autoMinScore" type="number" value="82" min="50" max="100">
 
-      <label>Minimum risk/reward</label>
-      <input id="autoMinRR" type="number" value="1.8" step="0.1">
+        <label>Minimum risk/reward</label>
+        <input id="autoMinRR" type="number" value="1.8" step="0.1">
 
-      <button id="resetAccountBtn" class="danger" type="button">Reset $5K Account</button>
-      <div id="autoRulesBox" class="note">Rules loading...</div>
-    </details>
+        <button id="resetAccountBtn" class="danger" type="button">Reset $5K Account</button>
+        <div id="autoRulesBox" class="note">Rules loading...</div>
+      </details>
 
-    <details class="card">
-      <summary>Scanner Log and Auto Decision</summary>
-      <h3>Auto Paper Decision</h3>
-      <div id="autoDecisionBox" class="note">Waiting for scan.</div>
-      <h3>Log</h3>
-      <div id="log" class="log">Waiting...</div>
-    </details>
-  </div>
+      <details class="card">
+        <summary>Scanner Log and Auto Decision</summary>
+        <h3>Auto Paper Decision</h3>
+        <div id="autoDecisionBox" class="note">Waiting for scan.</div>
+        <h3>Log</h3>
+        <div id="log" class="log">Waiting...</div>
+      </details>
+    </section>
 
+  </main>
 </div>
 
 <div id="alertBox" class="alert"></div>
@@ -864,6 +1051,11 @@ function num(value){var n=Number(value);return Number.isFinite(n)?n:null;}
 function pad(value){value=Number(value);return value<10?"0"+value:String(value);}
 function nowText(){return new Date().toLocaleString();}
 
+function jumpTo(id){
+  var node = el(id);
+  if(node)node.scrollIntoView({behavior:"smooth",block:"start"});
+}
+
 function parseDateSafe(value){
   var d = new Date(value);
   return isNaN(d.getTime()) ? null : d;
@@ -905,6 +1097,7 @@ function setDots(kind){
 function status(message,kind){
   setText("status",message);
   setText("connection",kind==="good"?"Connected":kind==="work"?"Working":"Offline");
+  setText("sideConnection",kind==="good"?"Connected":kind==="work"?"Working":"Offline");
   setDots(kind);
 }
 
@@ -1166,16 +1359,14 @@ function renderBestTrades(){
 
 function renderMarketHealth(){
   var box = el("marketHealthBox");
-  var textBox = el("marketHealthText");
+  var big = el("marketBig");
   if(!box)return;
 
   var entries = RESULTS.filter(function(r){return /ENTER_NOW/i.test(String(r.decision));}).length;
   var pullbacks = RESULTS.filter(function(r){return /PULLBACK/i.test(String(r.decision));}).length;
   var breakouts = RESULTS.filter(function(r){return /BREAKOUT/i.test(String(r.decision));}).length;
 
-  if(textBox){
-    textBox.textContent = "Market context is returned by the live backend scan.";
-  }
+  if(big)big.textContent = MARKET_HEALTH || "Unknown";
 
   var text = "<b>Market:</b> "+escapeHtml(MARKET_HEALTH)+"<br>" +
     "<b>Live results:</b> "+RESULTS.length+"<br>" +
@@ -1278,6 +1469,7 @@ function renderAccount(){
   var winRate = closed.length ? (wins / closed.length) * 100 : 0;
 
   setText("topEquity",money(getEquity(account)));
+  setText("sideEquity",money(getEquity(account)));
   setText("cashKpi",money(account.cash));
   setText("openValueKpi",money(getOpenValue(account)));
   setText("realisedKpi",money(getRealised(account)));
@@ -1372,6 +1564,7 @@ function scan(){
 
     setText("updated",new Date().toLocaleTimeString());
     setText("signalCount",RESULTS.length);
+    setText("sideSignals",RESULTS.length);
     setText("topSignal",RESULTS[0]?RESULTS[0].symbol:"-");
 
     if(errors.length){
@@ -1451,7 +1644,7 @@ function renderTopSignalCard(r){
       '<span class="chip blue">SWING</span>'+
       '</div><p>Waiting for first live scan.</p></div>'+
       '<div class="signal-headline">The selected live trade summary will appear here.</div>'+
-      '<div class="note">No fake figures are displayed. This card fills only after live backend data is returned.</div>';
+      '<div class="note">This card fills only after live backend data returns.</div>';
     return;
   }
 
@@ -1472,14 +1665,14 @@ function renderTopSignalCard(r){
     '</div>'+
     '<div class="signal-headline">'+escapeHtml(headline)+'</div>'+
     '<div class="signal-meta">'+
-      '<div class="level"><span>Price</span><strong>'+money(r.price)+'</strong></div>'+
-      '<div class="level"><span>Buy Zone</span><strong>'+money(r.buyLow)+' to '+money(r.buyHigh)+'</strong></div>'+
-      '<div class="level"><span>Support</span><strong>'+money(sr.support)+'</strong></div>'+
-      '<div class="level"><span>Resistance</span><strong>'+money(sr.resistance)+'</strong></div>'+
-      '<div class="level"><span>Stop</span><strong>'+money(r.stop)+'</strong></div>'+
-      '<div class="level"><span>Target</span><strong>'+money(r.target)+'</strong></div>'+
-      '<div class="level"><span>Score</span><strong>'+escapeHtml(r.score)+'</strong></div>'+
-      '<div class="level"><span>R/R</span><strong>'+escapeHtml(r.rr)+'</strong></div>'+
+      '<div class="stat"><span>Price</span><strong>'+money(r.price)+'</strong></div>'+
+      '<div class="stat"><span>Buy Zone</span><strong>'+money(r.buyLow)+' to '+money(r.buyHigh)+'</strong></div>'+
+      '<div class="stat"><span>Support</span><strong>'+money(sr.support)+'</strong></div>'+
+      '<div class="stat"><span>Resistance</span><strong>'+money(sr.resistance)+'</strong></div>'+
+      '<div class="stat"><span>Stop</span><strong>'+money(r.stop)+'</strong></div>'+
+      '<div class="stat"><span>Target</span><strong>'+money(r.target)+'</strong></div>'+
+      '<div class="stat"><span>Score</span><strong>'+escapeHtml(r.score)+'</strong></div>'+
+      '<div class="stat"><span>R/R</span><strong>'+escapeHtml(r.rr)+'</strong></div>'+
     '</div>';
 }
 
@@ -1563,7 +1756,7 @@ function drawCandlestickChart(r){
   var h = canvas.height;
 
   ctx.clearRect(0,0,w,h);
-  ctx.fillStyle = "#000";
+  ctx.fillStyle = "#020303";
   ctx.fillRect(0,0,w,h);
 
   var bars = getBarsFromResult(r).slice(-CHART_DAYS);
@@ -1613,7 +1806,7 @@ function drawCandlestickChart(r){
   if(Number.isFinite(num(r.buyLow)) && Number.isFinite(num(r.buyHigh))){
     var y1=yFor(Math.max(num(r.buyLow),num(r.buyHigh)));
     var y2=yFor(Math.min(num(r.buyLow),num(r.buyHigh)));
-    ctx.fillStyle="rgba(0,255,136,.11)";
+    ctx.fillStyle="rgba(0,255,136,.10)";
     ctx.fillRect(left,y1,cw,Math.max(5*dpr,y2-y1));
     ctx.fillStyle="rgba(0,255,136,.65)";
     ctx.font="bold "+(14*dpr)+"px Arial";
@@ -1664,7 +1857,7 @@ function drawCandlestickChart(r){
   levelLine(r.stop,"#ff5577","STOP",true);
   levelLine(sr.support,"#ff5577","SUPPORT",false);
 
-  ctx.fillStyle="rgba(125,255,168,.25)";
+  ctx.fillStyle="rgba(125,255,168,.22)";
   ctx.font="bold "+(44*dpr)+"px Arial";
   ctx.fillText(r.symbol,left+14*dpr,top+48*dpr);
 
@@ -1756,9 +1949,12 @@ function updateTimers(){
   if(SCANNER_RUNNING && NEXT_SCAN){
     var ms = NEXT_SCAN - Date.now();
     if(ms<0)ms=0;
-    setText("nextScan",Math.floor(ms/60000)+":"+pad(Math.floor((ms%60000)/1000)));
+    var t = Math.floor(ms/60000)+":"+pad(Math.floor((ms%60000)/1000));
+    setText("nextScan",t);
+    setText("sideRefresh",t);
   }else{
     setText("nextScan","Paused");
+    setText("sideRefresh","Paused");
   }
 }
 
