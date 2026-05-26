@@ -11,7 +11,6 @@
   --side:#061018;
   --panel:#07121a;
   --panel2:#0b1822;
-  --panel3:#101f2b;
   --line:rgba(57,255,20,.34);
   --line2:rgba(255,255,255,.08);
   --text:#eef8f1;
@@ -184,9 +183,9 @@ body{overflow:auto}
   font-size:13px;
 }
 
-.kpi strong.good{color:var(--green)}
-.kpi strong.warn{color:var(--yellow)}
-.kpi strong.bad{color:var(--red)}
+.good{color:var(--green)!important}
+.warn{color:var(--yellow)!important}
+.bad{color:var(--red)!important}
 
 .actionBtns{
   display:flex;
@@ -277,9 +276,7 @@ th{
   z-index:2;
 }
 
-tbody tr{
-  cursor:pointer;
-}
+tbody tr{cursor:pointer}
 
 tbody tr:hover,
 tbody tr.selected{
@@ -320,12 +317,6 @@ tbody tr.selected{
 .badge.watch{
   color:#d6e2df;
   background:#172331;
-}
-
-.badge.wait{
-  color:var(--yellow);
-  background:rgba(255,209,102,.08);
-  border-color:rgba(255,209,102,.42);
 }
 
 .redText{color:var(--red)}
@@ -905,6 +896,8 @@ function getSignalsFromResponse(data){
   if(data.payload&&Array.isArray(data.payload.rows))return data.payload.rows;
   if(data.payload&&Array.isArray(data.payload.ranked))return data.payload.ranked;
   if(data.payload&&Array.isArray(data.payload.opportunities))return data.payload.opportunities;
+  if(data.payload&&Array.isArray(data.payload.stocks))return data.payload.stocks;
+  if(data.payload&&Array.isArray(data.payload.items))return data.payload.items;
 
   return [];
 }
@@ -978,7 +971,7 @@ function sr(r){
 
 function setup(r){
   var d=String(r.decision||"");
-  if(/ENTER/i.test(d))return"Entry";
+  if(/ENTER|BUY|ENTRY/i.test(d))return"Entry";
   if(/BREAKOUT/i.test(d))return"Breakout";
   if(/PULLBACK/i.test(d))return"Pullback";
   return"Watch";
@@ -1230,7 +1223,6 @@ function renderMarket(){
   setText("regime",MARKET_HEALTH||"Unknown");
 
   var entered=RESULTS.filter(function(r){return stage(r)==="ENTER";}).length;
-  var watches=RESULTS.length-entered;
   var breadth=RESULTS.length?Math.round((entered/RESULTS.length)*100):0;
 
   setText("breadthState",RESULTS.length?breadth+"%":"Waiting");
