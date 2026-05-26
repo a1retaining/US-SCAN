@@ -7,15 +7,15 @@
 
 <style>
 :root{
-  --bg:#03080b;
-  --side:#071017;
-  --panel:#08131a;
-  --panel2:#0b1720;
-  --panel3:#101e28;
-  --line:rgba(38,255,88,.28);
+  --bg:#020609;
+  --side:#061018;
+  --panel:#07121a;
+  --panel2:#0b1822;
+  --panel3:#101f2b;
+  --line:rgba(57,255,20,.34);
   --line2:rgba(255,255,255,.08);
-  --text:#eef7f1;
-  --muted:#8ea69a;
+  --text:#eef8f1;
+  --muted:#8fa59b;
   --green:#39ff14;
   --green2:#00ff88;
   --yellow:#ffd166;
@@ -218,10 +218,11 @@ button.gray{border-color:var(--line2);background:#121d27;color:#d5e0db}
 }
 
 .panelTitle{
-  height:38px;
+  min-height:38px;
   display:flex;
   align-items:center;
   justify-content:space-between;
+  gap:12px;
   padding:0 11px;
   border-bottom:1px solid var(--line2);
   text-transform:uppercase;
@@ -336,6 +337,7 @@ tbody tr.selected{
   display:grid;
   grid-template-columns:1.1fr 1fr 1fr;
   gap:8px;
+  margin-bottom:8px;
 }
 
 .detailBox{
@@ -555,6 +557,7 @@ details summary{
     <div class="sideRow"><span>Status</span><b id="sideMarket">Checking</b></div>
     <div class="sideRow"><span>Clock</span><b id="sideClock">--:--</b></div>
     <div class="sideRow"><span>Next</span><b id="sideNext">Checking</b></div>
+    <div class="sideRow"><span>Refresh</span><b id="sideRefresh">1:00</b></div>
   </div>
 
   <div class="sidePanel">
@@ -578,17 +581,17 @@ details summary{
   <div class="kpi"><span>Breadth</span><strong id="breadthState">Waiting</strong></div>
   <div class="kpi"><span>Data Feed</span><strong id="feedState" class="warn">Loading</strong></div>
   <div class="kpi"><span>Paper Cash</span><strong id="cashKpi">$5,000.00</strong></div>
-  <div class="kpi"><span>Auto Paper</span><strong id="autoPaperKpi" class="good">ON</strong></div>
+  <div class="kpi"><span>Auto Paper</span><strong id="autoPaperKpi" class="good">ON | $5,000</strong></div>
   <div class="kpi actionBtns">
-    <button onclick="showAlert('Backtest','Backtest is not enabled until it is built from real historical data.','warn')">Backtest</button>
-    <button onclick="showAlert('Optimizer','Optimizer is not enabled until it is built from real closed trade data.','warn')">Optimize</button>
+    <button onclick="showAlert('Backtest','Backtest will only be enabled after real historical testing is built. No fake backtest data is shown.','warn')">Backtest</button>
+    <button onclick="showAlert('Optimizer','Optimizer will only be enabled after real paper trade history exists. No fake optimizer data is shown.','warn')">Optimize</button>
     <button class="yellow" onclick="scan()">Refresh</button>
   </div>
 </section>
 
 <section class="panel">
   <div class="panelTitle">
-    <span id="chartTitle">CAT CHART - FULL WIDTH</span>
+    <span id="chartTitle">CHART - FULL WIDTH</span>
     <small id="chartStatus">Waiting</small>
   </div>
   <div class="chartWrap">
@@ -765,18 +768,17 @@ details summary{
 </div>
 
 <script>
-var RESULTS = [];
-var SELECTED = null;
-var MARKET_HEALTH = "Unknown";
-var LOOP = null;
-var NEXT_SCAN = 0;
-var CHART_DAYS = 180;
-var ALERT_TIMER = null;
-var POP_TIMER = null;
-var VOICE_UNLOCKED = false;
-var MUTED = localStorage.getItem("scannerMuted") === "true";
-var SCANNER_RUNNING = localStorage.getItem("scannerRunning") !== "false";
-var AUTO_PAPER = localStorage.getItem("autoPaperOn") !== "false";
+var RESULTS=[];
+var SELECTED=null;
+var MARKET_HEALTH="Unknown";
+var LOOP=null;
+var NEXT_SCAN=0;
+var ALERT_TIMER=null;
+var POP_TIMER=null;
+var VOICE_UNLOCKED=false;
+var MUTED=localStorage.getItem("scannerMuted")==="true";
+var SCANNER_RUNNING=localStorage.getItem("scannerRunning")!=="false";
+var AUTO_PAPER=localStorage.getItem("autoPaperOn")!=="false";
 
 function el(id){return document.getElementById(id);}
 function setText(id,v){var n=el(id);if(n)n.textContent=v;}
@@ -785,7 +787,15 @@ function money(v){var n=Number(v);return Number.isFinite(n)?"$"+n.toFixed(2):"-"
 function num(v){var n=Number(v);return Number.isFinite(n)?n:null;}
 function pad(v){return Number(v)<10?"0"+v:String(v);}
 function nowText(){return new Date().toLocaleString();}
-function jumpTo(id){var x=el(id);if(x)x.scrollIntoView({behavior:"smooth",block:"start"});}
+
+function jumpTo(id){
+  var target=document.getElementById(id);
+  if(!target){
+    console.warn("Missing section:",id);
+    return;
+  }
+  target.scrollIntoView({behavior:"smooth",block:"start"});
+}
 
 function log(msg){
   var box=el("log");
@@ -849,7 +859,7 @@ function toggleMute(){
 
 function speak(msg){
   try{
-    if(MUTED || !VOICE_UNLOCKED)return;
+    if(MUTED||!VOICE_UNLOCKED)return;
     speechSynthesis.cancel();
     var u=new SpeechSynthesisUtterance(msg);
     u.rate=.95;
@@ -869,40 +879,77 @@ function api(path){
   });
 }
 
+function getSignalsFromResponse(data){
+  if(!data)return [];
+  if(Array.isArray(data))return data;
+
+  if(Array.isArray(data.signals))return data.signals;
+  if(Array.isArray(data.results))return data.results;
+  if(Array.isArray(data.data))return data.data;
+  if(Array.isArray(data.rows))return data.rows;
+  if(Array.isArray(data.ranked))return data.ranked;
+  if(Array.isArray(data.opportunities))return data.opportunities;
+  if(Array.isArray(data.stocks))return data.stocks;
+  if(Array.isArray(data.items))return data.items;
+
+  if(data.data&&Array.isArray(data.data.signals))return data.data.signals;
+  if(data.data&&Array.isArray(data.data.results))return data.data.results;
+  if(data.data&&Array.isArray(data.data.rows))return data.data.rows;
+  if(data.data&&Array.isArray(data.data.ranked))return data.data.ranked;
+  if(data.data&&Array.isArray(data.data.opportunities))return data.data.opportunities;
+  if(data.data&&Array.isArray(data.data.stocks))return data.data.stocks;
+  if(data.data&&Array.isArray(data.data.items))return data.data.items;
+
+  if(data.payload&&Array.isArray(data.payload.signals))return data.payload.signals;
+  if(data.payload&&Array.isArray(data.payload.results))return data.payload.results;
+  if(data.payload&&Array.isArray(data.payload.rows))return data.payload.rows;
+  if(data.payload&&Array.isArray(data.payload.ranked))return data.payload.ranked;
+  if(data.payload&&Array.isArray(data.payload.opportunities))return data.payload.opportunities;
+
+  return [];
+}
+
 function symbols(){
   return (el("symbols").value||"").split(",").map(function(s){return s.trim().toUpperCase();}).filter(Boolean).join(",");
 }
 
 function field(o,names){
   for(var i=0;i<names.length;i++){
-    if(o[names[i]]!==undefined && o[names[i]]!==null)return o[names[i]];
+    if(o[names[i]]!==undefined&&o[names[i]]!==null)return o[names[i]];
   }
   return null;
 }
 
 function clean(o){
+  if(!o)o={};
+
+  var symbol=o.symbol||o.ticker||o.code||o.name||"-";
+  var decision=field(o,["decision","tradeDecision","action","signal","recommendation"])||"WATCH";
+  var score=field(o,["score","conf","confidence","entryScore","rankScore"])||0;
+  var price=field(o,["price","currentPrice","last","close","mark"]);
+
   return{
     raw:o,
-    symbol:o.symbol||"-",
-    decision:field(o,["decision","tradeDecision","action"])||"WATCH",
-    score:o.score!==undefined?o.score:"-",
-    strengthScore:o.strengthScore!==undefined?o.strengthScore:o.score,
-    entryScore:o.entryScore!==undefined?o.entryScore:o.score,
-    rank:o.rankScore!==undefined?o.rankScore:o.score,
-    price:field(o,["price","currentPrice"]),
-    buyLow:field(o,["buyZoneLow","buyLow"]),
-    buyHigh:field(o,["buyZoneHigh","buyHigh"]),
-    stop:field(o,["stopLoss","stop","sl"]),
-    target:field(o,["target1","targetPrice","tp"]),
-    target2:field(o,["target2"]),
-    rr:o.riskReward||"-",
-    hold:o.expectedHold||"24 hours or more",
-    summary:o.summary||o.plainEnglish||"",
-    plan:o.actionPlan||o.summary||"",
+    symbol:String(symbol).toUpperCase(),
+    decision:decision,
+    score:score,
+    strengthScore:field(o,["strengthScore","strength","trendScore"])||score,
+    entryScore:field(o,["entryScore","conf","confidence"])||score,
+    rank:field(o,["rankScore","rank","score","conf","confidence"])||score,
+    price:price,
+    buyLow:field(o,["buyZoneLow","buyLow","entryLow","buy_low"]),
+    buyHigh:field(o,["buyZoneHigh","buyHigh","entryHigh","buy_high"]),
+    stop:field(o,["stopLoss","stop","sl","stopPrice"]),
+    target:field(o,["target1","targetPrice","target","tp"]),
+    target2:field(o,["target2","tp2"]),
+    rr:field(o,["riskReward","rr","rR","risk_reward"])||"-",
+    hold:field(o,["expectedHold","hold","holdTime"])||"24 hours or more",
+    summary:field(o,["summary","plainEnglish","reason","thesis","description"])||"",
+    plan:field(o,["actionPlan","plan","summary"])||"",
     reasons:Array.isArray(o.reasons)?o.reasons:[],
     warnings:Array.isArray(o.warnings)?o.warnings:[],
-    bars:Array.isArray(o.bars)?o.bars:[],
-    change:o.changePercent,
+    bars:Array.isArray(o.bars)?o.bars:(Array.isArray(o.candles)?o.candles:[]),
+    change:field(o,["changePercent","changePct","change"]),
     support:o.support,
     resistance:o.resistance
   };
@@ -915,7 +962,7 @@ function bars(r){
       high:num(b.high!==undefined?b.high:b.h),
       low:num(b.low!==undefined?b.low:b.l),
       close:num(b.close!==undefined?b.close:b.c),
-      date:b.date||""
+      date:b.date||b.time||""
     };
   }).filter(function(b){return Number.isFinite(b.close)&&Number.isFinite(b.high)&&Number.isFinite(b.low);});
 }
@@ -931,7 +978,7 @@ function sr(r){
 
 function setup(r){
   var d=String(r.decision||"");
-  if(/ENTER_NOW/i.test(d))return"Entry";
+  if(/ENTER/i.test(d))return"Entry";
   if(/BREAKOUT/i.test(d))return"Breakout";
   if(/PULLBACK/i.test(d))return"Pullback";
   return"Watch";
@@ -939,14 +986,7 @@ function setup(r){
 
 function stage(r){
   var d=String(r.decision||"");
-  var p=Number(r.price),hi=Number(r.buyHigh),lo=Number(r.buyLow);
-  if(/ENTER_NOW/i.test(d))return"ENTER";
-  if(/BREAKOUT/i.test(d))return"WATCH";
-  if(/PULLBACK/i.test(d)){
-    if(Number.isFinite(p)&&Number.isFinite(hi)&&p>hi)return"WATCH";
-    if(Number.isFinite(p)&&Number.isFinite(lo)&&Number.isFinite(hi)&&p>=lo&&p<=hi)return"READY";
-    return"WATCH";
-  }
+  if(/ENTER|BUY|ENTRY/i.test(d))return"ENTER";
   return"WATCH";
 }
 
@@ -1079,7 +1119,8 @@ function health(){
     status("Connected","good");
     setText("feedState","LIVE");
     setText("dataStatus","LIVE DATA");
-    setText("discoveryText",(d.discoveryCount||"?")+" tickers");
+    if(d.discoveryCount)setText("breadthState",d.discoveryCount+" tickers");
+    log("HEALTH KEYS: "+Object.keys(d).join(", "));
   }).catch(function(e){
     status("Backend failed","bad");
     setText("feedState","ERROR");
@@ -1095,29 +1136,6 @@ function keepAlive(){
   });
 }
 
-function getSignalsFromResponse(data){
-  if(!data)return [];
-
-  if(Array.isArray(data))return data;
-
-  if(Array.isArray(data.signals))return data.signals;
-  if(Array.isArray(data.results))return data.results;
-  if(Array.isArray(data.data))return data.data;
-  if(Array.isArray(data.rows))return data.rows;
-  if(Array.isArray(data.ranked))return data.ranked;
-  if(Array.isArray(data.opportunities))return data.opportunities;
-  if(Array.isArray(data.stocks))return data.stocks;
-  if(Array.isArray(data.items))return data.items;
-
-  if(data.data && Array.isArray(data.data.signals))return data.data.signals;
-  if(data.data && Array.isArray(data.data.results))return data.data.results;
-  if(data.data && Array.isArray(data.data.rows))return data.data.rows;
-  if(data.data && Array.isArray(data.data.ranked))return data.data.ranked;
-  if(data.data && Array.isArray(data.data.opportunities))return data.data.opportunities;
-
-  return [];
-}
-
 function scan(){
   if(!SCANNER_RUNNING){
     status("Paused","bad");
@@ -1129,7 +1147,6 @@ function scan(){
 
   var risk=el("risk").value||"100";
   var scanLimit=el("scanLimit").value||"100";
-
   var scanUrl="/api/scan?mode=swing&symbols="+encodeURIComponent(symbols())+"&risk="+encodeURIComponent(risk);
   var discoverUrl="/api/discover?risk="+encodeURIComponent(risk)+"&limit=20&scanLimit="+encodeURIComponent(scanLimit)+"&exclude="+encodeURIComponent(symbols());
 
@@ -1139,12 +1156,9 @@ function scan(){
 
     if(res[0].status==="fulfilled"){
       var scanData=res[0].value;
-
-      MARKET_HEALTH=scanData.market || scanData.regime || scanData.marketRegime || "Unknown";
-
+      MARKET_HEALTH=scanData.market||scanData.regime||scanData.marketRegime||"Unknown";
       var scanSignals=getSignalsFromResponse(scanData);
       all=all.concat(scanSignals);
-
       log("WATCHLIST RESPONSE KEYS: "+Object.keys(scanData).join(", "));
       log("WATCHLIST SIGNALS FOUND: "+scanSignals.length);
     }else{
@@ -1153,14 +1167,9 @@ function scan(){
 
     if(res[1].status==="fulfilled"){
       var discoverData=res[1].value;
-
       var discoverSignals=getSignalsFromResponse(discoverData);
       all=all.concat(discoverSignals);
-
-      if(discoverData.discoveryScanned){
-        setText("discoveryText",discoverData.discoveryScanned+" / "+discoverData.discoveryUniverse);
-      }
-
+      if(discoverData.discoveryScanned)setText("breadthState",discoverData.discoveryScanned+" / "+discoverData.discoveryUniverse);
       log("DISCOVER RESPONSE KEYS: "+Object.keys(discoverData).join(", "));
       log("DISCOVER SIGNALS FOUND: "+discoverSignals.length);
     }else{
@@ -1171,8 +1180,7 @@ function scan(){
 
     all.forEach(function(x){
       var r=clean(x);
-
-      if(!r.symbol || r.symbol==="-")return;
+      if(!r.symbol||r.symbol==="-")return;
 
       if(seen[r.symbol]){
         if(Number(r.rank||r.score||0)>Number(seen[r.symbol].rank||seen[r.symbol].score||0)){
@@ -1183,15 +1191,9 @@ function scan(){
       }
     });
 
-    RESULTS=Object.keys(seen).map(function(k){
-      return seen[k];
-    })
-    .filter(function(r){
-      return r && r.symbol && r.symbol !== "-";
-    })
-    .sort(function(a,b){
-      return Number(b.rank||b.score||0)-Number(a.rank||a.score||0);
-    });
+    RESULTS=Object.keys(seen).map(function(k){return seen[k];})
+      .filter(function(r){return r&&r.symbol&&r.symbol!=="-";})
+      .sort(function(a,b){return Number(b.rank||b.score||0)-Number(a.rank||a.score||0);});
 
     renderRows();
     renderMarket();
@@ -1200,84 +1202,14 @@ function scan(){
       selectTrade(0,false);
     }else{
       setText("chartTitle","NO TRADES RETURNED");
-      setText("chartStatus","CHECK BACKEND RESPONSE");
+      setText("chartStatus","CHECK LOG / BACKEND RESPONSE");
       el("details").innerHTML="The scan ran, but no usable symbols were found in the backend response.";
-      el("warnings").innerHTML="<b>Debug:</b><br>"+esc(errors.join(" | ") || "No errors. Backend response may be using a different field name or returning empty arrays.");
+      el("warnings").innerHTML="<b>Debug:</b><br>"+esc(errors.join(" | ")||"No frontend errors. Backend may be returning empty arrays.");
     }
-
-    setText("dataStatus",errors.length ? "PARTIAL_LIVE_DATA" : "LIVE_DATA");
-    setText("feedState",errors.length ? "PARTIAL" : "LIVE");
-
-    status("Scan complete: "+RESULTS.length,"good");
-
-    if(errors.length){
-      log(errors.join(" | "));
-    }
-
-    autoPaperCheck();
-    renderPaper();
-    renderAccount();
-    schedule();
-  }).catch(function(e){
-    status("Scan failed","bad");
-    setText("dataStatus","ERROR");
-    showAlert("Scan failed",e.message,"bad");
-    schedule();
-  });
-}
-  if(!SCANNER_RUNNING){
-    status("Paused","bad");
-    return;
-  }
-
-  status("Scanning","work");
-  setText("dataStatus","SCANNING");
-
-  var risk=el("risk").value||"100";
-  var scanLimit=el("scanLimit").value||"100";
-  var scanUrl="/api/scan?mode=swing&symbols="+encodeURIComponent(symbols())+"&risk="+encodeURIComponent(risk);
-  var discoverUrl="/api/discover?risk="+encodeURIComponent(risk)+"&limit=20&scanLimit="+encodeURIComponent(scanLimit)+"&exclude="+encodeURIComponent(symbols());
-
-  Promise.allSettled([api(scanUrl),api(discoverUrl)]).then(function(res){
-    var all=[];
-    var errors=[];
-
-    if(res[0].status==="fulfilled"){
-      MARKET_HEALTH=res[0].value.market||"Unknown";
-      all=all.concat(res[0].value.signals||[]);
-    }else{
-      errors.push("Watchlist failed: "+res[0].reason.message);
-    }
-
-    if(res[1].status==="fulfilled"){
-      all=all.concat(res[1].value.signals||[]);
-      if(res[1].value.discoveryScanned)setText("discoveryText",res[1].value.discoveryScanned+" / "+res[1].value.discoveryUniverse);
-    }else{
-      errors.push("Discovery failed: "+res[1].reason.message);
-    }
-
-    var seen={};
-    all.forEach(function(x){
-      var r=clean(x);
-      if(!r.symbol||r.symbol==="-")return;
-      if(seen[r.symbol]){
-        if(Number(r.rank||r.score||0)>Number(seen[r.symbol].rank||seen[r.symbol].score||0))seen[r.symbol]=r;
-      }else{
-        seen[r.symbol]=r;
-      }
-    });
-
-    RESULTS=Object.keys(seen).map(function(k){return seen[k];})
-      .filter(function(r){return r && r.symbol && r.symbol !== "-";})
-      .sort(function(a,b){return Number(b.rank||b.score||0)-Number(a.rank||a.score||0);});
-
-    renderRows();
-    renderMarket();
-
-    if(RESULTS.length)selectTrade(0,false);
 
     setText("dataStatus",errors.length?"PARTIAL_LIVE_DATA":"LIVE_DATA");
     setText("feedState",errors.length?"PARTIAL":"LIVE");
+
     status("Scan complete: "+RESULTS.length,"good");
 
     if(errors.length)log(errors.join(" | "));
@@ -1295,8 +1227,7 @@ function scan(){
 }
 
 function renderMarket(){
-  setText("regime",MARKET_HEALTH || "Unknown");
-  setText("marketBig",MARKET_HEALTH || "Unknown");
+  setText("regime",MARKET_HEALTH||"Unknown");
 
   var entered=RESULTS.filter(function(r){return stage(r)==="ENTER";}).length;
   var watches=RESULTS.length-entered;
@@ -1306,13 +1237,8 @@ function renderMarket(){
   setText("spyState",MARKET_HEALTH==="Bullish"?"BULLISH":"UNKNOWN");
   setText("volState","UNKNOWN");
 
-  var box=el("marketHealthBox");
-  if(box){
-    box.innerHTML="<b>Regime:</b> "+esc(MARKET_HEALTH)+"<br>"+
-      "<b>Live signals:</b> "+RESULTS.length+"<br>"+
-      "<b>Entry candidates:</b> "+entered+"<br>"+
-      "<b>Watchlist:</b> "+watches+"<br>"+
-      "<span class='yellowText'>Only real returned backend data is shown.</span>";
+  if(RESULTS.length){
+    setText("chartStatus",setup(RESULTS[0])+" | "+stage(RESULTS[0])+" | WATCHLIST");
   }
 }
 
@@ -1371,7 +1297,6 @@ function selectTrade(i,voice){
   setText("dBuy",money(r.buyLow)+" to "+money(r.buyHigh));
   setText("dStop",money(r.stop));
   setText("dTarget",money(r.target));
-
   setText("chartTitle",r.symbol+" CHART - FULL WIDTH");
   setText("chartStatus",setup(r)+" | "+stage(r)+" | WATCHLIST");
 
@@ -1388,8 +1313,7 @@ function selectTrade(i,voice){
     "Expected hold: 24 hours or more unless stop or risk exit triggers.";
 
   el("warnings").innerHTML="<b>Warnings:</b><br>"+warns;
-
-  setText("thesisWhy",r.summary || "No summary returned from backend.");
+  setText("thesisWhy",r.summary||"No summary returned from backend.");
   setText("thesisEntry","Only enter around "+money(r.buyLow)+" to "+money(r.buyHigh)+". Do not chase above the zone.");
   setText("thesisExit","Stop at "+money(r.stop)+". Target at "+money(r.target)+". Risk/reward "+r.rr+".");
 
@@ -1436,11 +1360,10 @@ function drawChart(r){
 
   var min=Math.min.apply(null,vals)*.99;
   var max=Math.max.apply(null,vals)*1.01;
-
   if(max<=min)max=min+1;
 
-  var left=360*dpr;
-  var right=380*dpr;
+  var left=330*dpr;
+  var right=360*dpr;
   var top=35*dpr;
   var bottom=45*dpr;
   var cw=w-left-right;
@@ -1468,7 +1391,7 @@ function drawChart(r){
     var yl=y(bar.low);
     var yo=y(bar.open);
     var yc=y(bar.close);
-    var c=bar.close>=bar.open?varGreen():varRed();
+    var c=bar.close>=bar.open?"#39ff14":"#ff4d6d";
 
     ctx.strokeStyle=c;
     ctx.lineWidth=1.4*dpr;
@@ -1488,7 +1411,6 @@ function drawChart(r){
 
     ctx.strokeStyle=c;
     ctx.lineWidth=2*dpr;
-
     if(dash)ctx.setLineDash([8*dpr,6*dpr]);
 
     ctx.beginPath();
@@ -1497,7 +1419,6 @@ function drawChart(r){
     ctx.stroke();
 
     ctx.setLineDash([]);
-
     ctx.fillStyle=c;
     ctx.font="bold "+(12*dpr)+"px Arial";
     ctx.fillText(label,w-right+8*dpr,yy-4*dpr);
@@ -1513,9 +1434,6 @@ function drawChart(r){
   ctx.font="bold "+(18*dpr)+"px Arial";
   ctx.fillText(r.symbol+" "+setup(r)+"-"+stage(r),left-40*dpr,top+10*dpr);
 }
-
-function varGreen(){return"#39ff14";}
-function varRed(){return"#ff4d6d";}
 
 function marketClock(){
   var now=new Date();
@@ -1562,18 +1480,31 @@ function timers(){
   setText("sideClock",local);
   setText("sideMarket",m.state.toUpperCase());
   setText("sideNext",m.next);
+
+  if(SCANNER_RUNNING&&NEXT_SCAN){
+    var ms=Math.max(0,NEXT_SCAN-Date.now());
+    var t=Math.floor(ms/60000)+":"+pad(Math.floor((ms%60000)/1000));
+    setText("sideRefresh",t);
+  }else{
+    setText("sideRefresh","Paused");
+  }
 }
 
 function schedule(){
   if(LOOP)clearTimeout(LOOP);
 
-  if(!SCANNER_RUNNING)return;
+  if(!SCANNER_RUNNING){
+    NEXT_SCAN=0;
+    timers();
+    return;
+  }
 
   var minutes=Number(el("refresh").value||1);
   if(!Number.isFinite(minutes)||minutes<1)minutes=1;
 
   NEXT_SCAN=Date.now()+minutes*60000;
   LOOP=setTimeout(scan,minutes*60000);
+  timers();
 }
 
 function closedSameTickerToday(a,symbol){
@@ -1706,13 +1637,13 @@ function autoPaperCheck(){
       return;
     }
 
-    if(lines.length<8 && i<8){
+    if(lines.length<8&&i<8){
       lines.push("<b>"+esc(r.symbol)+" not entered</b><br>Reason: "+esc(reason(r))+". Score "+esc(r.score)+".");
     }
   });
 
   saveAccount(a);
-  el("autoDecisionBox").innerHTML=lines.join("<br><br>") || "No auto paper action.";
+  el("autoDecisionBox").innerHTML=lines.join("<br><br>")||"No auto paper action.";
 }
 
 function manualPaperFromIndex(i){
@@ -1870,6 +1801,7 @@ function start(){
   setText("autoPaperKpi",AUTO_PAPER?"ON | $5,000":"OFF");
 
   setInterval(timers,1000);
+
   keepAlive();
   setInterval(keepAlive,240000);
 
