@@ -1095,7 +1095,136 @@ function keepAlive(){
   });
 }
 
+function getSignalsFromResponse(data){
+  if(!data)return [];
+
+  if(Array.isArray(data))return data;
+
+  if(Array.isArray(data.signals))return data.signals;
+  if(Array.isArray(data.results))return data.results;
+  if(Array.isArray(data.data))return data.data;
+  if(Array.isArray(data.rows))return data.rows;
+  if(Array.isArray(data.ranked))return data.ranked;
+  if(Array.isArray(data.opportunities))return data.opportunities;
+  if(Array.isArray(data.stocks))return data.stocks;
+  if(Array.isArray(data.items))return data.items;
+
+  if(data.data && Array.isArray(data.data.signals))return data.data.signals;
+  if(data.data && Array.isArray(data.data.results))return data.data.results;
+  if(data.data && Array.isArray(data.data.rows))return data.data.rows;
+  if(data.data && Array.isArray(data.data.ranked))return data.data.ranked;
+  if(data.data && Array.isArray(data.data.opportunities))return data.data.opportunities;
+
+  return [];
+}
+
 function scan(){
+  if(!SCANNER_RUNNING){
+    status("Paused","bad");
+    return;
+  }
+
+  status("Scanning","work");
+  setText("dataStatus","SCANNING");
+
+  var risk=el("risk").value||"100";
+  var scanLimit=el("scanLimit").value||"100";
+
+  var scanUrl="/api/scan?mode=swing&symbols="+encodeURIComponent(symbols())+"&risk="+encodeURIComponent(risk);
+  var discoverUrl="/api/discover?risk="+encodeURIComponent(risk)+"&limit=20&scanLimit="+encodeURIComponent(scanLimit)+"&exclude="+encodeURIComponent(symbols());
+
+  Promise.allSettled([api(scanUrl),api(discoverUrl)]).then(function(res){
+    var all=[];
+    var errors=[];
+
+    if(res[0].status==="fulfilled"){
+      var scanData=res[0].value;
+
+      MARKET_HEALTH=scanData.market || scanData.regime || scanData.marketRegime || "Unknown";
+
+      var scanSignals=getSignalsFromResponse(scanData);
+      all=all.concat(scanSignals);
+
+      log("WATCHLIST RESPONSE KEYS: "+Object.keys(scanData).join(", "));
+      log("WATCHLIST SIGNALS FOUND: "+scanSignals.length);
+    }else{
+      errors.push("Watchlist failed: "+res[0].reason.message);
+    }
+
+    if(res[1].status==="fulfilled"){
+      var discoverData=res[1].value;
+
+      var discoverSignals=getSignalsFromResponse(discoverData);
+      all=all.concat(discoverSignals);
+
+      if(discoverData.discoveryScanned){
+        setText("discoveryText",discoverData.discoveryScanned+" / "+discoverData.discoveryUniverse);
+      }
+
+      log("DISCOVER RESPONSE KEYS: "+Object.keys(discoverData).join(", "));
+      log("DISCOVER SIGNALS FOUND: "+discoverSignals.length);
+    }else{
+      errors.push("Discovery failed: "+res[1].reason.message);
+    }
+
+    var seen={};
+
+    all.forEach(function(x){
+      var r=clean(x);
+
+      if(!r.symbol || r.symbol==="-")return;
+
+      if(seen[r.symbol]){
+        if(Number(r.rank||r.score||0)>Number(seen[r.symbol].rank||seen[r.symbol].score||0)){
+          seen[r.symbol]=r;
+        }
+      }else{
+        seen[r.symbol]=r;
+      }
+    });
+
+    RESULTS=Object.keys(seen).map(function(k){
+      return seen[k];
+    })
+    .filter(function(r){
+      return r && r.symbol && r.symbol !== "-";
+    })
+    .sort(function(a,b){
+      return Number(b.rank||b.score||0)-Number(a.rank||a.score||0);
+    });
+
+    renderRows();
+    renderMarket();
+
+    if(RESULTS.length){
+      selectTrade(0,false);
+    }else{
+      setText("chartTitle","NO TRADES RETURNED");
+      setText("chartStatus","CHECK BACKEND RESPONSE");
+      el("details").innerHTML="The scan ran, but no usable symbols were found in the backend response.";
+      el("warnings").innerHTML="<b>Debug:</b><br>"+esc(errors.join(" | ") || "No errors. Backend response may be using a different field name or returning empty arrays.");
+    }
+
+    setText("dataStatus",errors.length ? "PARTIAL_LIVE_DATA" : "LIVE_DATA");
+    setText("feedState",errors.length ? "PARTIAL" : "LIVE");
+
+    status("Scan complete: "+RESULTS.length,"good");
+
+    if(errors.length){
+      log(errors.join(" | "));
+    }
+
+    autoPaperCheck();
+    renderPaper();
+    renderAccount();
+    schedule();
+  }).catch(function(e){
+    status("Scan failed","bad");
+    setText("dataStatus","ERROR");
+    showAlert("Scan failed",e.message,"bad");
+    schedule();
+  });
+}
   if(!SCANNER_RUNNING){
     status("Paused","bad");
     return;
