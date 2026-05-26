@@ -1,6 +1,6 @@
 {
   "name": "tradingmint-pro-scanner",
-  "version": "24.0.0",
+  "version": "25.0.0",
   "description": "TradingMint Pro live 24h+ swing scanner with paper trading dashboard.",
   "type": "commonjs",
   "private": true,
