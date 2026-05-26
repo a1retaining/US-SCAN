@@ -1008,11 +1008,182 @@ function isNearBuyZone(r){
   return false;
 }
 
+function getRR(r){
+  var raw=r?r.rr:null;
+  var rr=Number(raw);
+
+  if(!Number.isFinite(rr) && raw!==null && raw!==undefined){
+    var m=String(raw).match(/[0-9]+(\.[0-9]+)?/);
+    if(m)rr=Number(m[0]);
+  }
+
+  if(Number.isFinite(rr) && rr>0){
+    return rr;
+  }
+
+  var price=Number(r.price);
+  var stop=Number(r.stop);
+  var target=Number(r.target);
+
+  if(
+    Number.isFinite(price) &&
+    Number.isFinite(stop) &&
+    Number.isFinite(target) &&
+    price>stop
+  ){
+    return (target-price)/(price-stop);
+  }
+
+  return 0;
+}
+
+function getDistanceFromBuyZone(r){
+  var price=Number(r.price);
+  var buyLow=Number(r.buyLow);
+  var buyHigh=Number(r.buyHigh);
+
+  if(!Number.isFinite(price) || !Number.isFinite(buyLow) || !Number.isFinite(buyHigh)){
+    return null;
+  }
+
+  if(price>=buyLow && price<=buyHigh){
+    return 0;
+  }
+
+  if(price>buyHigh){
+    return ((price-buyHigh)/buyHigh)*100;
+  }
+
+  if(price<buyLow){
+    return -((buyLow-price)/buyLow)*100;
+  }
+
+  return null;
+}
+
+function getRejectReason(r){
+  var rr=getRR(r);
+  var price=Number(r.price);
+  var stop=Number(r.stop);
+  var target=Number(r.target);
+  var score=Number(r.score||0);
+  var minRR=Number(el("autoMinRR").value||1.8);
+  var minScore=Number(el("autoMinScore").value||82);
+  var distance=getDistanceFromBuyZone(r);
+
+  if(!Number.isFinite(price) || price<=0){
+    return "No valid price";
+  }
+
+  if(!Number.isFinite(stop) || stop<=0){
+    return "No valid stop";
+  }
+
+  if(!Number.isFinite(target) || target<=0){
+    return "No valid target";
+  }
+
+  if(rr<minRR){
+    return "R/R too low";
+  }
+
+  if(score<minScore-12){
+    return "Score too low";
+  }
+
+  if(distance!==null && distance>3){
+    return "Too extended";
+  }
+
+  if(distance!==null && distance<-6){
+    return "Too far below buy zone";
+  }
+
+  return "";
+}
+
+function tradeRankScore(r){
+  var score=Number(r.score||0);
+  var rr=getRR(r);
+  var distance=getDistanceFromBuyZone(r);
+  var reject=getRejectReason(r);
+
+  var rank=0;
+
+  rank+=score;
+
+  if(rr>=3){
+    rank+=240;
+  }else if(rr>=2.5){
+    rank+=190;
+  }else if(rr>=2){
+    rank+=140;
+  }else if(rr>=1.8){
+    rank+=90;
+  }else if(rr>=1.5){
+    rank-=300;
+  }else if(rr>=1){
+    rank-=600;
+  }else{
+    rank-=1000;
+  }
+
+  if(stage(r)==="ENTER"){
+    rank+=700;
+  }
+
+  if(stage(r)==="GET READY"){
+    rank+=420;
+  }
+
+  if(distance!==null){
+    var absDistance=Math.abs(distance);
+
+    if(absDistance<=0.5){
+      rank+=160;
+    }else if(absDistance<=1.5){
+      rank+=110;
+    }else if(absDistance<=3){
+      rank+=50;
+    }else if(distance>3){
+      rank-=distance*90;
+    }else if(distance<-6){
+      rank-=180;
+    }
+  }
+
+  if(reject){
+    rank-=1200;
+  }
+
+  return rank;
+}
+
 function stage(r){
   var d=String(r.decision||"");
-  if(/ENTER|BUY|ENTRY/i.test(d))return"ENTER";
-  if(isNearBuyZone(r)&&Number(r.score)>=Number(el("autoMinScore").value||82)-8)return"GET READY";
-  return"WATCH";
+  var rr=getRR(r);
+  var minRR=Number(el("autoMinRR").value||1.8);
+  var score=Number(r.score||0);
+  var minScore=Number(el("autoMinScore").value||82);
+  var reject=getRejectReason(r);
+
+  if(reject){
+    return "WATCH";
+  }
+
+  if(rr<minRR){
+    return "WATCH";
+  }
+
+  if(/ENTER|BUY|ENTRY/i.test(d)){
+    return "ENTER";
+  }
+
+  if(isNearBuyZone(r) && score>=minScore-8){
+    return "GET READY";
+  }
+
+  return "WATCH";
 }
 
 function grade(r){
@@ -1033,11 +1204,29 @@ function edge(r){
 }
 
 function reason(r){
-  if(stage(r)==="ENTER")return"Entry candidate";
-  if(stage(r)==="GET READY")return"Near entry zone";
-  if(setup(r)==="Pullback")return"Pullback watch";
-  if(setup(r)==="Breakout")return"Breakout watch";
-  return"Watchlist";
+  var reject=getRejectReason(r);
+
+  if(reject){
+    return reject;
+  }
+
+  if(stage(r)==="ENTER"){
+    return "Entry candidate";
+  }
+
+  if(stage(r)==="GET READY"){
+    return "Near entry zone";
+  }
+
+  if(setup(r)==="Pullback"){
+    return "Pullback watch";
+  }
+
+  if(setup(r)==="Breakout"){
+    return "Breakout watch";
+  }
+
+  return "Watchlist";
 }
 
 function rowClass(r){
@@ -1219,7 +1408,9 @@ function scan(){
 
     RESULTS=Object.keys(seen).map(function(k){return seen[k];})
       .filter(function(r){return r&&r.symbol&&r.symbol!=="-";})
-      .sort(function(a,b){return Number(b.rank||b.score||0)-Number(a.rank||a.score||0);});
+      .sort(function(a,b){
+        return tradeRankScore(b)-tradeRankScore(a);
+      });
 
     renderRows();
     renderMarket();
@@ -1294,7 +1485,7 @@ function renderRows(){
       "<td>"+esc(edge(r))+"</td>"+
       "<td>"+money(r.price)+"</td>"+
       "<td class='"+chgClass+"'>"+esc(chgText)+"</td>"+
-      "<td>"+esc(r.rr)+"</td>"+
+      "<td>"+getRR(r).toFixed(2)+"</td>"+
       "<td>"+esc(reason(r))+"</td>"+
       "<td><span class='"+badge+"'>"+st+"</span></td>"+
       "<td><button onclick='event.stopPropagation();manualPaperFromIndex("+i+")'>Enter</button></td>"+
@@ -1336,7 +1527,7 @@ function selectTrade(i,voice){
     "Resistance: "+money(x.resistance)+"<br>"+
     "Stop: "+money(r.stop)+"<br>"+
     "Target: "+money(r.target)+"<br>"+
-    "Risk/reward: "+esc(r.rr)+"<br>"+
+    "Risk/reward: "+getRR(r).toFixed(2)+"<br>"+
     "Expected hold: 24 hours or more unless stop or risk exit triggers.";
 
   el("warnings").innerHTML="<b>Warnings:</b><br>"+warns;
@@ -1604,7 +1795,7 @@ function canEnter(r,a){
   if(closedSameTickerToday(a,r.symbol))return false;
   if(stage(r)!=="ENTER")return false;
   if(Number(r.score)<Number(el("autoMinScore").value))return false;
-  if(Number(r.rr)<Number(el("autoMinRR").value))return false;
+  if(getRR(r)<Number(el("autoMinRR").value))return false;
   if(!Number.isFinite(Number(r.price))||!Number.isFinite(Number(r.stop))||!Number.isFinite(Number(r.target)))return false;
   return true;
 }
