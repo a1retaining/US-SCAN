@@ -319,6 +319,47 @@ tbody tr.selected{
   background:#172331;
 }
 
+.badge.pullback{
+  color:var(--yellow);
+  background:rgba(255,209,102,.09);
+  border-color:rgba(255,209,102,.45);
+}
+
+.badge.breakout{
+  color:var(--blue);
+  background:rgba(85,183,255,.09);
+  border-color:rgba(85,183,255,.45);
+}
+
+.bestEntryBar{
+  border:1px solid var(--line);
+  background:#061017;
+  margin-bottom:8px;
+  padding:12px;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  align-items:center;
+}
+
+.bestEntryTitle{
+  color:#fff;
+  font-weight:900;
+  text-transform:uppercase;
+  font-size:14px;
+}
+
+.bestEntryText{
+  margin-top:5px;
+  color:var(--muted);
+  line-height:1.45;
+}
+
+.reasonText{
+  color:#dce7e1;
+  line-height:1.35;
+}
+
 .redText{color:var(--red)}
 .greenText{color:var(--green)}
 .yellowText{color:var(--yellow)}
@@ -580,6 +621,14 @@ details summary{
   </div>
 </section>
 
+<section class="bestEntryBar" id="bestEntryBox">
+  <div>
+    <div class="bestEntryTitle" id="bestEntryTitle">Best Entry Now: waiting for scan</div>
+    <div class="bestEntryText" id="bestEntryText">This box only shows an entry when the live scanner passes score, risk/reward and account rules.</div>
+  </div>
+  <button class="yellow" onclick="scan()">Refresh Now</button>
+</section>
+
 <section class="panel">
   <div class="panelTitle">
     <span id="chartTitle">CHART - FULL WIDTH</span>
@@ -610,11 +659,12 @@ details summary{
           <th>R:R</th>
           <th>Safety</th>
           <th>Action</th>
+          <th>Reason</th>
           <th>Paper</th>
         </tr>
       </thead>
       <tbody id="rows">
-        <tr><td colspan="12" style="text-align:center;padding:24px;color:#9fe9ba">Waiting for live scanner data...</td></tr>
+        <tr><td colspan="13" style="text-align:center;padding:24px;color:#9fe9ba">Waiting for live scanner data...</td></tr>
       </tbody>
     </table>
   </div>
@@ -1014,6 +1064,75 @@ function rowClass(r){
   return"row-watch";
 }
 
+function actionText(r){
+  if(stage(r)==="ENTER")return"ENTER NOW";
+  if(setup(r)==="Pullback")return"WAIT PULLBACK";
+  if(setup(r)==="Breakout")return"BREAKOUT WATCH";
+  return"WATCH ONLY";
+}
+
+function actionBadgeClass(r){
+  if(stage(r)==="ENTER")return"badge enter";
+  if(setup(r)==="Pullback")return"badge pullback";
+  if(setup(r)==="Breakout")return"badge breakout";
+  return"badge watch";
+}
+
+function autoBlockReason(r){
+  if(stage(r)!=="ENTER")return"Not an entry yet. Current action is "+actionText(r)+".";
+  if(Number(r.score)<Number(el("autoMinScore").value))return"Score below auto-entry minimum.";
+  if(Number(r.rr)<Number(el("autoMinRR").value))return"R/R too low for auto paper.";
+  if(!Number.isFinite(Number(r.price)))return"No valid live price.";
+  if(!Number.isFinite(Number(r.stop)))return"No valid stop.";
+  if(!Number.isFinite(Number(r.target)))return"No valid target.";
+  return"Passes entry checks.";
+}
+
+function rowReason(r){
+  var block=autoBlockReason(r);
+  if(stage(r)==="ENTER" && block==="Passes entry checks.")return"Meets score and R/R rules. Paper entry can be considered.";
+  if(setup(r)==="Pullback")return"Strong setup, but price is not a safe entry. Wait for the buy zone. "+block;
+  if(setup(r)==="Breakout")return"Near breakout area. Needs confirmation before entry. "+block;
+  return"Watchlist only. "+block;
+}
+
+function renderBestEntryBox(){
+  var title=el("bestEntryTitle");
+  var body=el("bestEntryText");
+  if(!title||!body)return;
+
+  var a=getAccount();
+  var best=null;
+
+  for(var i=0;i<RESULTS.length;i++){
+    if(canEnter(RESULTS[i],a)){
+      best=RESULTS[i];
+      break;
+    }
+  }
+
+  if(best){
+    title.textContent="Best Entry Now: "+best.symbol+" at "+money(best.price);
+    body.innerHTML=
+      "<span class='greenText'>ENTER NOW</span> | Score "+esc(best.score)+
+      " | R/R "+esc(best.rr)+
+      " | Buy zone "+money(best.buyLow)+" to "+money(best.buyHigh)+
+      " | Stop "+money(best.stop)+
+      " | Target "+money(best.target)+
+      ".";
+  }else if(RESULTS.length){
+    var top=RESULTS[0];
+    title.textContent="Best Entry Now: none";
+    body.innerHTML=
+      "Top ranked setup is <b>"+esc(top.symbol)+"</b>, but it is <span class='yellowText'>"+esc(actionText(top))+"</span>. "+
+      esc(rowReason(top));
+  }else{
+    title.textContent="Best Entry Now: waiting for scan";
+    body.textContent="This box only shows an entry when the live scanner passes score, risk/reward and account rules.";
+  }
+}
+
+
 function defaultAccount(){
   return{starting:5000,cash:5000,open:{},closed:[],createdAt:nowText()};
 }
@@ -1198,6 +1317,7 @@ function scan(){
       setText("chartStatus","CHECK LOG / BACKEND RESPONSE");
       el("details").innerHTML="The scan ran, but no usable symbols were found in the backend response.";
       el("warnings").innerHTML="<b>Debug:</b><br>"+esc(errors.join(" | ")||"No frontend errors. Backend may be returning empty arrays.");
+      renderBestEntryBox();
     }
 
     setText("dataStatus",errors.length?"PARTIAL_LIVE_DATA":"LIVE_DATA");
@@ -1230,8 +1350,10 @@ function renderMarket(){
   setText("volState","UNKNOWN");
 
   if(RESULTS.length){
-    setText("chartStatus",setup(RESULTS[0])+" | "+stage(RESULTS[0])+" | WATCHLIST");
+    setText("chartStatus",setup(RESULTS[0])+" | "+actionText(RESULTS[0])+" | WATCHLIST");
   }
+
+  renderBestEntryBox();
 }
 
 function renderRows(){
@@ -1239,7 +1361,7 @@ function renderRows(){
   if(!body)return;
 
   if(!RESULTS.length){
-    body.innerHTML='<tr><td colspan="12" style="text-align:center;padding:24px;color:#9fe9ba">No live results returned. Check backend logs or loosen scanner rules.</td></tr>';
+    body.innerHTML='<tr><td colspan="13" style="text-align:center;padding:24px;color:#9fe9ba">No live results returned. Check backend logs or loosen scanner rules.</td></tr>';
     return;
   }
 
@@ -1247,8 +1369,9 @@ function renderRows(){
     var chg=Number(r.change);
     var chgText=Number.isFinite(chg)?((chg>=0?"▲ ":"▼ ")+Math.abs(chg).toFixed(2)+"%"):"-";
     var chgClass=Number.isFinite(chg)?(chg>=0?"greenText":"redText"):"";
-    var act=stage(r)==="ENTER"?"ENTER":"WATCH";
-    var badge=stage(r)==="ENTER"?"badge enter":"badge watch";
+    var act=actionText(r);
+    var badge=actionBadgeClass(r);
+    var safety=autoBlockReason(r)==="Passes entry checks."?"READY":"WATCHLIST";
 
     return"<tr class='"+rowClass(r)+"' data-index='"+i+"'>"+
       "<td class='rank'>"+(i+1)+"</td>"+
@@ -1260,8 +1383,9 @@ function renderRows(){
       "<td>"+money(r.price)+"</td>"+
       "<td class='"+chgClass+"'>"+esc(chgText)+"</td>"+
       "<td>"+esc(r.rr)+"</td>"+
-      "<td>WATCHLIST</td>"+
-      "<td><span class='"+badge+"'>"+act+"</span></td>"+
+      "<td>"+esc(safety)+"</td>"+
+      "<td><span class='"+badge+"'>"+esc(act)+"</span></td>"+
+      "<td><div class='reasonText'>"+esc(rowReason(r))+"</div></td>"+
       "<td><button onclick='event.stopPropagation();manualPaperFromIndex("+i+")'>Enter</button></td>"+
     "</tr>";
   }).join("");
@@ -1284,17 +1408,17 @@ function selectTrade(i,voice){
   var x=sr(r);
 
   setText("selectedSymbol",r.symbol);
-  setText("selectedBadge",stage(r)==="ENTER"?"ENTER":"WATCHLIST");
+  setText("selectedBadge",actionText(r));
   setText("dPrice",money(r.price));
   setText("dBuy",money(r.buyLow)+" to "+money(r.buyHigh));
   setText("dStop",money(r.stop));
   setText("dTarget",money(r.target));
   setText("chartTitle",r.symbol+" CHART - FULL WIDTH");
-  setText("chartStatus",setup(r)+" | "+stage(r)+" | WATCHLIST");
+  setText("chartStatus",setup(r)+" | "+actionText(r)+" | "+autoBlockReason(r));
 
   var warns=r.warnings.length?r.warnings.map(function(v){return"- "+esc(v);}).join("<br>"):"No major warnings returned.";
 
-  el("details").innerHTML="<b>"+esc(r.symbol)+" "+esc(setup(r))+"-"+esc(stage(r))+"</b><br>"+
+  el("details").innerHTML="<b>"+esc(r.symbol)+" "+esc(setup(r))+" - "+esc(actionText(r))+"</b><br>"+
     "Price: "+money(r.price)+"<br>"+
     "Buy zone: "+money(r.buyLow)+" to "+money(r.buyHigh)+"<br>"+
     "Support: "+money(x.support)+"<br>"+
@@ -1302,11 +1426,12 @@ function selectTrade(i,voice){
     "Stop: "+money(r.stop)+"<br>"+
     "Target: "+money(r.target)+"<br>"+
     "Risk/reward: "+esc(r.rr)+"<br>"+
+    "Auto-entry check: "+esc(autoBlockReason(r))+"<br>"+
     "Expected hold: 24 hours or more unless stop or risk exit triggers.";
 
   el("warnings").innerHTML="<b>Warnings:</b><br>"+warns;
   setText("thesisWhy",r.summary||"No summary returned from backend.");
-  setText("thesisEntry","Only enter around "+money(r.buyLow)+" to "+money(r.buyHigh)+". Do not chase above the zone.");
+  setText("thesisEntry",actionText(r)+". Only enter around "+money(r.buyLow)+" to "+money(r.buyHigh)+". Do not chase above the zone. "+autoBlockReason(r));
   setText("thesisExit","Stop at "+money(r.stop)+". Target at "+money(r.target)+". Risk/reward "+r.rr+".");
 
   drawChart(r);
@@ -1413,7 +1538,7 @@ function drawChart(r){
     ctx.setLineDash([]);
     ctx.fillStyle=c;
     ctx.font="bold "+(12*dpr)+"px Arial";
-    ctx.fillText(label,w-right+8*dpr,yy-4*dpr);
+    ctx.fillText(label+" "+money(v),w-right+8*dpr,yy-4*dpr);
   }
 
   line(r.target2,"#55b7ff","T2",true);
@@ -1424,7 +1549,7 @@ function drawChart(r){
 
   ctx.fillStyle="#fff";
   ctx.font="bold "+(18*dpr)+"px Arial";
-  ctx.fillText(r.symbol+" "+setup(r)+"-"+stage(r),left-40*dpr,top+10*dpr);
+  ctx.fillText(r.symbol+" "+setup(r)+"-"+actionText(r),left-40*dpr,top+10*dpr);
 }
 
 function marketClock(){
@@ -1786,6 +1911,7 @@ function start(){
   renderAccount();
   renderFeed();
   renderMarket();
+  renderBestEntryBox();
   rules();
   timers();
 
