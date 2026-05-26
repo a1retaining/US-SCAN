@@ -8,7 +8,7 @@ const publicPath = path.join(__dirname, "..", "public");
 
 app.use(express.json({ limit: "1mb" }));
 
-const VERSION = "server-fixed-api-routes-2026-01-12";
+const VERSION = "server-live-yahoo-stooq-fallback-2026-01-12";
 
 const DEFAULT_SYMBOLS = [
   "SPY", "QQQ", "NVDA", "TSLA", "AAPL", "MSFT", "META", "AMD",
@@ -17,7 +17,7 @@ const DEFAULT_SYMBOLS = [
 
 const DISCOVERY_UNIVERSE = [
   "SPY", "QQQ", "DIA", "IWM", "XLK", "XLF", "XLE", "XLV", "XLY", "XLI", "XLC",
-  "AAPL", "MSFT", "NVDA", "META", "GOOGL", "AMZN", "TSLA", "AMD", "AVGO", "NFLX",
+  "AAPL", "MSFT", "NVDA", "META", "GOOGL", "GOOG", "AMZN", "TSLA", "AMD", "AVGO", "NFLX",
   "COST", "LLY", "UNH", "JPM", "V", "MA", "HD", "WMT", "ORCL", "CRM", "ADBE",
   "NOW", "INTC", "QCOM", "MU", "AMAT", "MRVL", "PANW", "CRWD", "DDOG", "NET",
   "PLTR", "SMCI", "ARM", "SNOW", "UBER", "ABNB", "SHOP", "COIN", "HOOD", "SQ",
@@ -26,8 +26,7 @@ const DISCOVERY_UNIVERSE = [
   "JNJ", "PFE", "MRK", "ABBV", "TMO", "DHR", "ISRG", "VRTX", "REGN",
   "BAC", "WFC", "GS", "MS", "BLK", "SCHW", "AXP",
   "PEP", "KO", "MCD", "SBUX", "NKE", "TGT", "LOW",
-  "LIN", "APD", "FCX", "NEM", "AA",
-  "ENPH", "FSLR", "SEDG", "RIVN", "LCID"
+  "LIN", "APD", "FCX", "NEM", "AA"
 ];
 
 function toNumber(value) {
@@ -38,12 +37,14 @@ function toNumber(value) {
 function round(value, decimals = 2) {
   const n = Number(value);
   if (!Number.isFinite(n)) return null;
+
   const p = Math.pow(10, decimals);
   return Math.round(n * p) / p;
 }
 
 function uniqueSymbols(input) {
   const seen = new Set();
+
   return String(input || "")
     .split(",")
     .map(s => s.trim().toUpperCase())
@@ -57,12 +58,15 @@ function uniqueSymbols(input) {
 
 function average(values) {
   const clean = values.filter(v => Number.isFinite(v));
+
   if (!clean.length) return null;
+
   return clean.reduce((a, b) => a + b, 0) / clean.length;
 }
 
 function sma(values, length) {
   if (!Array.isArray(values) || values.length < length) return null;
+
   return average(values.slice(values.length - length));
 }
 
@@ -104,7 +108,7 @@ function rsi(values, length = 14) {
 function calcAtr(bars, length = 14) {
   if (!Array.isArray(bars) || bars.length < length + 1) return null;
 
-  const trs = [];
+  const values = [];
 
   for (let i = bars.length - length; i < bars.length; i++) {
     const current = bars[i];
@@ -118,17 +122,45 @@ function calcAtr(bars, length = 14) {
       Math.abs(current.low - previous.close)
     );
 
-    if (Number.isFinite(tr)) trs.push(tr);
+    if (Number.isFinite(tr)) values.push(tr);
   }
 
-  return average(trs);
+  return average(values);
 }
 
 function safeDate(timestamp) {
   if (!timestamp) return null;
+
   const d = new Date(timestamp * 1000);
+
   if (Number.isNaN(d.getTime())) return null;
+
   return d.toISOString().slice(0, 10);
+}
+
+async function fetchText(url, timeoutMs = 12000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        "User-Agent": "Mozilla/5.0 TradingMintScanner/1.0",
+        "Accept": "text/plain, application/json, */*"
+      }
+    });
+
+    const text = await response.text();
+
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status + " from " + url);
+    }
+
+    return text;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 async function yahooChart(symbol, range = "1y", interval = "1d") {
@@ -140,33 +172,25 @@ async function yahooChart(symbol, range = "1y", interval = "1d") {
     "&interval=" +
     encodeURIComponent(interval);
 
-  const response = await fetch(url, {
-    headers: {
-      "User-Agent": "Mozilla/5.0 TradingMintScanner/1.0",
-      "Accept": "application/json"
-    }
-  });
-
-  const text = await response.text();
+  const text = await fetchText(url);
 
   let data;
+
   try {
     data = JSON.parse(text);
   } catch (error) {
     throw new Error("Yahoo returned non JSON for " + symbol);
   }
 
-  if (!response.ok) {
-    throw new Error("Yahoo HTTP " + response.status + " for " + symbol);
-  }
-
-  const result = data &&
+  const result =
+    data &&
     data.chart &&
     Array.isArray(data.chart.result) &&
     data.chart.result[0];
 
   if (!result) {
-    const err = data &&
+    const err =
+      data &&
       data.chart &&
       data.chart.error &&
       data.chart.error.description;
@@ -175,17 +199,19 @@ async function yahooChart(symbol, range = "1y", interval = "1d") {
   }
 
   const timestamps = Array.isArray(result.timestamp) ? result.timestamp : [];
-  const quote = result.indicators &&
+  const quote =
+    result.indicators &&
     result.indicators.quote &&
     result.indicators.quote[0];
 
-  const adjclose = result.indicators &&
+  const adjclose =
+    result.indicators &&
     result.indicators.adjclose &&
     result.indicators.adjclose[0] &&
     result.indicators.adjclose[0].adjclose;
 
   if (!quote || !timestamps.length) {
-    throw new Error("No quote data for " + symbol);
+    throw new Error("No Yahoo quote data for " + symbol);
   }
 
   const bars = [];
@@ -217,13 +243,133 @@ async function yahooChart(symbol, range = "1y", interval = "1d") {
   }
 
   if (bars.length < 35) {
-    throw new Error("Not enough candle data for " + symbol);
+    throw new Error("Yahoo returned too few bars for " + symbol);
   }
 
   return bars;
 }
 
-function analyzeSymbol(symbol, bars, marketContext) {
+function parseCsvLine(line) {
+  const out = [];
+  let current = "";
+  let quote = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+
+    if (ch === '"') {
+      quote = !quote;
+    } else if (ch === "," && !quote) {
+      out.push(current);
+      current = "";
+    } else {
+      current += ch;
+    }
+  }
+
+  out.push(current);
+
+  return out.map(x => x.trim());
+}
+
+async function stooqChart(symbol) {
+  const stooqSymbol = symbol.toLowerCase().replace("-", ".") + ".us";
+  const url = "https://stooq.com/q/d/l/?s=" + encodeURIComponent(stooqSymbol) + "&i=d";
+
+  const text = await fetchText(url);
+
+  const lines = String(text)
+    .trim()
+    .split(/\r?\n/)
+    .filter(Boolean);
+
+  if (lines.length < 40) {
+    throw new Error("Stooq returned too few rows for " + symbol);
+  }
+
+  const header = parseCsvLine(lines[0]).map(x => x.toLowerCase());
+
+  const dateIndex = header.indexOf("date");
+  const openIndex = header.indexOf("open");
+  const highIndex = header.indexOf("high");
+  const lowIndex = header.indexOf("low");
+  const closeIndex = header.indexOf("close");
+  const volumeIndex = header.indexOf("volume");
+
+  if (
+    dateIndex < 0 ||
+    openIndex < 0 ||
+    highIndex < 0 ||
+    lowIndex < 0 ||
+    closeIndex < 0
+  ) {
+    throw new Error("Stooq CSV missing columns for " + symbol);
+  }
+
+  const bars = [];
+
+  for (let i = 1; i < lines.length; i++) {
+    const row = parseCsvLine(lines[i]);
+
+    const open = toNumber(row[openIndex]);
+    const high = toNumber(row[highIndex]);
+    const low = toNumber(row[lowIndex]);
+    const close = toNumber(row[closeIndex]);
+    const volume = volumeIndex >= 0 ? toNumber(row[volumeIndex]) : 0;
+
+    if (
+      Number.isFinite(open) &&
+      Number.isFinite(high) &&
+      Number.isFinite(low) &&
+      Number.isFinite(close)
+    ) {
+      bars.push({
+        date: row[dateIndex],
+        open: round(open, 4),
+        high: round(high, 4),
+        low: round(low, 4),
+        close: round(close, 4),
+        volume: volume || 0
+      });
+    }
+  }
+
+  if (bars.length < 35) {
+    throw new Error("Stooq parsed too few bars for " + symbol);
+  }
+
+  return bars.slice(-260);
+}
+
+async function getBars(symbol) {
+  const errors = [];
+
+  try {
+    const bars = await yahooChart(symbol, "1y", "1d");
+
+    return {
+      source: "Yahoo",
+      bars
+    };
+  } catch (error) {
+    errors.push("Yahoo: " + error.message);
+  }
+
+  try {
+    const bars = await stooqChart(symbol);
+
+    return {
+      source: "Stooq",
+      bars
+    };
+  } catch (error) {
+    errors.push("Stooq: " + error.message);
+  }
+
+  throw new Error(errors.join(" | "));
+}
+
+function analyzeSymbol(symbol, bars, marketContext, source) {
   const closes = bars.map(b => b.close).filter(Number.isFinite);
   const volumes = bars.map(b => b.volume || 0).filter(Number.isFinite);
 
@@ -243,8 +389,9 @@ function analyzeSymbol(symbol, bars, marketContext) {
   const avgVol20 = sma(volumes, 20);
   const volumeRatio = avgVol20 && last.volume ? last.volume / avgVol20 : null;
 
-  const high20 = Math.max(...bars.slice(-20).map(b => b.high));
-  const low20 = Math.min(...bars.slice(-20).map(b => b.low));
+  const recent20 = bars.slice(-20);
+  const high20 = Math.max(...recent20.map(b => b.high));
+  const low20 = Math.min(...recent20.map(b => b.low));
 
   const support = low20;
   const resistance = high20;
@@ -259,7 +406,7 @@ function analyzeSymbol(symbol, bars, marketContext) {
   const warnings = [];
 
   if (ema20 && price > ema20) {
-    score += 15;
+    score += 16;
     reasons.push("Price is above EMA20.");
   } else {
     warnings.push("Price is below EMA20 or EMA20 is unavailable.");
@@ -281,25 +428,25 @@ function analyzeSymbol(symbol, bars, marketContext) {
   }
 
   if (ema50 && ema200 && ema50 > ema200) {
-    score += 12;
+    score += 10;
     reasons.push("EMA50 is above EMA200.");
   }
 
-  if (rsi14 && rsi14 >= 45 && rsi14 <= 68) {
+  if (rsi14 && rsi14 >= 42 && rsi14 <= 70) {
     score += 10;
     reasons.push("RSI is in a usable swing zone.");
   } else if (rsi14 && rsi14 > 72) {
-    warnings.push("RSI is hot, so chasing is risky.");
+    warnings.push("RSI is hot. Do not chase.");
   }
 
-  if (volumeRatio && volumeRatio >= 1.05) {
+  if (volumeRatio && volumeRatio >= 1.0) {
     score += 8;
-    reasons.push("Volume is above recent average.");
+    reasons.push("Volume is near or above recent average.");
   }
 
-  if (resistance && price > resistance * 0.985) {
-    score += 8;
-    reasons.push("Price is near a 20 day breakout area.");
+  if (resistance && price > resistance * 0.97) {
+    score += 7;
+    reasons.push("Price is near the recent high area.");
   }
 
   if (marketContext && marketContext.market === "Bullish") {
@@ -331,11 +478,11 @@ function analyzeSymbol(symbol, bars, marketContext) {
 
   const inBuyZone =
     price >= buyZoneLow &&
-    price <= buyZoneHigh * 1.004;
+    price <= buyZoneHigh * 1.006;
 
   if (
     score >= 82 &&
-    riskReward >= 1.5 &&
+    riskReward >= 1.4 &&
     inBuyZone &&
     price > (ema20 || 0)
   ) {
@@ -344,7 +491,7 @@ function analyzeSymbol(symbol, bars, marketContext) {
   } else if (score >= 70 && price > (ema20 || 0)) {
     decision = "WAIT_FOR_PULLBACK";
     setup = "Pullback";
-  } else if (score >= 65 && resistance && price >= resistance * 0.97) {
+  } else if (score >= 62 && resistance && price >= resistance * 0.965) {
     decision = "BREAKOUT_WATCH";
     setup = "Breakout";
   } else {
@@ -354,12 +501,12 @@ function analyzeSymbol(symbol, bars, marketContext) {
 
   const summary =
     decision === "ENTER_NOW"
-      ? symbol + " has a strong swing setup and is close enough to the buy zone for a paper entry."
+      ? symbol + " has a strong 24h+ swing setup and is close enough to the buy zone for a paper entry."
       : decision === "WAIT_FOR_PULLBACK"
         ? symbol + " is strong but should not be chased. Wait for price to pull back into the buy zone."
         : decision === "BREAKOUT_WATCH"
           ? symbol + " is near a breakout area. Watch for confirmation before entry."
-          : symbol + " is currently a watchlist candidate only.";
+          : symbol + " is a watchlist candidate only.";
 
   return {
     symbol,
@@ -387,6 +534,7 @@ function analyzeSymbol(symbol, bars, marketContext) {
         : "Do not chase. Wait for the scanner to improve or for price to enter the buy zone.",
     reasons,
     warnings,
+    source,
     indicators: {
       ema10: round(ema10),
       ema20: round(ema20),
@@ -402,8 +550,9 @@ function analyzeSymbol(symbol, bars, marketContext) {
 
 async function buildMarketContext() {
   try {
-    const spyBars = await yahooChart("SPY", "1y", "1d");
-    const closes = spyBars.map(b => b.close);
+    const result = await getBars("SPY");
+    const bars = result.bars;
+    const closes = bars.map(b => b.close);
 
     const price = closes[closes.length - 1];
     const ema20Value = ema(closes, 20);
@@ -418,6 +567,7 @@ async function buildMarketContext() {
 
     return {
       market: bullish ? "Bullish" : "Neutral",
+      source: result.source,
       spy: {
         price: round(price),
         ema20: round(ema20Value),
@@ -428,6 +578,7 @@ async function buildMarketContext() {
   } catch (error) {
     return {
       market: "Unknown",
+      source: "None",
       error: error.message
     };
   }
@@ -436,40 +587,32 @@ async function buildMarketContext() {
 async function scanSymbols(symbolList, risk) {
   const marketContext = await buildMarketContext();
 
-  const jobs = symbolList.map(async symbol => {
+  const signals = [];
+  const errors = [];
+
+  for (const symbol of symbolList) {
     try {
-      const bars = await yahooChart(symbol, "1y", "1d");
-      return {
-        ok: true,
-        signal: analyzeSymbol(symbol, bars, marketContext)
-      };
+      const result = await getBars(symbol);
+      const signal = analyzeSymbol(symbol, result.bars, marketContext, result.source);
+
+      signals.push(signal);
     } catch (error) {
-      return {
-        ok: false,
+      errors.push({
         symbol,
         error: error.message
-      };
+      });
     }
+  }
+
+  signals.sort((a, b) => {
+    return Number(b.rankScore || b.score || 0) - Number(a.rankScore || a.score || 0);
   });
-
-  const settled = await Promise.all(jobs);
-
-  const signals = settled
-    .filter(x => x.ok && x.signal)
-    .map(x => x.signal)
-    .sort((a, b) => Number(b.rankScore || b.score || 0) - Number(a.rankScore || a.score || 0));
-
-  const errors = settled
-    .filter(x => !x.ok)
-    .map(x => ({
-      symbol: x.symbol,
-      error: x.error
-    }));
 
   return {
     ok: true,
     version: VERSION,
     market: marketContext.market,
+    marketSource: marketContext.source,
     risk: Number(risk || 100),
     count: signals.length,
     signals,
@@ -524,6 +667,7 @@ app.get("/api/scan", async function(req, res) {
     }
 
     const result = await scanSymbols(symbols, risk);
+
     res.json(result);
   } catch (error) {
     res.status(500).json({
