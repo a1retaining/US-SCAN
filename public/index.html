@@ -1299,18 +1299,49 @@ function renderMarket(){
 
 
 function getRR(r){
-  var rr=Number(r.rr);
-
-  if(Number.isFinite(rr) && rr > 0){
-    return rr;
-  }
-
   var price=Number(r.price);
   var stop=Number(r.stop);
   var target=Number(r.target);
 
-  if(Number.isFinite(price) && Number.isFinite(stop) && Number.isFinite(target) && price > stop){
+  /*
+    Correct R:R for a long swing trade:
+    reward = target - entry
+    risk = entry - stop
+    R:R = reward / risk
+
+    Use the current displayed price first because that is what the scanner table is showing.
+  */
+
+  if(Number.isFinite(price) && Number.isFinite(stop) && Number.isFinite(target) && price > stop && target > price){
     return (target-price)/(price-stop);
+  }
+
+  /*
+    Fallback for pullback/watch setups:
+    If the current price is not a valid entry, calculate planned R:R from the middle
+    of the displayed buy zone.
+  */
+
+  var buyLow=Number(r.buyLow);
+  var buyHigh=Number(r.buyHigh);
+
+  if(Number.isFinite(buyLow) && Number.isFinite(buyHigh) && Number.isFinite(stop) && Number.isFinite(target) && buyLow > 0 && buyHigh > 0){
+    var plannedEntry=(buyLow+buyHigh)/2;
+
+    if(plannedEntry > stop && target > plannedEntry){
+      return (target-plannedEntry)/(plannedEntry-stop);
+    }
+  }
+
+  /*
+    Last fallback only:
+    Use backend R:R only if price/zone calculation cannot be done.
+  */
+
+  var backendRR=Number(r.rr);
+
+  if(Number.isFinite(backendRR) && backendRR > 0){
+    return backendRR;
   }
 
   return 0;
