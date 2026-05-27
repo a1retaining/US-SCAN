@@ -1239,7 +1239,15 @@ function scan(){
 
     RESULTS=Object.keys(seen).map(function(k){return seen[k];})
       .filter(function(r){return r&&r.symbol&&r.symbol!=="-";})
-      .sort(function(a,b){return tradeRankScore(b)-tradeRankScore(a);});
+      .sort(function(a,b){
+        var rankDiff=tradeRankScore(b)-tradeRankScore(a);
+        if(rankDiff!==0)return rankDiff;
+
+        var scoreDiff=Number(b.score||0)-Number(a.score||0);
+        if(scoreDiff!==0)return scoreDiff;
+
+        return getRR(b)-getRR(a);
+      });
 
     renderRows();
     renderMarket();
@@ -1371,58 +1379,134 @@ function getRejectReason(r){
 
 function tradeRankScore(r){
   var score=Number(r.score||0);
+  var strength=Number(r.strengthScore||r.score||0);
   var rr=getRR(r);
   var distance=getDistanceFromBuyZone(r);
+  var st=stage(r);
   var reject=getRejectReason(r);
   var rank=0;
 
-  rank += score;
+  /*
+    Balanced ranking:
+    Score/setup quality is the main driver.
+    R:R still matters, but it cannot let a weak score beat a strong setup.
+  */
 
-  if(rr >= 3){
-    rank += 240;
-  }else if(rr >= 2.5){
-    rank += 190;
-  }else if(rr >= 2){
-    rank += 140;
-  }else if(rr >= 1.8){
-    rank += 90;
-  }else if(rr >= 1.5){
-    rank -= 300;
-  }else if(rr >= 1){
-    rank -= 600;
+  rank += score * 0.62;
+  rank += strength * 0.18;
+
+  /*
+    R:R bonus is capped.
+    A good R:R improves rank, but it does not overpower setup score.
+  */
+
+  if(Number.isFinite(rr) && rr > 0){
+    if(rr >= 3){
+      rank += 16;
+    }else if(rr >= 2.5){
+      rank += 14;
+    }else if(rr >= 2){
+      rank += 12;
+    }else if(rr >= 1.8){
+      rank += 9;
+    }else if(rr >= 1.5){
+      rank += 2;
+    }else{
+      rank -= 8;
+    }
   }else{
-    rank -= 1000;
+    rank -= 12;
   }
 
-  if(stage(r)==="ENTER"){
-    rank += 700;
-  }else if(stage(r)==="GET READY"){
-    rank += 420;
+  /*
+    Stage bonus.
+    ENTER is best, GET READY is next, WATCH remains lower.
+  */
+
+  if(st==="ENTER"){
+    rank += 22;
+  }else if(st==="GET READY"){
+    rank += 13;
+  }else{
+    rank += 0;
   }
+
+  /*
+    Price location.
+    Best setups are in or close to the buy zone.
+    Extended trades get reduced, but not destroyed unless they are very extended.
+  */
 
   if(distance !== null){
     var absDistance=Math.abs(distance);
 
     if(absDistance <= 0.5){
-      rank += 160;
+      rank += 10;
     }else if(absDistance <= 1.5){
-      rank += 110;
+      rank += 7;
     }else if(absDistance <= 3){
-      rank += 50;
-    }else if(distance > 3){
-      rank -= distance*90;
-    }else if(distance < -6){
-      rank -= 180;
+      rank += 3;
+    }
+
+    if(distance > 3){
+      rank -= Math.min(24, distance * 3);
+    }
+
+    if(distance < -6){
+      rank -= 12;
     }
   }
 
+  /*
+    Safety gates:
+    Low-score trades cannot rank above strong setups just because R:R is good.
+  */
+
+  if(score < 40){
+    rank -= 90;
+  }else if(score < 50){
+    rank -= 65;
+  }else if(score < 60){
+    rank -= 35;
+  }else if(score < 70){
+    rank -= 12;
+  }
+
+  /*
+    Reject reason penalties.
+    These are not all equal.
+    R/R too low is a watch problem, not a total quality failure.
+    Score too low is a bigger problem.
+  */
+
   if(reject){
-    rank -= 1200;
+    if(/score too low/i.test(reject)){
+      rank -= 55;
+    }else if(/R\/R too low/i.test(reject)){
+      rank -= 18;
+    }else if(/too extended/i.test(reject)){
+      rank -= 28;
+    }else if(/too far below/i.test(reject)){
+      rank -= 25;
+    }else{
+      rank -= 30;
+    }
+  }
+
+  /*
+    Extra confirmation bonuses.
+  */
+
+  if(score >= 80 && rr >= 1.5){
+    rank += 8;
+  }
+
+  if(score >= 75 && rr >= 1.8){
+    rank += 10;
   }
 
   return rank;
 }
-
 function renderRows(){
   var body=el("rows");
   if(!body)return;
