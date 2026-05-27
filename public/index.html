@@ -246,6 +246,35 @@ button.gray{border-color:var(--line2);background:#121d27;color:#d5e0db}
   background:#02080a;
 }
 
+.chartTools{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+  flex-wrap:wrap;
+}
+
+.chartTools button{
+  padding:5px 8px;
+  font-size:10px;
+  border-color:rgba(255,255,255,.16);
+  background:#0b1720;
+  color:#dce7e1;
+}
+
+.chartTools button.active{
+  border-color:var(--green);
+  background:rgba(57,255,20,.13);
+  color:var(--green);
+}
+
+.chartHint{
+  color:var(--muted);
+  font-size:10px;
+  margin-left:8px;
+  white-space:nowrap;
+}
+
 .tableWrap{
   max-height:405px;
   overflow:auto;
@@ -597,7 +626,15 @@ details summary{
 <section class="panel">
   <div class="panelTitle">
     <span id="chartTitle">CHART - FULL WIDTH</span>
-    <small id="chartStatus">Waiting</small>
+    <div class="chartTools" id="chartTools">
+      <button type="button" data-range="1d" data-interval="5m" data-label="1H / 5m" data-limit="12">1H</button>
+      <button type="button" data-range="1d" data-interval="15m" data-label="1D / 15m" data-limit="26">Day</button>
+      <button type="button" data-range="5d" data-interval="1h" data-label="1W / 1h" data-limit="40">Week</button>
+      <button type="button" data-range="1mo" data-interval="1d" data-label="1M / 1d" data-limit="24">Month</button>
+      <button type="button" data-range="1y" data-interval="1d" data-label="1Y / 1d" data-limit="252" class="active">Year</button>
+      <button type="button" data-range="5y" data-interval="1wk" data-label="5Y / 1wk" data-limit="260">Years</button>
+      <small id="chartStatus">Waiting</small>
+    </div>
   </div>
   <div class="chartWrap">
     <canvas id="chart"></canvas>
@@ -786,6 +823,11 @@ var MUTED=localStorage.getItem("scannerMuted")==="true";
 var SCANNER_RUNNING=localStorage.getItem("scannerRunning")!=="false";
 var AUTO_PAPER=localStorage.getItem("autoPaperOn")!=="false";
 var READY_SEEN={};
+var CHART_RANGE='1y';
+var CHART_INTERVAL='1d';
+var CHART_LABEL='1Y / 1d';
+var CHART_LIMIT=252;
+var CHART_CACHE={};
 
 function el(id){return document.getElementById(id);}
 function setText(id,v){var n=el(id);if(n)n.textContent=v;}
@@ -1615,7 +1657,7 @@ function selectTrade(i,voice){
   setText("thesisExit","The risk line is the stop at "+money(r.stop)+". The reward line is the target at "+money(r.target)+". Current risk/reward is "+(getRR(r) ? getRR(r).toFixed(2) : "-")+". If R/R is under the minimum, this is a watch only, not a trade.");
   setText("thesisLesson",getLessonText(r));
 
-  drawChart(r);
+  loadSelectedChart();
 
   if(voice)speak(r.symbol+" selected. "+setup(r)+" "+stage(r)+". Score "+r.score+".");
 }
@@ -1640,6 +1682,81 @@ function getLessonText(r){
   return "This is watchlist only. The lesson is that not every scanned stock is a trade. A professional system rejects weak or poorly placed setups.";
 }
 
+
+function setActiveChartButtons(){
+  document.querySelectorAll('#chartTools button').forEach(function(btn){
+    var same = btn.getAttribute('data-range')===CHART_RANGE && btn.getAttribute('data-interval')===CHART_INTERVAL && Number(btn.getAttribute('data-limit')||0)===Number(CHART_LIMIT||0);
+    btn.classList.toggle('active', same);
+  });
+}
+
+function getBarsArrayFromApi(data){
+  if(!data)return [];
+  if(Array.isArray(data))return data;
+  if(Array.isArray(data.bars))return data.bars;
+  if(Array.isArray(data.candles))return data.candles;
+  if(data.data&&Array.isArray(data.data.bars))return data.data.bars;
+  if(data.payload&&Array.isArray(data.payload.bars))return data.payload.bars;
+  return [];
+}
+
+function setChartTimeframe(range,interval,label,limit){
+  CHART_RANGE=range;
+  CHART_INTERVAL=interval;
+  CHART_LABEL=label;
+  CHART_LIMIT=Number(limit||0);
+  setActiveChartButtons();
+  loadSelectedChart();
+}
+
+function loadSelectedChart(){
+  if(!SELECTED){
+    setActiveChartButtons();
+    return;
+  }
+
+  setText('chartTitle',SELECTED.symbol+' CHART - '+CHART_LABEL);
+  setText('chartStatus','Loading '+CHART_LABEL);
+  setActiveChartButtons();
+
+  var key=SELECTED.symbol+'|'+CHART_RANGE+'|'+CHART_INTERVAL;
+
+  if(CHART_CACHE[key]){
+    var cached=Object.assign({},SELECTED,{bars:CHART_CACHE[key]});
+    drawChart(cached);
+    return;
+  }
+
+  api('/api/bars?symbol='+encodeURIComponent(SELECTED.symbol)+'&range='+encodeURIComponent(CHART_RANGE)+'&interval='+encodeURIComponent(CHART_INTERVAL))
+    .then(function(data){
+      var apiBars=getBarsArrayFromApi(data);
+
+      if(apiBars.length){
+        CHART_CACHE[key]=apiBars;
+        var copy=Object.assign({},SELECTED,{bars:apiBars});
+        drawChart(copy);
+      }else{
+        setText('chartStatus','No '+CHART_LABEL+' bars. Showing scanner chart.');
+        drawChart(SELECTED);
+      }
+    })
+    .catch(function(e){
+      setText('chartStatus','Chart fetch failed. Showing scanner chart.');
+      log('CHART FETCH FAILED: '+e.message);
+      drawChart(SELECTED);
+    });
+}
+
+function chartDateLabel(v){
+  if(!v)return '';
+  var d=new Date(v);
+  if(isNaN(d.getTime()))return String(v).slice(0,10);
+  if(CHART_INTERVAL==='5m'||CHART_INTERVAL==='15m'||CHART_INTERVAL==='1h'){
+    return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  }
+  return d.toLocaleDateString([], {month:'short', day:'numeric'});
+}
+
 function drawChart(r){
   var canvas=el("chart");
   if(!canvas)return;
@@ -1658,7 +1775,9 @@ function drawChart(r){
   ctx.fillStyle="#02080a";
   ctx.fillRect(0,0,w,h);
 
-  var b=bars(r).slice(-120);
+  var allBars=bars(r);
+  var limit=Number(CHART_LIMIT||120);
+  var b=limit>0?allBars.slice(-limit):allBars.slice(-120);
 
   if(!b.length){
     ctx.fillStyle="#9dffbc";
@@ -1668,6 +1787,9 @@ function drawChart(r){
   }
 
   b.forEach(function(x){if(!Number.isFinite(x.open))x.open=x.close;});
+
+  setText('chartTitle',r.symbol+' CHART - '+CHART_LABEL);
+  setText('chartStatus',CHART_LABEL+' | '+b.length+' candles | '+setup(r)+' | '+stage(r));
 
   var xsr=sr(r);
   var levels=[r.price,r.buyLow,r.buyHigh,r.stop,r.target,r.target2,xsr.support,xsr.resistance].map(num).filter(Number.isFinite);
@@ -1695,12 +1817,17 @@ function drawChart(r){
   ctx.strokeStyle="rgba(255,255,255,.08)";
   ctx.lineWidth=dpr;
 
+  ctx.fillStyle="#8fa59b";
+  ctx.font=(11*dpr)+"px Arial";
+
   for(var g=0;g<=8;g++){
     var gy=top+ch*g/8;
+    var priceLabel=max-(max-min)*g/8;
     ctx.beginPath();
     ctx.moveTo(left,gy);
     ctx.lineTo(w-right,gy);
     ctx.stroke();
+    ctx.fillText("$"+priceLabel.toFixed(2),10*dpr,gy+4*dpr);
   }
 
   if(Number.isFinite(Number(r.buyLow))&&Number.isFinite(Number(r.buyHigh))){
@@ -1757,9 +1884,29 @@ function drawChart(r){
   line(r.stop,"#ff4d6d","STOP",true);
   line(r.price,"#ffffff","PRICE",true);
 
+  if(b.length){
+    var first=b[0];
+    var last=b[b.length-1];
+    var mid=b[Math.floor(b.length/2)];
+
+    ctx.fillStyle="#8fa59b";
+    ctx.font=(12*dpr)+"px Arial";
+    ctx.fillText(chartDateLabel(first.date),left,h-24*dpr);
+    ctx.fillText(chartDateLabel(mid.date),left+cw/2-35*dpr,h-24*dpr);
+    ctx.fillText(chartDateLabel(last.date),w-right-70*dpr,h-24*dpr);
+
+    ctx.fillStyle="#ffffff";
+    ctx.font="bold "+(14*dpr)+"px Arial";
+    ctx.fillText("O "+money(last.open)+"  H "+money(last.high)+"  L "+money(last.low)+"  C "+money(last.close),left,top+18*dpr);
+  }
+
   ctx.fillStyle="#fff";
   ctx.font="bold "+(20*dpr)+"px Arial";
-  ctx.fillText(r.symbol+" "+setup(r)+" - "+stage(r),left,top-15*dpr);
+  ctx.fillText(r.symbol+" "+setup(r)+" - "+stage(r)+" | "+CHART_LABEL,left,top-15*dpr);
+
+  ctx.fillStyle="rgba(57,255,20,.16)";
+  ctx.font="bold "+(48*dpr)+"px Arial";
+  ctx.fillText(r.symbol,left+16*dpr,top+64*dpr);
 }
 
 function checkGetReadyAlerts(){
@@ -2157,6 +2304,13 @@ function start(){
   el("exportLogBtn").onclick=exportLog;
   el("resetAccountBtn").onclick=resetAccount;
   el("autoBtn").onclick=toggleAuto;
+
+  document.querySelectorAll('#chartTools button').forEach(function(btn){
+    btn.onclick=function(){
+      setChartTimeframe(btn.getAttribute('data-range'),btn.getAttribute('data-interval'),btn.getAttribute('data-label'),btn.getAttribute('data-limit'));
+    };
+  });
+  setActiveChartButtons();
 
   renderPaper();
   renderAccount();
