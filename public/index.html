@@ -2608,6 +2608,523 @@ function start(){
   }
 }
 
+
+/* =========================
+   CHART CLARITY + ZOOM UPGRADE
+   Added for clearer candles, non-overlapping labels, zoom, pan, and level toggles.
+   ========================= */
+(function(){
+  var style = document.createElement("style");
+  style.textContent = ""
+    + ".chartTools .chart-extra-btn{padding:5px 8px;font-size:10px;border-color:rgba(57,255,20,.45);background:#082214;color:#39ff14;}"
+    + ".chartTools .chart-extra-btn.off{border-color:rgba(255,255,255,.16);background:#0b1720;color:#8fa59b;}"
+    + ".chartTools .chart-extra-btn.blue{border-color:rgba(85,183,255,.55);color:#9ed1ff;background:#061b2c;}"
+    + ".chartTools .chart-extra-btn.yellow{border-color:rgba(255,209,102,.55);color:#ffd166;background:#221900;}"
+    + ".chartTools .chart-extra-btn.purple{border-color:rgba(155,92,255,.65);color:#d9c7ff;background:#160d26;}";
+  document.head.appendChild(style);
+
+  window.CHART_ZOOM = Number(localStorage.getItem("chartZoom") || 1);
+  window.CHART_PAN = Number(localStorage.getItem("chartPan") || 0);
+  window.CHART_SCALE_MODE = localStorage.getItem("chartScaleMode") || "price";
+  window.SHOW_DAY_LEVELS = localStorage.getItem("showDayLevels") !== "false";
+  window.SHOW_SWING_LEVELS = localStorage.getItem("showSwingLevels") !== "false";
+
+  var isDraggingChart = false;
+  var dragStartX = 0;
+  var dragStartPan = 0;
+  var chartRedrawTimer = null;
+
+  function saveChartView(){
+    localStorage.setItem("chartZoom", String(window.CHART_ZOOM));
+    localStorage.setItem("chartPan", String(window.CHART_PAN));
+    localStorage.setItem("chartScaleMode", window.CHART_SCALE_MODE);
+    localStorage.setItem("showDayLevels", window.SHOW_DAY_LEVELS ? "true" : "false");
+    localStorage.setItem("showSwingLevels", window.SHOW_SWING_LEVELS ? "true" : "false");
+  }
+
+  function redrawSelectedChart(){
+    saveChartView();
+
+    if (chartRedrawTimer) clearTimeout(chartRedrawTimer);
+
+    chartRedrawTimer = setTimeout(function(){
+      if (typeof SELECTED !== "undefined" && SELECTED) {
+        if (typeof loadSelectedChart === "function") {
+          loadSelectedChart();
+        } else if (typeof drawChart === "function") {
+          drawChart(SELECTED);
+        }
+      }
+
+      updateChartExtraButtons();
+    }, 20);
+  }
+
+  function updateChartExtraButtons(){
+    var fitPrice = document.getElementById("chartFitPriceBtn");
+    var fitTrade = document.getElementById("chartFitTradeBtn");
+    var dayBtn = document.getElementById("chartDayLevelsBtn");
+    var swingBtn = document.getElementById("chartSwingLevelsBtn");
+
+    if (fitPrice) fitPrice.classList.toggle("off", window.CHART_SCALE_MODE !== "price");
+    if (fitTrade) fitTrade.classList.toggle("off", window.CHART_SCALE_MODE !== "trade");
+    if (dayBtn) dayBtn.classList.toggle("off", !window.SHOW_DAY_LEVELS);
+    if (swingBtn) swingBtn.classList.toggle("off", !window.SHOW_SWING_LEVELS);
+  }
+
+  function addChartControls(){
+    var tools = document.getElementById("chartTools");
+    if (!tools || document.getElementById("chartZoomInBtn")) return;
+
+    function makeButton(id, text, cls, fn){
+      var btn = document.createElement("button");
+      btn.id = id;
+      btn.type = "button";
+      btn.className = "chart-extra-btn " + (cls || "");
+      btn.textContent = text;
+      btn.onclick = fn;
+      tools.appendChild(btn);
+      return btn;
+    }
+
+    makeButton("chartZoomOutBtn", "Zoom -", "", function(){
+      window.CHART_ZOOM = Math.max(1, window.CHART_ZOOM / 1.35);
+      window.CHART_PAN = 0;
+      redrawSelectedChart();
+    });
+
+    makeButton("chartZoomInBtn", "Zoom +", "", function(){
+      window.CHART_ZOOM = Math.min(14, window.CHART_ZOOM * 1.35);
+      redrawSelectedChart();
+    });
+
+    makeButton("chartResetZoomBtn", "Reset", "yellow", function(){
+      window.CHART_ZOOM = 1;
+      window.CHART_PAN = 0;
+      redrawSelectedChart();
+    });
+
+    makeButton("chartFitPriceBtn", "Fit Price", "blue", function(){
+      window.CHART_SCALE_MODE = "price";
+      redrawSelectedChart();
+    });
+
+    makeButton("chartFitTradeBtn", "Fit Trade", "blue", function(){
+      window.CHART_SCALE_MODE = "trade";
+      redrawSelectedChart();
+    });
+
+    makeButton("chartDayLevelsBtn", "Day Levels", "", function(){
+      window.SHOW_DAY_LEVELS = !window.SHOW_DAY_LEVELS;
+      redrawSelectedChart();
+    });
+
+    makeButton("chartSwingLevelsBtn", "Swing Levels", "", function(){
+      window.SHOW_SWING_LEVELS = !window.SHOW_SWING_LEVELS;
+      redrawSelectedChart();
+    });
+
+    updateChartExtraButtons();
+  }
+
+  function setupChartMouseControls(){
+    var canvas = document.getElementById("chart");
+    if (!canvas || canvas.dataset.zoomReady === "yes") return;
+
+    canvas.dataset.zoomReady = "yes";
+    canvas.style.cursor = "crosshair";
+
+    canvas.addEventListener("wheel", function(e){
+      e.preventDefault();
+
+      if (e.deltaY < 0) {
+        window.CHART_ZOOM = Math.min(14, window.CHART_ZOOM * 1.18);
+      } else {
+        window.CHART_ZOOM = Math.max(1, window.CHART_ZOOM / 1.18);
+      }
+
+      redrawSelectedChart();
+    }, { passive:false });
+
+    canvas.addEventListener("mousedown", function(e){
+      isDraggingChart = true;
+      dragStartX = e.clientX;
+      dragStartPan = Number(window.CHART_PAN || 0);
+      canvas.style.cursor = "grabbing";
+    });
+
+    window.addEventListener("mouseup", function(){
+      isDraggingChart = false;
+      if (canvas) canvas.style.cursor = "crosshair";
+    });
+
+    window.addEventListener("mousemove", function(e){
+      if (!isDraggingChart) return;
+
+      var dx = e.clientX - dragStartX;
+      var moveBars = Math.round(dx / 18);
+
+      window.CHART_PAN = Math.max(0, dragStartPan + moveBars);
+      redrawSelectedChart();
+    });
+  }
+
+  window.setChartTimeframe = function(range, interval, label, limit){
+    CHART_RANGE = range;
+    CHART_INTERVAL = interval;
+    CHART_LABEL = label;
+    CHART_LIMIT = Number(limit || 0);
+
+    window.CHART_ZOOM = 1;
+    window.CHART_PAN = 0;
+
+    if (typeof setActiveChartButtons === "function") {
+      setActiveChartButtons();
+    }
+
+    redrawSelectedChart();
+  };
+
+  window.drawChart = function(r){
+    var canvas = document.getElementById("chart");
+    if (!canvas) return;
+
+    var rect = canvas.getBoundingClientRect();
+    var dpr = window.devicePixelRatio || 1;
+
+    canvas.width = Math.max(1500, Math.floor(rect.width * dpr));
+    canvas.height = Math.max(660, Math.floor(rect.height * dpr));
+
+    var ctx = canvas.getContext("2d");
+    var w = canvas.width;
+    var h = canvas.height;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = "#02080a";
+    ctx.fillRect(0, 0, w, h);
+
+    var allBars = bars(r);
+
+    if (!allBars.length) {
+      ctx.fillStyle = "#9dffbc";
+      ctx.font = (22 * dpr) + "px Arial";
+      ctx.fillText("No candle data returned for " + r.symbol, 24 * dpr, 50 * dpr);
+      return;
+    }
+
+    allBars.forEach(function(x){
+      if (!Number.isFinite(x.open)) x.open = x.close;
+    });
+
+    var baseLimit = Number(CHART_LIMIT || 120);
+    if (!baseLimit || baseLimit <= 0) baseLimit = 120;
+
+    var zoom = Math.max(1, Number(window.CHART_ZOOM || 1));
+    var visibleCount = Math.max(18, Math.floor(baseLimit / zoom));
+    visibleCount = Math.min(visibleCount, allBars.length);
+
+    var maxPan = Math.max(0, allBars.length - visibleCount);
+    window.CHART_PAN = Math.max(0, Math.min(Number(window.CHART_PAN || 0), maxPan));
+
+    var end = allBars.length - window.CHART_PAN;
+    var start = Math.max(0, end - visibleCount);
+    var b = allBars.slice(start, end);
+
+    setText("chartTitle", r.symbol + " CHART - " + CHART_LABEL);
+    setText("chartStatus", CHART_LABEL + " | " + b.length + " candles | zoom " + zoom.toFixed(1) + "x | " + setup(r) + " | " + stage(r));
+
+    var xsr = sr(r);
+
+    var candleVals = [];
+
+    b.forEach(function(x){
+      candleVals.push(x.high, x.low, x.open, x.close);
+    });
+
+    var nearbyLevels = [
+      r.price,
+      r.buyLow,
+      r.buyHigh,
+      r.trigger,
+      xsr.support,
+      xsr.resistance
+    ].map(num).filter(Number.isFinite);
+
+    var tradeLevels = [
+      r.price,
+      r.buyLow,
+      r.buyHigh,
+      r.trigger,
+      xsr.support,
+      xsr.resistance
+    ];
+
+    if (window.SHOW_SWING_LEVELS) {
+      tradeLevels.push(r.stop, r.target, r.target2);
+    }
+
+    if (window.SHOW_DAY_LEVELS) {
+      tradeLevels.push(r.tightStop, r.dayTarget);
+    }
+
+    tradeLevels = tradeLevels.map(num).filter(Number.isFinite);
+
+    var scaleVals = candleVals.slice();
+
+    if (window.CHART_SCALE_MODE === "trade") {
+      tradeLevels.forEach(function(v){ scaleVals.push(v); });
+    } else {
+      nearbyLevels.forEach(function(v){ scaleVals.push(v); });
+
+      var price = Number(r.price);
+
+      if (Number.isFinite(price)) {
+        tradeLevels.forEach(function(v){
+          if (Math.abs((v - price) / price) * 100 <= 12) {
+            scaleVals.push(v);
+          }
+        });
+      }
+    }
+
+    var min = Math.min.apply(null, scaleVals);
+    var max = Math.max.apply(null, scaleVals);
+
+    if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) {
+      min = Math.min.apply(null, candleVals);
+      max = Math.max.apply(null, candleVals);
+    }
+
+    var padRange = (max - min) * 0.10;
+    min = min - padRange;
+    max = max + padRange;
+
+    if (max <= min) max = min + 1;
+
+    var left = 92 * dpr;
+    var right = 330 * dpr;
+    var top = 50 * dpr;
+    var bottom = 62 * dpr;
+
+    var cw = w - left - right;
+    var ch = h - top - bottom;
+
+    var step = cw / Math.max(1, b.length);
+    var bodyW = Math.max(4 * dpr, Math.min(16 * dpr, step * 0.66));
+
+    function y(v){
+      return top + ch - ((v - min) / (max - min)) * ch;
+    }
+
+    function x(i){
+      return left + step * i + step / 2;
+    }
+
+    ctx.strokeStyle = "rgba(255,255,255,.075)";
+    ctx.lineWidth = dpr;
+    ctx.fillStyle = "#8fa59b";
+    ctx.font = (11 * dpr) + "px Arial";
+
+    for (var g = 0; g <= 8; g++) {
+      var gy = top + ch * g / 8;
+      var priceLabel = max - (max - min) * g / 8;
+
+      ctx.beginPath();
+      ctx.moveTo(left, gy);
+      ctx.lineTo(w - right, gy);
+      ctx.stroke();
+
+      ctx.fillText("$" + priceLabel.toFixed(2), 10 * dpr, gy + 4 * dpr);
+    }
+
+    if (Number.isFinite(Number(r.buyLow)) && Number.isFinite(Number(r.buyHigh))) {
+      var yHi = y(Number(r.buyHigh));
+      var yLo = y(Number(r.buyLow));
+
+      ctx.fillStyle = "rgba(255,209,102,.10)";
+      ctx.fillRect(left, Math.min(yHi, yLo), cw, Math.abs(yLo - yHi));
+    }
+
+    b.forEach(function(bar, i){
+      var xx = x(i);
+      var yh = y(bar.high);
+      var yl = y(bar.low);
+      var yo = y(bar.open);
+      var yc = y(bar.close);
+      var c = bar.close >= bar.open ? "#39ff14" : "#ff4d6d";
+
+      ctx.strokeStyle = c;
+      ctx.lineWidth = 1.45 * dpr;
+
+      ctx.beginPath();
+      ctx.moveTo(xx, yh);
+      ctx.lineTo(xx, yl);
+      ctx.stroke();
+
+      ctx.fillStyle = c;
+      ctx.fillRect(
+        xx - bodyW / 2,
+        Math.min(yo, yc),
+        bodyW,
+        Math.max(2 * dpr, Math.abs(yo - yc))
+      );
+    });
+
+    var usedLabelYs = [];
+
+    function labelY(rawY){
+      var yy = rawY;
+      var minGap = 20 * dpr;
+
+      for (var i = 0; i < usedLabelYs.length; i++) {
+        if (Math.abs(yy - usedLabelYs[i]) < minGap) {
+          yy = usedLabelYs[i] + minGap;
+        }
+      }
+
+      yy = Math.max(top + 12 * dpr, Math.min(top + ch - 12 * dpr, yy));
+      usedLabelYs.push(yy);
+
+      return yy;
+    }
+
+    function levelLine(v, c, label, dash, importance){
+      v = num(v);
+      if (!Number.isFinite(v)) return;
+
+      var yy = y(v);
+      var visibleBuffer = 28 * dpr;
+
+      if (yy < top - visibleBuffer || yy > top + ch + visibleBuffer) {
+        var edgeY = yy < top ? top + 12 * dpr : top + ch - 12 * dpr;
+        var textY = labelY(edgeY);
+
+        ctx.fillStyle = "rgba(2,8,10,.86)";
+        ctx.fillRect(w - right + 6 * dpr, textY - 13 * dpr, right - 22 * dpr, 18 * dpr);
+
+        ctx.fillStyle = c;
+        ctx.font = "bold " + (12 * dpr) + "px Arial";
+        ctx.fillText(label + " " + money(v), w - right + 12 * dpr, textY);
+
+        return;
+      }
+
+      ctx.strokeStyle = c;
+      ctx.lineWidth = importance ? 2.4 * dpr : 1.6 * dpr;
+
+      if (dash) ctx.setLineDash([8 * dpr, 6 * dpr]);
+
+      ctx.beginPath();
+      ctx.moveTo(left, yy);
+      ctx.lineTo(w - right, yy);
+      ctx.stroke();
+
+      ctx.setLineDash([]);
+
+      var ty = labelY(yy);
+      var labelX = w - right + 10 * dpr;
+      var boxW = right - 22 * dpr;
+      var boxH = 18 * dpr;
+
+      ctx.fillStyle = "rgba(2,8,10,.86)";
+      ctx.fillRect(labelX - 4 * dpr, ty - 13 * dpr, boxW, boxH);
+
+      ctx.strokeStyle = "rgba(255,255,255,.10)";
+      ctx.strokeRect(labelX - 4 * dpr, ty - 13 * dpr, boxW, boxH);
+
+      ctx.fillStyle = c;
+      ctx.font = "bold " + (12 * dpr) + "px Arial";
+      ctx.fillText(label + " " + money(v), labelX, ty);
+    }
+
+    levelLine(r.price, "#ffffff", "PRICE", true, true);
+    levelLine(r.trigger, "#ffffff", "TRIGGER", true, true);
+    levelLine(r.buyHigh, "#ffd166", "BUY HIGH", true, true);
+    levelLine(r.buyLow, "#ffd166", "BUY LOW", true, true);
+
+    if (window.SHOW_SWING_LEVELS) {
+      levelLine(r.target, "#39ff14", "SWING TARGET", true, true);
+      levelLine(r.target2, "#55b7ff", "T2", true, false);
+      levelLine(r.stop, "#ff4d6d", "SWING STOP", true, true);
+    }
+
+    if (window.SHOW_DAY_LEVELS) {
+      levelLine(r.dayTarget, "#55b7ff", "DAY TARGET", true, false);
+      levelLine(r.tightStop, "#ff9f43", "TIGHT STOP", true, false);
+    }
+
+    function dateLabel(v){
+      if (!v) return "";
+
+      var d = new Date(v);
+
+      if (isNaN(d.getTime())) return String(v).slice(0, 10);
+
+      if (CHART_INTERVAL === "5m" || CHART_INTERVAL === "15m" || CHART_INTERVAL === "1h") {
+        return d.toLocaleTimeString([], { hour:"2-digit", minute:"2-digit" });
+      }
+
+      return d.toLocaleDateString([], { month:"short", day:"numeric" });
+    }
+
+    if (b.length) {
+      var first = b[0];
+      var last = b[b.length - 1];
+      var mid = b[Math.floor(b.length / 2)];
+
+      ctx.fillStyle = "#8fa59b";
+      ctx.font = (12 * dpr) + "px Arial";
+      ctx.fillText(dateLabel(first.date), left, h - 24 * dpr);
+      ctx.fillText(dateLabel(mid.date), left + cw / 2 - 35 * dpr, h - 24 * dpr);
+      ctx.fillText(dateLabel(last.date), w - right - 70 * dpr, h - 24 * dpr);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold " + (14 * dpr) + "px Arial";
+      ctx.fillText(
+        "O " + money(last.open) +
+        "  H " + money(last.high) +
+        "  L " + money(last.low) +
+        "  C " + money(last.close),
+        left,
+        top + 18 * dpr
+      );
+    }
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "bold " + (20 * dpr) + "px Arial";
+    ctx.fillText(
+      r.symbol + " " + setup(r) + " - " + stage(r) + " | " + CHART_LABEL,
+      left,
+      top - 15 * dpr
+    );
+
+    ctx.fillStyle = "rgba(57,255,20,.14)";
+    ctx.font = "bold " + (52 * dpr) + "px Arial";
+    ctx.fillText(r.symbol, left + 16 * dpr, top + 64 * dpr);
+
+    ctx.fillStyle = "#8fa59b";
+    ctx.font = (11 * dpr) + "px Arial";
+    ctx.fillText(
+      "Mouse wheel zoom | Drag left/right | Fit Price ignores far targets | Fit Trade shows all trade levels",
+      left,
+      h - 8 * dpr
+    );
+  };
+
+  function initTradingMintChartUpgrade(){
+    addChartControls();
+    setupChartMouseControls();
+    updateChartExtraButtons();
+
+    if (typeof SELECTED !== "undefined" && SELECTED) {
+      redrawSelectedChart();
+    }
+  }
+
+  setTimeout(initTradingMintChartUpgrade, 500);
+})();
+
+
 if(document.readyState==="loading"){
   document.addEventListener("DOMContentLoaded",start);
 }else{
