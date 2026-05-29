@@ -8,7 +8,7 @@ const publicPath = path.join(__dirname, "..", "public");
 
 app.use(express.json({ limit: "1mb" }));
 
-const VERSION = "server-pro-realdata-bars-day-scan-2026-05-29";
+const VERSION = "tradingmint-pro-v30-server-bars-day-scan-realdata";
 
 const DEFAULT_SYMBOLS = [
   "SPY", "QQQ", "NVDA", "TSLA", "AAPL", "MSFT", "META", "AMD",
@@ -175,12 +175,9 @@ function safeDate(timestamp, interval) {
 
   if (Number.isNaN(d.getTime())) return null;
 
-  if (
-    String(interval).includes("m") ||
-    String(interval).includes("h") ||
-    String(interval) === "60m" ||
-    String(interval) === "90m"
-  ) {
+  const i = String(interval || "");
+
+  if (i.includes("m") || i.includes("h")) {
     return d.toISOString();
   }
 
@@ -230,7 +227,7 @@ async function fetchText(url, timeoutMs = 12000) {
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "Mozilla/5.0 TradingMintScanner/2.0",
+        "User-Agent": "Mozilla/5.0 TradingMintScanner/3.0",
         "Accept": "text/plain, application/json, */*"
       }
     });
@@ -673,7 +670,7 @@ function analyzeSymbol(symbol, bars, marketContext, source) {
 
   const summary =
     decision === "ENTER_NOW"
-      ? symbol + " has a strong 24h+ swing setup and is close enough to the buy zone for a paper entry."
+      ? symbol + " has a strong 24H+ swing setup and is close enough to the buy zone for a paper entry."
       : decision === "WAIT_FOR_PULLBACK"
         ? symbol + " is strong but should not be chased. Wait for price to pull back into the buy zone."
         : decision === "BREAKOUT_WATCH"
@@ -1049,7 +1046,7 @@ app.get("/api/bars", async function(req, res) {
 app.get("/api/scan", async function(req, res) {
   try {
     const symbolsInput = req.query.symbols || DEFAULT_SYMBOLS.join(",");
-    const symbols = uniqueSymbols(symbolsInput).slice(0, 60);
+    const symbols = uniqueSymbols(symbolsInput).slice(0, 80);
     const risk = req.query.risk || 100;
 
     if (!symbols.length) {
@@ -1112,7 +1109,7 @@ app.get("/api/discover", async function(req, res) {
 app.get("/api/day-scan", async function(req, res) {
   try {
     const symbolsInput = req.query.symbols || DEFAULT_SYMBOLS.join(",");
-    const symbols = uniqueSymbols(symbolsInput).slice(0, 60);
+    const symbols = uniqueSymbols(symbolsInput).slice(0, 80);
     const result = await dayScanSymbols(symbols);
 
     res.json(result);
