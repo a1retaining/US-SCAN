@@ -1053,6 +1053,10 @@ function symbols(){
   return (el("symbols").value||"").split(",").map(function(s){return s.trim().toUpperCase();}).filter(Boolean).join(",");
 }
 
+function daySymbols(){
+  return symbols();
+}
+
 function field(o,names){
   for(var i=0;i<names.length;i++){
     if(o[names[i]]!==undefined&&o[names[i]]!==null)return o[names[i]];
@@ -1081,6 +1085,10 @@ function clean(o){
     stop:field(o,["stopLoss","stop","sl","stopPrice"]),
     target:field(o,["target1","targetPrice","target","tp"]),
     target2:field(o,["target2","tp2"]),
+    trigger:field(o,["trigger","triggerPrice"]),
+    tightStop:field(o,["tightStop","dayStop"]),
+    dayTarget:field(o,["dayTarget","intradayTarget"]),
+    dayRR:field(o,["dayRiskReward","dayRR"]),
     rr:field(o,["riskReward","rr","rR","risk_reward"])||"-",
     hold:field(o,["expectedHold","hold","holdTime"])||"24 hours or more",
     summary:field(o,["summary","plainEnglish","reason","thesis","description"])||"",
@@ -1093,10 +1101,11 @@ function clean(o){
     resistance:o.resistance
   };
 
-  r.trigger=calcTrigger(r);
-  r.tightStop=calcTightStop(r);
-  r.dayTarget=calcDayTarget(r);
-  r.dayRR=calcRR(r.price,r.tightStop,r.dayTarget);
+  if(!Number.isFinite(Number(r.trigger)))r.trigger=calcTrigger(r);
+  if(!Number.isFinite(Number(r.tightStop)))r.tightStop=calcTightStop(r);
+  if(!Number.isFinite(Number(r.dayTarget)))r.dayTarget=calcDayTarget(r);
+  if(!Number.isFinite(Number(r.dayRR)))r.dayRR=calcRR(r.price,r.tightStop,r.dayTarget);
+
   return r;
 }
 
@@ -1165,6 +1174,7 @@ function calcRR(entry,stop,target){
 
 function setup(r){
   var d=String(r.decision||"");
+  if(/DAY/i.test(d))return"Day Watch";
   if(/ENTER|BUY|ENTRY/i.test(d))return"Entry";
   if(/BREAKOUT/i.test(d))return"Breakout";
   if(/PULLBACK/i.test(d))return"Pullback";
@@ -1604,9 +1614,11 @@ function scan(){
   var scanLimit=el("scanLimit").value||"140";
   var scanUrl="/api/scan?mode=swing&symbols="+encodeURIComponent(symbols())+"&risk="+encodeURIComponent(risk);
   var discoverUrl="/api/discover?risk="+encodeURIComponent(risk)+"&limit=30&scanLimit="+encodeURIComponent(scanLimit)+"&exclude="+encodeURIComponent(symbols());
+  var dayUrl="/api/day-scan?symbols="+encodeURIComponent(daySymbols());
 
-  Promise.allSettled([api(scanUrl),api(discoverUrl)]).then(function(res){
+  Promise.allSettled([api(scanUrl),api(discoverUrl),api(dayUrl)]).then(function(res){
     var all=[];
+    var dayAll=[];
     var errors=[];
 
     if(res[0].status==="fulfilled"){
@@ -1629,6 +1641,14 @@ function scan(){
       errors.push("Discovery failed: "+res[1].reason.message);
     }
 
+    if(res[2].status==="fulfilled"){
+      var dayData=res[2].value;
+      dayAll=dayAll.concat(getSignalsFromResponse(dayData));
+      log("DAY SIGNALS FOUND: "+dayAll.length);
+    }else{
+      errors.push("Day scan failed: "+res[2].reason.message);
+    }
+
     var seen={};
 
     all.forEach(function(x){
@@ -1642,23 +1662,40 @@ function scan(){
       }
     });
 
-    var cleanList=Object.keys(seen).map(function(k){return seen[k];});
+    RESULTS=Object.keys(seen).map(function(k){return seen[k];})
+      .filter(function(r){return r&&r.symbol&&r.symbol!=="-";})
+      .sort(function(a,b){
+        var rankDiff=tradeRankScore(b)-tradeRankScore(a);
+        if(rankDiff!==0)return rankDiff;
+        var scoreDiff=Number(b.score||0)-Number(a.score||0);
+        if(scoreDiff!==0)return scoreDiff;
+        return getRR(b)-getRR(a);
+      });
 
-    RESULTS=cleanList.filter(function(r){
-      return r&&r.symbol&&r.symbol!=="-";
-    }).sort(function(a,b){
-      var rankDiff=tradeRankScore(b)-tradeRankScore(a);
-      if(rankDiff!==0)return rankDiff;
-      var scoreDiff=Number(b.score||0)-Number(a.score||0);
-      if(scoreDiff!==0)return scoreDiff;
-      return getRR(b)-getRR(a);
+    var daySeen={};
+
+    dayAll.forEach(function(x){
+      var r=clean(x);
+      if(!r.symbol||r.symbol==="-")return;
+
+      if(daySeen[r.symbol]){
+        if(dayRankScore(r)>dayRankScore(daySeen[r.symbol]))daySeen[r.symbol]=r;
+      }else{
+        daySeen[r.symbol]=r;
+      }
     });
 
-    DAY_RESULTS=cleanList.filter(function(r){
-      return Number(r.score||0)>=60&&Number(r.dayRR||0)>=1.2&&Number.isFinite(Number(r.price));
-    }).sort(function(a,b){
-      return dayRankScore(b)-dayRankScore(a);
-    });
+    if(!Object.keys(daySeen).length){
+      RESULTS.forEach(function(r){
+        if(Number(r.score||0)>=60&&Number(r.dayRR||0)>=1.2){
+          daySeen[r.symbol]=r;
+        }
+      });
+    }
+
+    DAY_RESULTS=Object.keys(daySeen).map(function(k){return daySeen[k];})
+      .filter(function(r){return Number(r.score||0)>=55&&Number(r.dayRR||0)>=1.0;})
+      .sort(function(a,b){return dayRankScore(b)-dayRankScore(a);});
 
     renderRows();
     renderDayRows();
