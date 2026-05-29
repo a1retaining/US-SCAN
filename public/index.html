@@ -3,1826 +3,1833 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>TradingMint Pro - Live Swing Scanner</title>
+<title>US Trade Scanner</title>
 
 <style>
 :root{
-  --bg:#020609;
-  --side:#061018;
-  --panel:#07121a;
-  --line:rgba(57,255,20,.34);
-  --line2:rgba(255,255,255,.08);
-  --text:#eef8f1;
-  --muted:#8fa59b;
-  --green:#39ff14;
-  --green2:#00ff88;
+  --bg:#020403;
+  --card:rgba(0,15,8,.96);
+  --line:rgba(0,255,136,.34);
+  --text:#d8ffe5;
+  --muted:#9fe9ba;
+  --green:#00ff88;
+  --green2:#7dffa8;
   --yellow:#ffd166;
-  --red:#ff4d6d;
-  --blue:#55b7ff;
-  --purple:#9b5cff;
-  --orange:#ff9f43;
+  --red:#ff5577;
+  --blue:#57a6ff;
+  --gray:#cbd5e1;
 }
 
 *{box-sizing:border-box}
 
 html,body{
   margin:0;
+  padding:0;
+  width:100%;
   min-height:100%;
-  background:var(--bg);
+  background:#020403;
   color:var(--text);
   font-family:Arial,Helvetica,sans-serif;
-  font-size:13px;
 }
 
 body{overflow:auto}
 
-.app{
+#app{
+  width:100%;
   min-height:100vh;
-  display:grid;
-  grid-template-columns:215px 1fr;
-  background:#020607;
+  padding:10px;
+  background:radial-gradient(circle at top left,rgba(0,255,136,.13),transparent 420px),#020403;
 }
 
-.sidebar{
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:10px;
+  margin-bottom:10px;
+  box-shadow:0 0 18px rgba(0,255,136,.05);
+}
+
+.topbar{
   position:sticky;
   top:0;
-  height:100vh;
-  background:linear-gradient(180deg,#071018,#03080d);
-  border-right:1px solid var(--line);
-  overflow:auto;
-}
-
-.logoBox{
-  padding:10px 12px 14px;
-  border-bottom:1px solid var(--line2);
-}
-
-.logoTick{
-  width:34px;
-  height:34px;
-  border:2px solid var(--green2);
-  border-radius:8px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  color:var(--green2);
-  font-size:22px;
-  margin-bottom:4px;
-}
-
-.logoText{
-  letter-spacing:7px;
-  font-size:18px;
-  line-height:20px;
-  font-weight:900;
-}
-
-.logoSub{
-  color:var(--muted);
-  font-size:9px;
-  letter-spacing:3px;
-  margin-top:3px;
-}
-
-.proBar{
-  height:9px;
-  border-radius:999px;
-  background:linear-gradient(90deg,var(--purple),#d79cff);
-  margin-top:7px;
-}
-
-.nav{
-  padding:8px;
+  z-index:20;
   display:grid;
-  gap:6px;
-}
-
-.nav button{
-  width:100%;
-  border:1px solid transparent;
-  background:transparent;
-  color:#dce7e1;
-  border-radius:7px;
-  padding:10px 11px;
-  text-align:left;
-  font-weight:900;
-  cursor:pointer;
-  font-size:12px;
-}
-
-.nav button:hover,
-.nav button.active{
-  background:rgba(57,255,20,.12);
-  border-color:rgba(57,255,20,.65);
-  color:var(--green);
-}
-
-.sidePanel{
-  margin:9px;
-  border:1px solid var(--line);
-  border-radius:8px;
-  background:#071018;
-  padding:10px;
-}
-
-.sidePanel h3{
-  margin:0 0 10px;
-  font-size:12px;
-  color:#fff;
-  text-transform:uppercase;
-}
-
-.sideRow{
-  display:flex;
-  justify-content:space-between;
+  grid-template-columns:minmax(230px,1.25fr) repeat(7,minmax(105px,.5fr)) auto auto;
   gap:8px;
-  border-bottom:1px solid var(--line2);
-  padding:6px 0;
-  color:var(--muted);
-}
-
-.sideRow:last-child{border-bottom:0}
-
-.sideRow b{color:var(--green)}
-
-.main{
-  min-width:0;
-  padding:8px 10px 14px;
-}
-
-.kpiBar{
-  display:grid;
-  grid-template-columns:repeat(8,1fr);
-  gap:0;
+  align-items:center;
+  background:rgba(0,15,8,.98);
   border:1px solid var(--line);
-  background:#071018;
-  margin-bottom:8px;
+  border-radius:14px;
+  padding:10px;
+  margin-bottom:10px;
+  backdrop-filter:blur(8px);
 }
 
-.kpi{
-  min-height:52px;
-  padding:9px 12px;
-  border-right:1px solid var(--line2);
-}
+h1,h2,h3{margin:0 0 8px;color:var(--green2)}
+h1{font-size:23px}
+h2{font-size:14px;text-transform:uppercase}
+h3{font-size:12px;text-transform:uppercase}
 
-.kpi:last-child{border-right:0}
-
-.kpi span{
-  display:block;
+p{
+  margin:5px 0;
   color:var(--muted);
+  font-size:13px;
+  line-height:1.4;
+}
+
+label{
+  display:block;
+  margin:8px 0 4px;
+  color:#8bffb7;
   font-size:10px;
   text-transform:uppercase;
-  margin-bottom:5px;
 }
 
-.kpi strong{
-  color:#fff;
-  font-size:13px;
+textarea,input,select{
+  width:100%;
+  background:#000;
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:8px;
+  font-size:12px;
 }
 
-.good{color:var(--green)!important}
-.warn{color:var(--yellow)!important}
-.bad{color:var(--red)!important}
-
-.actionBtns{
-  display:flex;
-  gap:6px;
-  align-items:center;
-  justify-content:flex-end;
-}
+textarea{min-height:86px;resize:vertical}
 
 button{
-  border:1px solid var(--line);
-  background:#082214;
-  color:var(--green);
-  border-radius:6px;
-  padding:7px 10px;
-  font-weight:900;
+  padding:9px 12px;
+  border-radius:9px;
+  border:1px solid var(--green);
+  background:#001f12;
+  color:#8bffb7;
+  font-weight:800;
   cursor:pointer;
+  text-transform:uppercase;
   font-size:12px;
 }
 
-button:hover{filter:brightness(1.15)}
-button.yellow{border-color:rgba(255,209,102,.55);background:#221900;color:var(--yellow)}
-button.red{border-color:rgba(255,77,109,.55);background:#26000a;color:#ff9aae}
-button.gray{border-color:var(--line2);background:#121d27;color:#d5e0db}
+button:hover{filter:brightness(1.12)}
+button.yellow{background:#211900;color:var(--yellow);border-color:var(--yellow)}
+button.danger{background:#2a0008;color:#ffb8c7;border-color:var(--red)}
+button.blue{background:#00172b;color:#9ed1ff;border-color:var(--blue)}
 
-.panel{
-  border:1px solid var(--line);
-  background:#061017;
-  margin-bottom:8px;
+button.icon{
+  width:42px;
+  height:42px;
+  padding:0;
+  border-radius:50%;
+  font-size:20px;
 }
 
-.panelTitle{
-  min-height:38px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-  padding:0 11px;
-  border-bottom:1px solid var(--line2);
-  text-transform:uppercase;
-  color:#fff;
-  font-weight:900;
-  font-size:13px;
+.dot{
+  width:12px;
+  height:12px;
+  border-radius:50%;
+  background:var(--red);
+  box-shadow:0 0 14px var(--red);
+  display:inline-block;
+  margin-right:6px;
 }
 
-.panelTitle small{
-  color:var(--green);
-  font-size:11px;
+.dot.green{background:var(--green);box-shadow:0 0 14px var(--green)}
+.dot.yellow{background:var(--yellow);box-shadow:0 0 14px var(--yellow)}
+
+.level{
+  background:#000;
+  border:1px solid rgba(0,255,136,.2);
+  border-radius:10px;
+  padding:8px;
 }
 
-.chartWrap{
-  height:72vh;
-  min-height:560px;
-  max-height:820px;
-  position:relative;
-}
-
-#chart{
-  width:100%;
-  height:100%;
+.level span{
   display:block;
-  background:#02080a;
-}
-
-.chartTools{
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
-  gap:6px;
-  flex-wrap:wrap;
-}
-
-.chartTools button{
-  padding:5px 8px;
-  font-size:10px;
-  border-color:rgba(255,255,255,.16);
-  background:#0b1720;
-  color:#dce7e1;
-}
-
-.chartTools button.active{
-  border-color:var(--green);
-  background:rgba(57,255,20,.13);
-  color:var(--green);
-}
-
-.chartHint{
   color:var(--muted);
   font-size:10px;
-  margin-left:8px;
-  white-space:nowrap;
+  text-transform:uppercase;
 }
 
-.tableWrap{
-  max-height:405px;
+.level strong{
+  display:block;
+  color:#fff;
+  margin-top:4px;
+  font-size:14px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.level.pdt{border-color:rgba(255,209,102,.55)}
+.level.pdt strong{color:var(--yellow)}
+.level.day{border-color:rgba(87,166,255,.55)}
+.level.day strong{color:#9ed1ff}
+
+.kpis{
+  display:grid;
+  grid-template-columns:repeat(8,minmax(110px,1fr));
+  gap:8px;
+  margin-bottom:10px;
+}
+
+.best-strip{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin-bottom:10px;
+}
+
+.best-card{
+  background:#000;
+  border:1px solid rgba(0,255,136,.28);
+  border-radius:12px;
+  padding:10px;
+  cursor:pointer;
+}
+
+.best-card:hover{
+  border-color:var(--green);
+  filter:brightness(1.08);
+}
+
+.best-card.enter{border-color:rgba(0,255,136,.65)}
+.best-card.pullback{border-color:rgba(255,209,102,.65)}
+.best-card.breakout{border-color:rgba(87,166,255,.65)}
+.best-card.day{border-color:rgba(87,166,255,.8)}
+
+.best-card strong{
+  display:block;
+  font-size:20px;
+  color:#fff;
+}
+
+.best-card span{
+  display:block;
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.table-wrap{
   overflow:auto;
+  max-height:50vh;
+  border:1px solid rgba(0,255,136,.2);
+  border-radius:10px;
+  background:#000;
 }
 
 table{
   width:100%;
   border-collapse:collapse;
-  min-width:1200px;
+  min-width:1250px;
 }
 
 th,td{
-  padding:12px 10px;
-  border-bottom:1px solid rgba(255,255,255,.06);
+  border-bottom:1px solid rgba(0,255,136,.15);
+  padding:9px;
+  font-size:13px;
   text-align:left;
-  vertical-align:middle;
-  font-size:12px;
+  vertical-align:top;
 }
 
 th{
   position:sticky;
   top:0;
-  background:#071018;
-  color:#cfd9d4;
+  background:#03110a;
+  color:var(--green2);
   font-size:10px;
   text-transform:uppercase;
   z-index:2;
 }
 
 tbody tr{cursor:pointer}
+tbody tr:hover,tbody tr.selected{background:rgba(0,255,136,.1)}
 
-tbody tr:hover,
-tbody tr.selected{
-  background:rgba(57,255,20,.09);
-}
-
-.rank{
-  color:var(--green);
-  font-weight:900;
-}
-
-.conf{
-  display:inline-block;
-  border:1px solid rgba(57,255,20,.55);
-  color:var(--green);
-  background:rgba(57,255,20,.08);
-  border-radius:5px;
-  padding:4px 8px;
-}
+tr.row-enter{background:rgba(0,255,136,.07)}
+tr.row-pullback{background:rgba(255,209,102,.055)}
+tr.row-breakout{background:rgba(87,166,255,.055)}
+tr.row-watch{background:rgba(156,163,175,.035)}
+tr.row-day{background:rgba(87,166,255,.065)}
 
 .badge{
   display:inline-block;
-  border-radius:5px;
+  min-width:112px;
+  text-align:center;
+  border-radius:999px;
   padding:5px 9px;
-  font-weight:900;
-  background:#172331;
-  border:1px solid var(--line2);
-  color:#d7e2dd;
-  text-transform:uppercase;
-}
-
-.badge.enter{
-  color:var(--green);
-  background:rgba(57,255,20,.09);
-  border-color:rgba(57,255,20,.45);
-}
-
-.badge.ready{
+  font-size:11px;
+  font-weight:800;
+  background:rgba(255,209,102,.16);
   color:var(--yellow);
-  background:rgba(255,209,102,.10);
-  border-color:rgba(255,209,102,.55);
+  border:1px solid rgba(255,209,102,.4);
 }
 
-.badge.watch{
-  color:#d6e2df;
-  background:#172331;
+.badge.enter{background:rgba(0,255,136,.16);color:var(--green);border-color:rgba(0,255,136,.4)}
+.badge.exit{background:rgba(255,85,119,.16);color:var(--red);border-color:rgba(255,85,119,.4)}
+.badge.avoid{background:rgba(156,163,175,.16);color:var(--gray);border-color:rgba(156,163,175,.4)}
+.badge.day{background:rgba(87,166,255,.16);color:#9ed1ff;border-color:rgba(87,166,255,.55)}
+
+.do-not-chase{
+  display:inline-block;
+  margin-top:5px;
+  border:1px solid rgba(255,85,119,.55);
+  color:#ff9aae;
+  border-radius:999px;
+  padding:3px 8px;
+  font-size:10px;
+  font-weight:800;
 }
 
-.redText{color:var(--red)}
-.greenText{color:var(--green)}
-.yellowText{color:var(--yellow)}
-.blueText{color:var(--blue)}
-
-.bottomGrid{
+.layout{
   display:grid;
-  grid-template-columns:1.1fr 1fr 1fr;
-  gap:8px;
-  margin-bottom:8px;
+  grid-template-columns:minmax(0,1fr) minmax(440px,.75fr);
+  gap:10px;
 }
 
-.detailBox{
-  border:1px solid var(--line);
-  background:#061017;
-  min-height:210px;
-}
-
-.boxBody{padding:12px}
-
-.bigSymbol{
-  color:var(--yellow);
-  font-size:25px;
-  font-weight:900;
-  margin-bottom:8px;
-}
-
-.note{
-  background:#02080a;
-  border:1px solid var(--line2);
-  border-radius:7px;
-  padding:9px;
-  margin-top:8px;
-  line-height:1.5;
-}
-
-.teach{
-  border-color:rgba(85,183,255,.35);
-}
-
-.grid2{
+.two-col{
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:8px;
+  gap:10px;
 }
 
 .grid4{
   display:grid;
   grid-template-columns:repeat(4,1fr);
   gap:8px;
+  margin-bottom:10px;
 }
 
-.mini{
-  background:#02080a;
-  border:1px solid var(--line2);
-  border-radius:6px;
-  padding:8px;
+.grid6{
+  display:grid;
+  grid-template-columns:repeat(6,minmax(110px,1fr));
+  gap:8px;
+  margin-bottom:10px;
 }
 
-.mini span{
-  display:block;
-  color:var(--muted);
-  font-size:10px;
-  text-transform:uppercase;
+.paper-wide{
+  display:grid;
+  grid-template-columns:repeat(8,minmax(110px,1fr));
+  gap:8px;
+  margin-bottom:10px;
 }
 
-.mini b{
-  display:block;
-  color:#fff;
-  margin-top:4px;
+.paper-row{
+  display:grid;
+  grid-template-columns:1.2fr .9fr .8fr auto auto auto;
+  gap:8px;
+  align-items:end;
 }
 
-input,textarea,select{
+.note{
+  background:#000;
+  border:1px solid rgba(0,255,136,.2);
+  border-radius:9px;
+  padding:10px;
+  font-size:13px;
+  line-height:1.5;
+  margin-top:8px;
+}
+
+.warn{border-color:rgba(255,85,119,.45)}
+
+.wake-warning{
+  display:none;
+  border-color:rgba(255,209,102,.65);
+  color:var(--yellow);
+}
+
+#chart{
   width:100%;
-  background:#02080a;
-  color:var(--text);
-  border:1px solid var(--line);
-  border-radius:6px;
-  padding:8px;
-}
-
-textarea{
-  min-height:85px;
-  resize:vertical;
-}
-
-label{
+  height:720px;
   display:block;
-  color:var(--green);
-  font-size:10px;
-  margin:7px 0 4px;
-  text-transform:uppercase;
+  background:#000;
+  border:1px solid var(--green);
+  border-radius:12px;
 }
-
-.feed{
-  max-height:170px;
-  overflow:auto;
-}
-
-.feed div{
-  padding:7px 0;
-  border-bottom:1px solid var(--line2);
-  color:var(--muted);
-}
-
-.feed b{color:#fff}
 
 .holding{
-  background:#02080a;
-  border:1px solid var(--line2);
-  border-radius:7px;
+  background:#000;
+  border:1px solid rgba(0,255,136,.2);
+  border-radius:9px;
   padding:8px;
   margin-top:8px;
+  font-size:12px;
   line-height:1.45;
 }
 
-.holding.good{border-color:rgba(57,255,20,.5)}
-.holding.bad{border-color:rgba(255,77,109,.5)}
+.holding.bad{border-color:rgba(255,85,119,.55)}
+.holding.good{border-color:rgba(0,255,136,.55)}
+.holding.day{border-color:rgba(87,166,255,.55)}
 
-.settings{
-  margin-top:8px;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:8px;
+.pnl-good{color:var(--green);font-weight:800}
+.pnl-bad{color:var(--red);font-weight:800}
+.pnl-flat{color:#fff;font-weight:800}
+
+.activity-feed{
+  max-height:220px;
+  overflow:auto;
 }
 
-details summary{
-  cursor:pointer;
-  color:#fff;
-  font-weight:900;
-  text-transform:uppercase;
-  padding-bottom:8px;
+.feed-item{
+  border-bottom:1px solid rgba(0,255,136,.12);
+  padding:7px 0;
+  font-size:12px;
+  color:var(--muted);
+}
+
+.feed-item b{color:#fff}
+
+.log{
+  white-space:pre-wrap;
+  background:#000;
+  border:1px solid rgba(0,255,136,.25);
+  border-radius:8px;
+  padding:8px;
+  font-size:12px;
+  max-height:180px;
+  overflow:auto;
 }
 
 .alert{
   position:fixed;
-  top:76px;
   right:18px;
+  top:76px;
   z-index:1000;
   display:none;
-  max-width:520px;
-  background:#071018;
+  max-width:460px;
+  background:#00190d;
   border:2px solid var(--green);
-  border-radius:10px;
-  padding:14px;
-  box-shadow:0 0 30px rgba(57,255,20,.22);
+  border-radius:14px;
+  padding:14px 16px;
+  box-shadow:0 0 32px rgba(0,255,136,.25);
+  line-height:1.45;
 }
 
 .alert.bad{border-color:var(--red)}
 .alert.warn{border-color:var(--yellow)}
-.alert.ready{border-color:var(--yellow)}
 
-.popWrap{
+.trade-pop-wrap{
   position:fixed;
   inset:0;
   z-index:2000;
   display:none;
   align-items:center;
   justify-content:center;
-  background:rgba(0,0,0,.68);
+  background:rgba(0,0,0,.58);
   padding:18px;
 }
 
-.pop{
+.trade-pop{
   width:min(680px,96vw);
-  background:#071018;
+  background:#00190d;
   border:2px solid var(--green);
-  border-radius:13px;
-  padding:16px;
-  box-shadow:0 0 46px rgba(57,255,20,.25);
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 0 42px rgba(0,255,136,.28);
 }
 
-.pop.bad{
+.trade-pop.bad{
   border-color:var(--red);
-  box-shadow:0 0 46px rgba(255,77,109,.2);
+  box-shadow:0 0 42px rgba(255,85,119,.22);
 }
 
-.pop.ready{
+.trade-pop.warn{
   border-color:var(--yellow);
-  box-shadow:0 0 46px rgba(255,209,102,.22);
+  box-shadow:0 0 42px rgba(255,209,102,.22);
 }
 
-.pop h2{
+.trade-pop.day{
+  border-color:var(--blue);
+  box-shadow:0 0 42px rgba(87,166,255,.24);
+}
+
+.trade-pop h2{
   margin:0 0 10px;
-  color:var(--green);
+  font-size:22px;
+  color:var(--green2);
 }
 
-.pop.bad h2{color:#ff9aae}
-.pop.ready h2{color:var(--yellow)}
+.trade-pop.bad h2{color:#ff9aae}
+.trade-pop.warn h2{color:var(--yellow)}
+.trade-pop.day h2{color:#9ed1ff}
 
-.popLines{
-  background:#02080a;
-  border:1px solid var(--line2);
-  border-radius:8px;
-  padding:11px;
+.trade-pop .trade-lines{
+  background:#000;
+  border:1px solid rgba(0,255,136,.2);
+  border-radius:12px;
+  padding:12px;
   line-height:1.55;
+  font-size:14px;
 }
 
-.popActions{
+.trade-pop .trade-lines b{color:#fff}
+
+.trade-pop .trade-actions{
   display:flex;
   justify-content:flex-end;
+  gap:8px;
   margin-top:12px;
 }
 
+.trade-pop .countdown{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:8px;
+}
+
+details summary{
+  cursor:pointer;
+  color:var(--green2);
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.bottom-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+
 @media(max-width:1200px){
-  .app{grid-template-columns:1fr}
-  .sidebar{position:relative;height:auto}
-  .kpiBar,.bottomGrid,.settings,.grid4{grid-template-columns:1fr}
-  .chartWrap{height:520px}
+  .topbar,.kpis,.paper-wide,.paper-row,.layout,.bottom-grid,.grid4,.grid6,.best-strip,.two-col{
+    grid-template-columns:1fr;
+  }
+
+  #chart{height:460px}
+  table{min-width:1050px}
 }
 </style>
 </head>
 
 <body>
-<div class="app">
+<div id="app">
 
-<aside class="sidebar">
-  <div class="logoBox">
-    <div class="logoTick">✓</div>
-    <div class="logoText">TRADING<br>MINT</div>
-    <div class="proBar"></div>
-    <div class="logoSub">MAX HISTORY ENGINE</div>
-  </div>
-
-  <div class="nav">
-    <button class="active" onclick="jumpTo('dashboard')">▣ DASHBOARD</button>
-    <button onclick="jumpTo('scanner')">⌕ SCANNER</button>
-    <button onclick="jumpTo('positions')">◉ POSITIONS <span id="sidePositions" style="float:right;background:#9b5cff;color:#fff;border-radius:999px;padding:1px 7px">0</span></button>
-    <button onclick="jumpTo('journal')">▣ JOURNAL</button>
-    <button onclick="jumpTo('settings')">⚙ RISK / SETTINGS</button>
-    <button onclick="health()">⟳ HEALTH</button>
-  </div>
-
-  <div class="sidePanel">
-    <h3>Market Session</h3>
-    <div class="sideRow"><span>Status</span><b id="sideMarket">Checking</b></div>
-    <div class="sideRow"><span>Clock</span><b id="sideClock">--:--</b></div>
-    <div class="sideRow"><span>Next</span><b id="sideNext">Checking</b></div>
-    <div class="sideRow"><span>Refresh</span><b id="sideRefresh">1:00</b></div>
-  </div>
-
-  <div class="sidePanel">
-    <h3>Sound Settings</h3>
-    <div class="sideRow"><span>Status</span><b id="soundStatus">LOCKED</b></div>
-    <div style="display:flex;gap:6px;margin-top:8px">
-      <button onclick="unlockVoice()">Enable</button>
-      <button onclick="testVoice()">Test</button>
-      <button id="muteBtn" onclick="toggleMute()" class="yellow">Mute</button>
+  <div class="topbar">
+    <div>
+      <h1>US Trade Scanner</h1>
+      <p><span id="statusDot" class="dot"></span><span id="status">Loading scanner...</span></p>
     </div>
-    <div class="note yellowText">Press Enable first. Then trade alerts can speak.</div>
+
+    <div class="level"><span>Local Time</span><strong id="localTime">--:--</strong></div>
+    <div class="level"><span>US Market</span><strong id="marketState">Checking</strong></div>
+    <div class="level"><span>Market Countdown</span><strong id="marketCountdown">Checking</strong></div>
+    <div class="level"><span>Next Scan</span><strong id="nextScan">Checking</strong></div>
+    <div class="level"><span>Last Full Scan</span><strong id="fullScanStatus">Waiting</strong></div>
+    <div class="level pdt"><span>Swing Mode</span><strong>PDT Safe</strong></div>
+    <div class="level day"><span>Day Paper</span><strong>Test Only</strong></div>
+
+    <button id="muteBtn" class="icon" type="button" title="Mute or unmute">🔊</button>
+    <button id="pauseBtn" class="yellow" type="button">Pause</button>
   </div>
-</aside>
 
-<main class="main">
+  <section class="kpis">
+    <div class="level"><span>Connection</span><strong id="connection">Loading</strong></div>
+    <div class="level"><span>Updated</span><strong id="updated">-</strong></div>
+    <div class="level"><span>Total Checked</span><strong id="checkedCount">0</strong></div>
+    <div class="level"><span>Signals</span><strong id="signalCount">0</strong></div>
+    <div class="level"><span>Top Swing</span><strong id="topSignal">-</strong></div>
+    <div class="level"><span>Top Day Watch</span><strong id="topDaySignal">-</strong></div>
+    <div class="level"><span>Discovery</span><strong id="discoveryText">Expanded</strong></div>
+    <div class="level"><span>Market Health</span><strong id="marketHealthTop">Unknown</strong></div>
+  </section>
 
-<section id="dashboard" class="kpiBar">
-  <div class="kpi"><span>Regime</span><strong id="regime">Checking</strong></div>
-  <div class="kpi"><span>SPY</span><strong id="spyState" class="warn">Unknown</strong></div>
-  <div class="kpi"><span>Volatility</span><strong id="volState" class="bad">Unknown</strong></div>
-  <div class="kpi"><span>Breadth</span><strong id="breadthState">Waiting</strong></div>
-  <div class="kpi"><span>Data Feed</span><strong id="feedState" class="warn">Loading</strong></div>
-  <div class="kpi"><span>Paper Cash</span><strong id="cashKpi">$5,000.00</strong></div>
-  <div class="kpi"><span>Auto Paper</span><strong id="autoPaperKpi" class="good">ON | $5,000</strong></div>
-  <div class="kpi actionBtns">
-    <button onclick="showAlert('Backtest','Backtest will only be enabled after real historical testing is built. No fake backtest data is shown.','warn')">Backtest</button>
-    <button onclick="showAlert('Optimizer','Optimizer will only be enabled after real paper trade history exists. No fake optimizer data is shown.','warn')">Optimize</button>
-    <button class="yellow" onclick="scan()">Refresh</button>
+  <div class="card">
+    <h2>Best Swing Trades Right Now</h2>
+    <p>These are stock swing candidates. Best is first, then working down. This is the safer PDT-style paper trader.</p>
+    <div id="wakeWarning" class="note wake-warning"></div>
+    <div id="bestTrades" class="best-strip">
+      <div class="best-card"><strong>-</strong><span>Waiting for scan.</span></div>
+      <div class="best-card"><strong>-</strong><span>Waiting for scan.</span></div>
+      <div class="best-card"><strong>-</strong><span>Waiting for scan.</span></div>
+    </div>
+    <div id="marketHealthBox" class="note">Market health loading.</div>
   </div>
-</section>
 
-<section class="panel">
-  <div class="panelTitle">
-    <span id="chartTitle">CHART - FULL WIDTH</span>
-    <div class="chartTools" id="chartTools">
-      <button type="button" data-range="1d" data-interval="5m" data-label="1H / 5m" data-limit="12">1H</button>
-      <button type="button" data-range="1d" data-interval="15m" data-label="1D / 15m" data-limit="26">Day</button>
-      <button type="button" data-range="5d" data-interval="1h" data-label="1W / 1h" data-limit="40">Week</button>
-      <button type="button" data-range="1mo" data-interval="1d" data-label="1M / 1d" data-limit="24">Month</button>
-      <button type="button" data-range="1y" data-interval="1d" data-label="1Y / 1d" data-limit="252" class="active">Year</button>
-      <button type="button" data-range="5y" data-interval="1wk" data-label="5Y / 1wk" data-limit="260">Years</button>
-      <small id="chartStatus">Waiting</small>
+  <div class="card">
+    <h2>Intraday Momentum Watch - Day Paper Test Only</h2>
+    <p>This is for testing fast trades like the trader you follow. It does not mean you should live day trade without understanding PDT and account rules.</p>
+    <div id="dayTrades" class="best-strip">
+      <div class="best-card day"><strong>-</strong><span>Waiting for scan.</span></div>
+      <div class="best-card day"><strong>-</strong><span>Waiting for scan.</span></div>
+      <div class="best-card day"><strong>-</strong><span>Waiting for scan.</span></div>
+    </div>
+    <div id="dayWatchReason" class="note">Day watch waits for a fresh scan.</div>
+  </div>
+
+  <div class="card">
+    <h2>Ranked Swing Signals</h2>
+    <p>Auto-scans your watchlist and expanded discovery universe. The table is ranked by score, R:R, edge, and action. Low score cannot beat a strong setup just because R:R looks good.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Symbol</th>
+            <th>Decision</th>
+            <th>Score</th>
+            <th>Strength</th>
+            <th>Price</th>
+            <th>Trigger</th>
+            <th>Buy Zone</th>
+            <th>Stop</th>
+            <th>Target</th>
+            <th>R/R</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="12" style="text-align:center;padding:20px;color:#9fe9ba">Scanner starting...</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
-  <div class="chartWrap">
+
+  <div class="card">
+    <h2>Selected Trade Plan</h2>
+    <p>Selected: <b id="selectedName">-</b></p>
+    <div class="grid6">
+      <div class="level"><span>Price</span><strong id="dPrice">-</strong></div>
+      <div class="level"><span>Trigger</span><strong id="dTrigger">-</strong></div>
+      <div class="level"><span>Buy Zone</span><strong id="dBuy">-</strong></div>
+      <div class="level"><span>Stop</span><strong id="dStop">-</strong></div>
+      <div class="level"><span>Target</span><strong id="dTarget">-</strong></div>
+      <div class="level"><span>R/R</span><strong id="dRR">-</strong></div>
+    </div>
+    <div id="details" class="note">Waiting for scanner.</div>
+    <div id="warnings" class="note warn">Warnings will show here.</div>
+    <div id="education" class="note">Select a trade to see why the scanner ranked it.</div>
+  </div>
+
+  <div class="card">
+    <h2>Clear Candlestick Chart</h2>
+    <p id="chartInfo">Candles, buy zone, trigger, stop, target and current price are marked clearly.</p>
     <canvas id="chart"></canvas>
   </div>
-</section>
 
-<section id="scanner" class="panel">
-  <div class="panelTitle">
-    <span>LIVE SCANNER - FULL WIDTH | REAL BACKEND DATA ONLY</span>
-    <small id="dataStatus">Loading</small>
-  </div>
-  <div class="tableWrap">
-    <table>
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Ticker</th>
-          <th>Setup</th>
-          <th>Conf</th>
-          <th>Grade</th>
-          <th>Edge</th>
-          <th>Price</th>
-          <th>Change</th>
-          <th>R:R</th>
-          <th>Safety</th>
-          <th>Action</th>
-          <th>Paper</th>
-        </tr>
-      </thead>
-      <tbody id="rows">
-        <tr><td colspan="12" style="text-align:center;padding:24px;color:#9fe9ba">Waiting for live scanner data...</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
+  <div class="two-col">
 
-<section class="bottomGrid">
-  <div id="trade" class="detailBox">
-    <div class="panelTitle"><span>Selected Trade Detail</span><small id="selectedBadge">WATCHLIST</small></div>
-    <div class="boxBody">
-      <div class="bigSymbol" id="selectedSymbol">WAITING</div>
+    <div class="card">
+      <h2>Swing Paper Account - $5,000</h2>
       <div class="grid4">
-        <div class="mini"><span>Price</span><b id="dPrice">-</b></div>
-        <div class="mini"><span>Buy Zone</span><b id="dBuy">-</b></div>
-        <div class="mini"><span>Stop</span><b id="dStop">-</b></div>
-        <div class="mini"><span>Target</span><b id="dTarget">-</b></div>
+        <div class="level"><span>Equity</span><strong id="swingEquity">$5,000.00</strong></div>
+        <div class="level"><span>Cash</span><strong id="swingCash">$5,000.00</strong></div>
+        <div class="level"><span>Open P/L</span><strong id="swingOpenPnl">$0.00</strong></div>
+        <div class="level"><span>Closed P/L</span><strong id="swingClosedPnl">$0.00</strong></div>
       </div>
-      <div id="details" class="note">Waiting for scanner.</div>
-    </div>
-  </div>
-
-  <div class="detailBox">
-    <div class="panelTitle"><span>System / Alerts</span><small id="systemStatus">Starting</small></div>
-    <div class="boxBody">
-      <div id="warnings" class="note">Warnings will show here.</div>
-      <div id="autoDecisionBox" class="note">Auto paper decision waiting.</div>
-    </div>
-  </div>
-
-  <div class="detailBox">
-    <div class="panelTitle"><span>Trade Teaching</span><small>LEARN THE SETUP</small></div>
-    <div class="boxBody">
-      <div class="note teach"><b>Why this stock</b><br><span id="thesisWhy">Waiting for selection.</span></div>
-      <div class="note teach"><b>Entry lesson</b><br><span id="thesisEntry">Waiting for selection.</span></div>
-      <div class="note teach"><b>Exit lesson</b><br><span id="thesisExit">Waiting for selection.</span></div>
-      <div class="note teach"><b>What to learn</b><br><span id="thesisLesson">This scanner is for 24h+ swing trades. The goal is planned entry, defined risk, and no chasing.</span></div>
-    </div>
-  </div>
-</section>
-
-<section id="positions" class="bottomGrid">
-  <div class="detailBox">
-    <div class="panelTitle"><span>Paper Account</span><small id="equityKpi">$5,000.00</small></div>
-    <div class="boxBody">
-      <div class="grid2">
-        <div class="mini"><span>Open Value</span><b id="openValueKpi">$0.00</b></div>
-        <div class="mini"><span>Unrealised</span><b id="unrealisedKpi">$0.00</b></div>
-        <div class="mini"><span>Realised</span><b id="realisedKpi">$0.00</b></div>
-        <div class="mini"><span>Win Rate</span><b id="winRateKpi">0%</b></div>
+      <div class="grid4">
+        <div class="level"><span>Open Trades</span><strong id="swingOpenCount">0</strong></div>
+        <div class="level"><span>Closed Trades</span><strong id="swingClosedCount">0</strong></div>
+        <div class="level"><span>Win Rate</span><strong id="swingWinRate">0%</strong></div>
+        <div class="level"><span>Auto Swing</span><strong id="swingAutoStateTop">On</strong></div>
       </div>
-      <div id="paperBox"></div>
+      <div id="swingOpenBox"><p>No open swing paper trades yet.</p></div>
+    </div>
+
+    <div class="card">
+      <h2>Day Paper Account - Test Only</h2>
+      <div class="grid4">
+        <div class="level"><span>Equity</span><strong id="dayEquity">$5,000.00</strong></div>
+        <div class="level"><span>Cash</span><strong id="dayCash">$5,000.00</strong></div>
+        <div class="level"><span>Open P/L</span><strong id="dayOpenPnl">$0.00</strong></div>
+        <div class="level"><span>Closed P/L</span><strong id="dayClosedPnl">$0.00</strong></div>
+      </div>
+      <div class="grid4">
+        <div class="level"><span>Open Trades</span><strong id="dayOpenCount">0</strong></div>
+        <div class="level"><span>Closed Trades</span><strong id="dayClosedCount">0</strong></div>
+        <div class="level"><span>Day Entries</span><strong id="dayEntriesToday">0</strong></div>
+        <div class="level"><span>Auto Day</span><strong id="dayAutoStateTop">On</strong></div>
+      </div>
+      <div id="dayOpenBox"><p>No open day paper trades yet.</p></div>
+    </div>
+
+  </div>
+
+  <div class="two-col">
+
+    <div class="card">
+      <h2>Closed Swing Paper Trades</h2>
+      <button id="clearSwingClosedBtn" class="danger" type="button">Clear Swing Log</button>
+      <div id="swingClosedBox"><p>No closed swing trades yet.</p></div>
+    </div>
+
+    <div class="card">
+      <h2>Closed Day Paper Trades</h2>
+      <button id="clearDayClosedBtn" class="danger" type="button">Clear Day Log</button>
+      <div id="dayClosedBox"><p>No closed day trades yet.</p></div>
+    </div>
+
+  </div>
+
+  <div class="card">
+    <h2>Manual Paper Trade</h2>
+    <div class="paper-row">
+      <div>
+        <label>Manual Symbol</label>
+        <input id="paperSymbol" placeholder="NVDA">
+      </div>
+      <div>
+        <label>Manual Entry</label>
+        <input id="paperEntry" type="number" step="0.01">
+      </div>
+      <div>
+        <label>Shares</label>
+        <input id="paperShares" type="number" step="0.0001">
+      </div>
+      <button id="addSwingPaperBtn" type="button">Add Swing</button>
+      <button id="addDayPaperBtn" class="blue" type="button">Add Day</button>
+      <button id="exportLogBtn" type="button">Export Log</button>
     </div>
   </div>
 
-  <div id="journal" class="detailBox">
-    <div class="panelTitle"><span>Journal</span><small id="closedCountKpi">0</small></div>
-    <div class="boxBody">
-      <button class="red" id="clearClosedBtn">Clear Closed Log</button>
-      <button id="exportLogBtn">Export Log</button>
-      <div id="closedBox"></div>
+  <div class="card">
+    <h2>Auto Paper Activity Feed</h2>
+    <div id="activityFeed" class="activity-feed">
+      <div class="feed-item">Waiting for scanner activity.</div>
     </div>
   </div>
 
-  <div class="detailBox">
-    <div class="panelTitle"><span>Activity Feed</span><small>LIVE</small></div>
-    <div class="boxBody">
-      <div id="activityFeed" class="feed"><div>Waiting for scanner activity.</div></div>
-    </div>
-  </div>
-</section>
+  <div class="bottom-grid">
 
-<section id="settings" class="settings">
-  <details class="panel" open>
-    <summary class="panelTitle">Scanner Settings</summary>
-    <div class="boxBody">
+    <details class="card">
+      <summary>Scanner Settings</summary>
+
+      <label>Mode</label>
+      <select id="mode">
+        <option value="swing" selected>PDT-safe Swing</option>
+        <option value="both">Both context</option>
+      </select>
+
       <label>Watchlist</label>
-      <textarea id="symbols">SPY,QQQ,NVDA,TSLA,AAPL,MSFT,META,AMD,PLTR,COST,LLY,UNH,JPM,AVGO</textarea>
+      <textarea id="symbols">SPY,QQQ,NVDA,TSLA,AAPL,MSFT,META,AMD,PLTR,COST,LLY,UNH,JPM,AVGO,HPE,UBER,GOOGL,PANW,AMAT,MU,LRCX,CAT,XLI,XLK,NFLX,COIN,SMCI,MSTR,ARM</textarea>
 
       <label>Discovery scan size</label>
       <select id="scanLimit">
-        <option value="60">Fast: 60 extra tickers</option>
-        <option value="100" selected>Balanced: 100 extra tickers</option>
-        <option value="140">Wide: 140 extra tickers</option>
+        <option value="80">Fast: 80 extra tickers</option>
+        <option value="140" selected>Balanced: 140 extra tickers</option>
+        <option value="220">Wide: 220 extra tickers</option>
       </select>
 
       <label>Refresh minutes</label>
-      <input id="refresh" type="number" value="1" min="1">
+      <input id="refresh" type="number" value="5" min="1">
 
       <label>Risk $</label>
-      <input id="risk" type="number" value="100">
-    </div>
-  </details>
+      <input id="risk" type="number" value="50">
+    </details>
 
-  <details class="panel" open>
-    <summary class="panelTitle">Auto Paper Rules</summary>
-    <div class="boxBody">
-      <button id="autoBtn">Turn Auto Paper Off</button>
+    <details class="card">
+      <summary>Swing Paper Rules</summary>
+      <p>Auto swing paper: <b id="swingAutoState">On</b></p>
+      <button id="swingAutoBtn" class="yellow" type="button">Turn Swing Auto Off</button>
 
       <label>Paper account size</label>
-      <input id="accountSize" type="number" value="5000" min="100">
+      <input id="swingAccountSize" type="number" value="5000" min="100">
 
       <label>Max one trade %</label>
-      <input id="maxTradePct" type="number" value="20" min="1" max="100">
+      <input id="swingMaxTradePct" type="number" value="20" min="1" max="100">
 
-      <label>Max open trades</label>
-      <input id="maxOpenTrades" type="number" value="5" min="1" max="20">
+      <label>Risk dollars per trade</label>
+      <input id="swingRiskDollars" type="number" value="50" min="5">
 
-      <label>Max new entries per day</label>
-      <input id="maxDailyEntries" type="number" value="3" min="1" max="20">
+      <label>Max open swing trades</label>
+      <input id="swingMaxOpenTrades" type="number" value="5" min="1" max="20">
 
-      <label>Minimum score to auto-enter</label>
-      <input id="autoMinScore" type="number" value="82" min="50" max="100">
+      <label>Max new swing entries per day</label>
+      <input id="swingMaxDailyEntries" type="number" value="3" min="1" max="20">
 
-      <label>Minimum risk/reward</label>
-      <input id="autoMinRR" type="number" value="1.8" step="0.1">
+      <button id="resetSwingAccountBtn" class="danger" type="button">Reset Swing $5K</button>
+      <div id="swingRulesBox" class="note">Rules loading...</div>
+    </details>
 
-      <button class="red" id="resetAccountBtn">Reset $5K Account</button>
-      <div id="autoRulesBox" class="note">Rules loading...</div>
-    </div>
+    <details class="card">
+      <summary>Day Paper Rules</summary>
+      <p>Auto day paper: <b id="dayAutoState">On</b></p>
+      <button id="dayAutoBtn" class="yellow" type="button">Turn Day Auto Off</button>
+
+      <label>Day paper account size</label>
+      <input id="dayAccountSize" type="number" value="5000" min="100">
+
+      <label>Max one day trade %</label>
+      <input id="dayMaxTradePct" type="number" value="12" min="1" max="100">
+
+      <label>Risk dollars per day trade</label>
+      <input id="dayRiskDollars" type="number" value="25" min="5">
+
+      <label>Max open day trades</label>
+      <input id="dayMaxOpenTrades" type="number" value="2" min="1" max="10">
+
+      <label>Max day entries per session</label>
+      <input id="dayMaxDailyEntries" type="number" value="3" min="1" max="20">
+
+      <label>Max day hold minutes</label>
+      <input id="dayMaxHoldMinutes" type="number" value="90" min="5">
+
+      <button id="resetDayAccountBtn" class="danger" type="button">Reset Day $5K</button>
+      <div id="dayRulesBox" class="note">Rules loading...</div>
+    </details>
+
+  </div>
+
+  <details class="card">
+    <summary>Scanner Log and Auto Decisions</summary>
+    <h3>Auto Paper Decision</h3>
+    <div id="autoDecisionBox" class="note">Waiting for scan.</div>
+    <h3>Log</h3>
+    <div id="log" class="log">Waiting...</div>
   </details>
 
-  <details class="panel">
-    <summary class="panelTitle">Log / Health</summary>
-    <div class="boxBody">
-      <div class="note">Keepalive: <b id="keepalive">Starting</b></div>
-      <div id="log" class="note" style="max-height:180px;overflow:auto;white-space:pre-wrap">Waiting...</div>
-    </div>
-  </details>
-</section>
-
-</main>
 </div>
 
 <div id="alertBox" class="alert"></div>
 
-<div id="tradePopWrap" class="popWrap">
-  <div id="tradePop" class="pop">
+<div id="tradePopWrap" class="trade-pop-wrap">
+  <div id="tradePop" class="trade-pop">
     <h2 id="tradePopTitle">Paper Trade Alert</h2>
-    <div id="tradePopLines" class="popLines"></div>
-    <div class="popActions">
-      <button id="tradePopClose">Close</button>
+    <div id="tradePopLines" class="trade-lines"></div>
+    <div id="tradePopCountdown" class="countdown">Closing in 12 seconds...</div>
+    <div class="trade-actions">
+      <button id="tradePopClose" type="button">Close</button>
     </div>
   </div>
 </div>
 
 <script>
-var RESULTS=[];
-var SELECTED=null;
-var MARKET_HEALTH="Unknown";
-var LOOP=null;
-var NEXT_SCAN=0;
-var ALERT_TIMER=null;
-var POP_TIMER=null;
-var VOICE_UNLOCKED=false;
-var MUTED=localStorage.getItem("scannerMuted")==="true";
-var SCANNER_RUNNING=localStorage.getItem("scannerRunning")!=="false";
-var AUTO_PAPER=localStorage.getItem("autoPaperOn")!=="false";
-var READY_SEEN={};
-var CHART_RANGE='1y';
-var CHART_INTERVAL='1d';
-var CHART_LABEL='1Y / 1d';
-var CHART_LIMIT=252;
-var CHART_CACHE={};
+var API = "";
+var RESULTS = [];
+var DAY_RESULTS = [];
+var SELECTED = null;
+var SELECTED_SYMBOL = localStorage.getItem("selectedSymbol") || "";
+var LOOP = null;
+var NEXT_SCAN = 0;
+var TIMER = null;
+var KEEP_TIMER = null;
+var ALERT_TIMER = null;
+var TRADE_POP_TIMER = null;
+var TRADE_POP_LEFT = 12;
+var TRADE_POP_COUNTDOWN = null;
+var MARKET_HEALTH = "Unknown";
+var LAST_ACTIVE_TIME = Date.now();
+var LAST_TOTAL_CHECKED = 0;
+
+var SCANNER_RUNNING = localStorage.getItem("scannerRunning") !== "false";
+var SWING_AUTO = localStorage.getItem("swingAutoOn") !== "false";
+var DAY_AUTO = localStorage.getItem("dayAutoOn") !== "false";
+var MUTED = localStorage.getItem("scannerMuted") === "true";
+var VOICE_UNLOCKED = false;
 
 function el(id){return document.getElementById(id);}
-function setText(id,v){var n=el(id);if(n)n.textContent=v;}
-function esc(v){var d=document.createElement("div");d.textContent=v==null?"":String(v);return d.innerHTML;}
-function money(v){var n=Number(v);return Number.isFinite(n)?"$"+n.toFixed(2):"-";}
-function num(v){var n=Number(v);return Number.isFinite(n)?n:null;}
-function pad(v){return Number(v)<10?"0"+v:String(v);}
+function setText(id,value){var n=el(id);if(n)n.textContent=value;}
+function escapeHtml(value){var d=document.createElement("div");d.textContent=value==null?"":String(value);return d.innerHTML;}
+function money(value){var n=Number(value);return Number.isFinite(n)?"$"+n.toFixed(2):"-";}
+function num(value){var n=Number(value);return Number.isFinite(n)?n:null;}
+function pad(value){value=Number(value);return value<10?"0"+value:String(value);}
 function nowText(){return new Date().toLocaleString();}
 
-function jumpTo(id){
-  var target=document.getElementById(id);
-  if(!target){
-    console.warn("Missing section:",id);
-    return;
-  }
-  target.scrollIntoView({behavior:"smooth",block:"start"});
+function parseDateSafe(value){
+  var d = new Date(value);
+  return isNaN(d.getTime()) ? null : d;
 }
 
-function log(msg){
+function sameToday(value){
+  var d = parseDateSafe(value);
+  if(!d)return false;
+  var n = new Date();
+  return d.getFullYear()===n.getFullYear() && d.getMonth()===n.getMonth() && d.getDate()===n.getDate();
+}
+
+function ageText(value){
+  var d = parseDateSafe(value);
+  if(!d)return "-";
+  var ms = Date.now() - d.getTime();
+  if(ms < 0) ms = 0;
+  var mins = Math.floor(ms / 60000);
+  var hours = Math.floor(mins / 60);
+  var days = Math.floor(hours / 24);
+  if(days > 0)return days+"d "+(hours%24)+"h";
+  if(hours > 0)return hours+"h "+(mins%60)+"m";
+  return mins+"m";
+}
+
+function ageMinutes(value){
+  var d = parseDateSafe(value);
+  if(!d)return 0;
+  return Math.max(0, Math.floor((Date.now() - d.getTime()) / 60000));
+}
+
+function pnlClass(value){
+  value = Number(value);
+  if(value > 0)return "pnl-good";
+  if(value < 0)return "pnl-bad";
+  return "pnl-flat";
+}
+
+function log(message){
   var box=el("log");
-  if(box)box.textContent="["+new Date().toLocaleTimeString()+"] "+msg+"\n\n"+box.textContent;
+  if(box)box.textContent="["+new Date().toLocaleTimeString()+"] "+message+"\n\n"+box.textContent;
 }
 
-function status(msg,kind){
-  setText("systemStatus",msg);
+function setDots(kind){
+  var d=el("statusDot");
+  if(d){
+    d.className="dot";
+    if(kind==="good")d.className="dot green";
+    if(kind==="work")d.className="dot yellow";
+  }
 }
 
-function showAlert(title,msg,type){
+function status(message,kind){
+  setText("status",message);
+  setText("connection",kind==="good"?"Connected":kind==="work"?"Working":"Offline");
+  setDots(kind);
+}
+
+function showAlert(title,message,type){
   var box=el("alertBox");
   if(!box)return;
   clearTimeout(ALERT_TIMER);
   box.className="alert "+(type||"");
-  box.innerHTML="<b>"+esc(title)+"</b><br>"+esc(msg);
+  box.innerHTML="<b>"+escapeHtml(title)+"</b><br>"+escapeHtml(message);
   box.style.display="block";
   ALERT_TIMER=setTimeout(function(){box.style.display="none";},10000);
 }
 
-function closePop(){
-  var w=el("tradePopWrap");
-  if(w)w.style.display="none";
-  if(POP_TIMER)clearTimeout(POP_TIMER);
+function closeTradePop(){
+  var wrap = el("tradePopWrap");
+  if (wrap) wrap.style.display = "none";
+  if (TRADE_POP_TIMER) clearTimeout(TRADE_POP_TIMER);
+  if (TRADE_POP_COUNTDOWN) clearInterval(TRADE_POP_COUNTDOWN);
+  TRADE_POP_TIMER = null;
+  TRADE_POP_COUNTDOWN = null;
 }
 
-function showPop(title,lines,type){
-  var w=el("tradePopWrap"),p=el("tradePop"),t=el("tradePopTitle"),l=el("tradePopLines");
-  if(!w||!p||!t||!l)return;
-  closePop();
-  p.className="pop "+(type||"");
-  t.textContent=title;
-  l.innerHTML=lines.map(function(x){return"<div>"+x+"</div>";}).join("");
-  w.style.display="flex";
-  POP_TIMER=setTimeout(closePop,12000);
+function showTradePop(title, lines, type){
+  var wrap = el("tradePopWrap");
+  var pop = el("tradePop");
+  var titleBox = el("tradePopTitle");
+  var linesBox = el("tradePopLines");
+  var countdownBox = el("tradePopCountdown");
+
+  if (!wrap || !pop || !titleBox || !linesBox) {
+    showAlert(title, lines.join(" | "), type);
+    return;
+  }
+
+  closeTradePop();
+
+  pop.className = "trade-pop " + (type || "");
+  titleBox.textContent = title;
+  linesBox.innerHTML = lines.map(function(line){return "<div>" + line + "</div>";}).join("");
+
+  TRADE_POP_LEFT = 12;
+  if (countdownBox) countdownBox.textContent = "Closing in " + TRADE_POP_LEFT + " seconds...";
+  wrap.style.display = "flex";
+
+  TRADE_POP_COUNTDOWN = setInterval(function(){
+    TRADE_POP_LEFT -= 1;
+    if (countdownBox) countdownBox.textContent = "Closing in " + Math.max(0, TRADE_POP_LEFT) + " seconds...";
+    if (TRADE_POP_LEFT <= 0) closeTradePop();
+  }, 1000);
+
+  TRADE_POP_TIMER = setTimeout(function(){closeTradePop();},12000);
 }
 
-function unlockVoice(){
-  VOICE_UNLOCKED=true;
-  setText("soundStatus","UNLOCKED");
-  speak("TradingMint voice alerts are enabled.");
-}
-
-function testVoice(){
-  VOICE_UNLOCKED=true;
-  speak("Voice test successful.");
-}
-
-function toggleMute(){
-  MUTED=!MUTED;
-  localStorage.setItem("scannerMuted",MUTED?"true":"false");
-  el("muteBtn").textContent=MUTED?"Unmute":"Mute";
-  setText("soundStatus",MUTED?"MUTED":"UNLOCKED");
-}
-
-function speak(msg){
+function speak(message){
   try{
     if(MUTED||!VOICE_UNLOCKED)return;
-    speechSynthesis.cancel();
-    var u=new SpeechSynthesisUtterance(msg);
-    u.rate=.95;
-    speechSynthesis.speak(u);
-  }catch(e){}
+    window.speechSynthesis.cancel();
+    var v=new SpeechSynthesisUtterance(message);
+    v.rate=.95;
+    window.speechSynthesis.speak(v);
+  }catch(error){
+    log("SPEAK ERROR: "+error.message);
+  }
 }
 
-function api(path){
-  log("Fetching: "+path);
-  return fetch(path,{cache:"no-store"}).then(function(r){
-    return r.text().then(function(txt){
+function unlockVoiceOnce(){VOICE_UNLOCKED=true;}
+
+function apiJson(path){
+  var url=API+path;
+  log("Fetching: "+url);
+  return fetch(url,{cache:"no-store",mode:"cors"}).then(function(response){
+    return response.text().then(function(text){
       var data={};
-      try{data=txt?JSON.parse(txt):{};}catch(e){data={raw:txt};}
-      if(!r.ok)throw new Error(data.error||data.message||"HTTP "+r.status);
+      try{data=text?JSON.parse(text):{};}catch(e){data={raw:text};}
+      if(!response.ok)throw new Error(data.error||data.message||data.detail||"HTTP "+response.status);
       return data;
     });
   });
 }
 
-function getSignalsFromResponse(data){
-  if(!data)return [];
-  if(Array.isArray(data))return data;
-
-  if(Array.isArray(data.signals))return data.signals;
-  if(Array.isArray(data.results))return data.results;
-  if(Array.isArray(data.data))return data.data;
-  if(Array.isArray(data.rows))return data.rows;
-  if(Array.isArray(data.ranked))return data.ranked;
-  if(Array.isArray(data.opportunities))return data.opportunities;
-  if(Array.isArray(data.stocks))return data.stocks;
-  if(Array.isArray(data.items))return data.items;
-
-  if(data.data&&Array.isArray(data.data.signals))return data.data.signals;
-  if(data.data&&Array.isArray(data.data.results))return data.data.results;
-  if(data.data&&Array.isArray(data.data.rows))return data.data.rows;
-  if(data.data&&Array.isArray(data.data.ranked))return data.data.ranked;
-  if(data.data&&Array.isArray(data.data.opportunities))return data.data.opportunities;
-  if(data.data&&Array.isArray(data.data.stocks))return data.data.stocks;
-  if(data.data&&Array.isArray(data.data.items))return data.data.items;
-
-  if(data.payload&&Array.isArray(data.payload.signals))return data.payload.signals;
-  if(data.payload&&Array.isArray(data.payload.results))return data.payload.results;
-  if(data.payload&&Array.isArray(data.payload.rows))return data.payload.rows;
-  if(data.payload&&Array.isArray(data.payload.ranked))return data.payload.ranked;
-  if(data.payload&&Array.isArray(data.payload.opportunities))return data.payload.opportunities;
-  if(data.payload&&Array.isArray(data.payload.stocks))return data.payload.stocks;
-  if(data.payload&&Array.isArray(data.payload.items))return data.payload.items;
-
-  return [];
+function getSymbols(){
+  var box=el("symbols");
+  if(!box)return "";
+  return box.value.split(",").map(function(s){return s.trim().toUpperCase();}).filter(Boolean).join(",");
 }
 
-function symbols(){
-  return (el("symbols").value||"").split(",").map(function(s){return s.trim().toUpperCase();}).filter(Boolean).join(",");
-}
-
-function field(o,names){
+function field(item,names){
   for(var i=0;i<names.length;i++){
-    if(o[names[i]]!==undefined&&o[names[i]]!==null)return o[names[i]];
+    if(item[names[i]]!==undefined&&item[names[i]]!==null)return item[names[i]];
   }
   return null;
 }
 
-function clean(o){
-  if(!o)o={};
-
-  var symbol=o.symbol||o.ticker||o.code||o.name||"-";
-  var decision=field(o,["decision","tradeDecision","action","signal","recommendation"])||"WATCH";
-  var score=field(o,["score","conf","confidence","entryScore","rankScore"])||0;
-  var price=field(o,["price","currentPrice","last","close","mark"]);
-
-  return{
-    raw:o,
-    symbol:String(symbol).toUpperCase(),
-    decision:decision,
-    score:score,
-    strengthScore:field(o,["strengthScore","strength","trendScore"])||score,
-    entryScore:field(o,["entryScore","conf","confidence"])||score,
-    rank:field(o,["rankScore","rank","score","conf","confidence"])||score,
-    price:price,
-    buyLow:field(o,["buyZoneLow","buyLow","entryLow","buy_low"]),
-    buyHigh:field(o,["buyZoneHigh","buyHigh","entryHigh","buy_high"]),
-    stop:field(o,["stopLoss","stop","sl","stopPrice"]),
-    target:field(o,["target1","targetPrice","target","tp"]),
-    target2:field(o,["target2","tp2"]),
-    rr:field(o,["riskReward","rr","rR","risk_reward"])||"-",
-    hold:field(o,["expectedHold","hold","holdTime"])||"24 hours or more",
-    summary:field(o,["summary","plainEnglish","reason","thesis","description"])||"",
-    plan:field(o,["actionPlan","plan","summary"])||"",
-    reasons:Array.isArray(o.reasons)?o.reasons:[],
-    warnings:Array.isArray(o.warnings)?o.warnings:[],
-    bars:Array.isArray(o.bars)?o.bars:(Array.isArray(o.candles)?o.candles:[]),
-    change:field(o,["changePercent","changePct","change"]),
-    support:o.support,
-    resistance:o.resistance
+function clean(item){
+  var r = {
+    raw:item,
+    symbol:item.symbol||"-",
+    decision:field(item,["decision","tradeDecision","action"])||"WATCH",
+    score:item.score!==undefined?item.score:"-",
+    strengthScore:item.strengthScore!==undefined?item.strengthScore:item.score,
+    entryScore:item.entryScore!==undefined?item.entryScore:item.score,
+    rank:item.rankScore!==undefined?item.rankScore:item.score,
+    price:field(item,["price","currentPrice"]),
+    buyLow:field(item,["buyZoneLow","buyLow"]),
+    buyHigh:field(item,["buyZoneHigh","buyHigh"]),
+    stop:field(item,["stopLoss","stop","sl"]),
+    target:field(item,["target1","targetPrice","tp"]),
+    target2:field(item,["target2"]),
+    rr:item.riskReward||"-",
+    hold:item.expectedHold||"1 to 5 trading days",
+    summary:item.summary||item.plainEnglish||"",
+    plan:item.actionPlan||item.summary||"",
+    reasons:Array.isArray(item.reasons)?item.reasons:[],
+    warnings:Array.isArray(item.warnings)?item.warnings:[],
+    bars:Array.isArray(item.bars)?item.bars:[]
   };
+
+  r.trigger = calcTrigger(r);
+  r.tightStop = calcTightStop(r);
+  r.dayTarget = calcDayTarget(r);
+  r.dayRR = calcRR(r.price, r.tightStop, r.dayTarget);
+  r.finalRank = finalRankScore(r);
+  r.dayRank = dayRankScore(r);
+
+  return r;
 }
 
-function bars(r){
-  return (r&&Array.isArray(r.bars)?r.bars:[]).map(function(b){
-    return{
-      open:num(b.open!==undefined?b.open:b.o),
-      high:num(b.high!==undefined?b.high:b.h),
-      low:num(b.low!==undefined?b.low:b.l),
-      close:num(b.close!==undefined?b.close:b.c),
-      date:b.date||b.time||""
-    };
-  }).filter(function(b){return Number.isFinite(b.close)&&Number.isFinite(b.high)&&Number.isFinite(b.low);});
+function calcTrigger(r){
+  var price = Number(r.price);
+  var buyHigh = Number(r.buyHigh);
+  if(Number.isFinite(price) && Number.isFinite(buyHigh)){
+    return Math.max(price, buyHigh);
+  }
+  if(Number.isFinite(price))return price;
+  return null;
 }
 
-function sr(r){
-  var b=bars(r).slice(-20);
-  if(!b.length)return{support:num(r&&r.support),resistance:num(r&&r.resistance)};
-  return{
-    support:Math.min.apply(null,b.map(function(x){return x.low;})),
-    resistance:Math.max.apply(null,b.map(function(x){return x.high;}))
-  };
+function calcTightStop(r){
+  var bars = Array.isArray(r.bars) ? r.bars.slice(-8) : [];
+  var lows = bars.map(function(b){return Number(b.low!==undefined?b.low:b.l);}).filter(Number.isFinite);
+  var price = Number(r.price);
+  if(lows.length){
+    var low = Math.min.apply(null,lows);
+    if(Number.isFinite(price) && low < price)return low;
+  }
+  var buyLow = Number(r.buyLow);
+  if(Number.isFinite(buyLow))return buyLow;
+  var stop = Number(r.stop);
+  if(Number.isFinite(stop))return stop;
+  return null;
 }
 
-function setup(r){
-  var d=String(r.decision||"");
-  if(/ENTER|BUY|ENTRY/i.test(d))return"Entry";
-  if(/BREAKOUT/i.test(d))return"Breakout";
-  if(/PULLBACK/i.test(d))return"Pullback";
-  return"Watch";
+function calcDayTarget(r){
+  var price = Number(r.price);
+  var target = Number(r.target);
+  if(Number.isFinite(price) && Number.isFinite(target) && target > price){
+    var capped = price + ((target - price) * 0.35);
+    return Math.max(capped, price * 1.008);
+  }
+  if(Number.isFinite(price))return price * 1.012;
+  return null;
 }
 
-function isPriceInBuyZone(r){
-  var p=Number(r.price);
-  var lo=Number(r.buyLow);
-  var hi=Number(r.buyHigh);
-  if(!Number.isFinite(p)||!Number.isFinite(lo)||!Number.isFinite(hi))return false;
-  return p>=lo&&p<=hi;
+function calcRR(entry, stop, target){
+  entry = Number(entry);
+  stop = Number(stop);
+  target = Number(target);
+  if(!Number.isFinite(entry) || !Number.isFinite(stop) || !Number.isFinite(target))return 0;
+  var risk = entry - stop;
+  var reward = target - entry;
+  if(risk <= 0 || reward <= 0)return 0;
+  return reward / risk;
 }
 
-function isNearBuyZone(r){
-  var p=Number(r.price);
-  var lo=Number(r.buyLow);
-  var hi=Number(r.buyHigh);
-  if(!Number.isFinite(p)||!Number.isFinite(lo)||!Number.isFinite(hi)||hi<=0)return false;
-  var above=(p-hi)/hi;
-  var below=(lo-p)/lo;
-  if(isPriceInBuyZone(r))return true;
-  if(above>0&&above<=0.025)return true;
-  if(below>0&&below<=0.015)return true;
-  return false;
-}
+function shortReason(r){
+  var decision = String(r.decision || "");
 
-function stage(r){
-  var d=String(r.decision||"");
-  var reject=getRejectReason(r);
-  var score=Number(r.score||0);
-  var minScore=Number(el("autoMinScore").value||82);
+  if (/ENTER_NOW/i.test(decision)) return "Best active swing entry";
 
-  if(reject){
-    return "WATCH";
+  if (/PULLBACK/i.test(decision)) {
+    var price = Number(r.price);
+    var high = Number(r.buyHigh);
+    if (Number.isFinite(price) && Number.isFinite(high) && price > high) return "Strong but above buy zone";
+    return "Waiting for safer pullback";
   }
 
-  if(/ENTER|BUY|ENTRY/i.test(d)){
-    return "ENTER";
-  }
-
-  if(isNearBuyZone(r) && score >= minScore-8){
-    return "GET READY";
-  }
-
-  return "WATCH";
+  if (/BREAKOUT/i.test(decision)) return "Waiting for breakout";
+  if (Number(r.rr) < 1.8) return "R/R needs improvement";
+  return "Watch only";
 }
 
-function grade(r){
-  var s=Number(r.score||0);
-  if(s>=90)return"A";
-  if(s>=82)return"B+";
-  if(s>=72)return"B";
-  if(s>=62)return"C+";
-  return"C";
-}
+function dayReason(r){
+  var score = Number(r.score || 0);
+  var rr = Number(r.dayRR || 0);
+  var price = Number(r.price);
+  var trigger = Number(r.trigger);
 
-function edge(r){
-  var s=Number(r.score||0);
-  if(s>=80)return"ELITE EDGE";
-  if(s>=70)return"GOOD EDGE";
-  if(s>=60)return"SMALL EDGE";
-  return"LOW EDGE";
-}
-
-function reason(r){
-  var reject=getRejectReason(r);
-
-  if(reject){
-    return reject;
+  if(score >= 75 && rr >= 1.3 && Number.isFinite(price) && Number.isFinite(trigger) && price >= trigger * 0.992){
+    return "Intraday momentum watch. Trigger is close and tight stop is available.";
   }
 
-  if(stage(r)==="ENTER")return"Entry candidate";
-  if(stage(r)==="GET READY")return"Near entry zone";
-  if(setup(r)==="Pullback")return"Pullback watch";
-  if(setup(r)==="Breakout")return"Breakout watch";
-  return"Watchlist";
+  if(score >= 65 && rr >= 1.5){
+    return "Possible intraday watch, but needs price to prove the trigger.";
+  }
+
+  return "Not a clean day paper setup yet.";
 }
 
 function rowClass(r){
-  if(stage(r)==="ENTER")return"row-enter";
-  if(setup(r)==="Pullback")return"row-pullback";
-  if(setup(r)==="Breakout")return"row-breakout";
-  return"row-watch";
+  var decision = String(r.decision || "");
+  if (/ENTER_NOW/i.test(decision)) return "row-enter";
+  if (/PULLBACK/i.test(decision)) return "row-pullback";
+  if (/BREAKOUT/i.test(decision)) return "row-breakout";
+  return "row-watch";
 }
 
-function defaultAccount(){
-  return{starting:5000,cash:5000,open:{},closed:[],createdAt:nowText()};
+function bestCardClass(r){
+  var decision = String(r.decision || "");
+  if (/ENTER_NOW/i.test(decision)) return "enter";
+  if (/PULLBACK/i.test(decision)) return "pullback";
+  if (/BREAKOUT/i.test(decision)) return "breakout";
+  return "";
 }
 
-function getAccount(){
+function chaseBadge(r){
+  var price = Number(r.price);
+  var buyHigh = Number(r.buyHigh);
+  if (Number.isFinite(price) && Number.isFinite(buyHigh) && buyHigh > 0) {
+    var above = ((price - buyHigh) / buyHigh) * 100;
+    if (above > 0.5) return "<span class='do-not-chase'>DO NOT CHASE</span>";
+  }
+  return "";
+}
+
+function finalRankScore(r){
+  var score = Number(r.score || 0);
+  var rr = Number(r.rr || 0);
+  var strength = Number(r.strengthScore || r.score || 0);
+  var decision = String(r.decision || "").toUpperCase();
+  var rank = 0;
+
+  rank += score * 0.60;
+  rank += strength * 0.20;
+
+  if (Number.isFinite(rr)) {
+    if (rr >= 3.0) rank += 15;
+    else if (rr >= 2.5) rank += 13;
+    else if (rr >= 2.0) rank += 11;
+    else if (rr >= 1.8) rank += 8;
+    else if (rr >= 1.5) rank += 3;
+    else rank -= 8;
+  } else {
+    rank -= 10;
+  }
+
+  if (/ENTER_NOW|ENTER|BUY/i.test(decision)) rank += 18;
+  else if (/PULLBACK/i.test(decision)) rank += 10;
+  else if (/BREAKOUT/i.test(decision)) rank += 8;
+  else if (/WATCH/i.test(decision)) rank += 2;
+
+  if (score < 50) rank -= 60;
+  else if (score < 60) rank -= 30;
+  else if (score < 70) rank -= 12;
+
+  if (score >= 75 && rr >= 1.8) rank += 10;
+  if (score >= 85 && rr >= 1.5) rank += 8;
+
+  var price = Number(r.price);
+  var buyHigh = Number(r.buyHigh);
+  if (Number.isFinite(price) && Number.isFinite(buyHigh) && buyHigh > 0) {
+    var aboveBuyZone = ((price - buyHigh) / buyHigh) * 100;
+    if (aboveBuyZone > 0.5) rank -= 12;
+    if (aboveBuyZone > 2) rank -= 20;
+  }
+
+  return rank;
+}
+
+function dayRankScore(r){
+  var score = Number(r.score || 0);
+  var rr = Number(r.dayRR || 0);
+  var price = Number(r.price);
+  var trigger = Number(r.trigger);
+  var rank = 0;
+
+  rank += score * 0.75;
+
+  if(rr >= 2.0) rank += 18;
+  else if(rr >= 1.6) rank += 14;
+  else if(rr >= 1.3) rank += 10;
+  else rank -= 10;
+
+  if(Number.isFinite(price) && Number.isFinite(trigger) && trigger > 0){
+    var away = Math.abs((price - trigger) / trigger) * 100;
+    if(away <= 0.35) rank += 14;
+    else if(away <= 0.75) rank += 9;
+    else if(away <= 1.25) rank += 4;
+    else rank -= 10;
+  }
+
+  if(score < 60) rank -= 60;
+  if(score >= 75 && rr >= 1.3) rank += 10;
+
+  return rank;
+}
+
+function addActivity(text){
+  var items = [];
+  try {items = JSON.parse(localStorage.getItem("activityFeed") || "[]");} catch(e) {items = [];}
+  items.unshift({time: new Date().toLocaleTimeString(), text: text});
+  items = items.slice(0, 80);
+  localStorage.setItem("activityFeed", JSON.stringify(items));
+  renderActivity();
+}
+
+function renderActivity(){
+  var box = el("activityFeed");
+  if (!box) return;
+  var items = [];
+  try {items = JSON.parse(localStorage.getItem("activityFeed") || "[]");} catch(e) {items = [];}
+  if (!items.length) {
+    box.innerHTML = "<div class='feed-item'>Waiting for scanner activity.</div>";
+    return;
+  }
+  box.innerHTML = items.map(function(item){
+    return "<div class='feed-item'><b>" + escapeHtml(item.time) + "</b> - " + escapeHtml(item.text) + "</div>";
+  }).join("");
+}
+
+function renderBestTrades(){
+  var box = el("bestTrades");
+  if (!box) return;
+
+  var top = RESULTS.slice(0, 3);
+  if (!top.length) {
+    box.innerHTML =
+      "<div class='best-card'><strong>-</strong><span>Waiting for scan.</span></div>" +
+      "<div class='best-card'><strong>-</strong><span>Waiting for scan.</span></div>" +
+      "<div class='best-card'><strong>-</strong><span>Waiting for scan.</span></div>";
+    return;
+  }
+
+  box.innerHTML = top.map(function(r, i){
+    return "<div class='best-card " + bestCardClass(r) + "' data-best-index='" + i + "'>" +
+      "<strong>" + (i + 1) + ". " + escapeHtml(r.symbol) + "</strong>" +
+      "<span>" + escapeHtml(String(r.decision).replace(/_/g, " ")) + "</span>" +
+      "<span>Score: " + escapeHtml(r.score) + " | R:R: " + escapeHtml(r.rr) + "</span>" +
+      "<span>Trigger: " + money(r.trigger) + " | Stop: " + money(r.stop) + "</span>" +
+      "<span>" + escapeHtml(shortReason(r)) + "</span>" +
+      chaseBadge(r) +
+    "</div>";
+  }).join("");
+
+  document.querySelectorAll("[data-best-index]").forEach(function(card){
+    card.addEventListener("click", function(){
+      selectTrade(Number(card.getAttribute("data-best-index")), true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+}
+
+function renderDayTrades(){
+  var box = el("dayTrades");
+  if (!box) return;
+
+  var top = DAY_RESULTS.slice(0, 3);
+  if (!top.length) {
+    box.innerHTML =
+      "<div class='best-card day'><strong>-</strong><span>Waiting for scan.</span></div>" +
+      "<div class='best-card day'><strong>-</strong><span>Waiting for scan.</span></div>" +
+      "<div class='best-card day'><strong>-</strong><span>Waiting for scan.</span></div>";
+    setText("topDaySignal","-");
+    return;
+  }
+
+  setText("topDaySignal",top[0].symbol);
+
+  box.innerHTML = top.map(function(r, i){
+    return "<div class='best-card day' data-day-index='" + i + "'>" +
+      "<strong>" + (i + 1) + ". " + escapeHtml(r.symbol) + "</strong>" +
+      "<span>Day Watch Score: " + Number(r.dayRank || 0).toFixed(1) + "</span>" +
+      "<span>Price: " + money(r.price) + " | Trigger: " + money(r.trigger) + "</span>" +
+      "<span>Tight stop: " + money(r.tightStop) + " | Day target: " + money(r.dayTarget) + "</span>" +
+      "<span>Day R:R: " + Number(r.dayRR || 0).toFixed(2) + "</span>" +
+      "<span>" + escapeHtml(dayReason(r)) + "</span>" +
+    "</div>";
+  }).join("");
+
+  document.querySelectorAll("[data-day-index]").forEach(function(card){
+    card.addEventListener("click", function(){
+      var r = DAY_RESULTS[Number(card.getAttribute("data-day-index"))];
+      var idx = RESULTS.findIndex(function(x){return x.symbol === r.symbol;});
+      if(idx >= 0) selectTrade(idx, true);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  });
+}
+
+function renderMarketHealth(){
+  var box = el("marketHealthBox");
+  if (!box) return;
+
+  var entries = RESULTS.filter(function(r){return /ENTER_NOW/i.test(String(r.decision));}).length;
+  var pullbacks = RESULTS.filter(function(r){return /PULLBACK/i.test(String(r.decision));}).length;
+  var breakouts = RESULTS.filter(function(r){return /BREAKOUT/i.test(String(r.decision));}).length;
+
+  setText("marketHealthTop",MARKET_HEALTH);
+
+  var text = "<b>Market health:</b> " + escapeHtml(MARKET_HEALTH) + "<br>" +
+    "ENTER_NOW: " + entries + " | Pullbacks: " + pullbacks + " | Breakout watches: " + breakouts + "<br>" +
+    "Checked: " + escapeHtml(LAST_TOTAL_CHECKED) + " tickers. Signals returned: " + escapeHtml(RESULTS.length) + ".<br>";
+
+  if (MARKET_HEALTH !== "Bullish") {
+    text += "<span style='color:#ffd166'>Market is not strongly bullish, so paper trading should be more selective.</span>";
+  } else {
+    text += "<span style='color:#00ff88'>Market is supportive for long setups, but risk rules still apply.</span>";
+  }
+
+  box.innerHTML = text;
+}
+
+function checkWakeGap(){
+  var now = Date.now();
+  var gap = now - LAST_ACTIVE_TIME;
+  LAST_ACTIVE_TIME = now;
+
+  if (gap > 10 * 60000) {
+    var mins = Math.round(gap / 60000);
+    var box = el("wakeWarning");
+    if (box) {
+      box.style.display = "block";
+      box.innerHTML = "<b>Scanner resumed after " + mins + " minutes inactive.</b><br>Fresh scan started. Do not trust older prices.";
+    }
+    addActivity("Scanner resumed after " + mins + " minutes inactive. Fresh scan started.");
+  }
+}
+
+function defaultAccount(starting){
+  return{starting:starting,cash:starting,open:{},closed:[],createdAt:nowText()};
+}
+
+function getAccount(key, starting){
   try{
-    var a=JSON.parse(localStorage.getItem("paperAccount")||"null");
-    if(!a||typeof a!=="object")return defaultAccount();
-    if(!a.open)a.open={};
-    if(!Array.isArray(a.closed))a.closed=[];
-    if(!Number.isFinite(Number(a.cash)))a.cash=5000;
-    if(!Number.isFinite(Number(a.starting)))a.starting=5000;
-    return a;
-  }catch(e){return defaultAccount();}
+    var account=JSON.parse(localStorage.getItem(key)||"null");
+    if(!account||typeof account!=="object")return defaultAccount(starting);
+    if(!account.open)account.open={};
+    if(!Array.isArray(account.closed))account.closed=[];
+    if(!Number.isFinite(Number(account.starting)))account.starting=starting;
+    if(!Number.isFinite(Number(account.cash)))account.cash=account.starting;
+    return account;
+  }catch(e){
+    return defaultAccount(starting);
+  }
 }
 
-function saveAccount(a){localStorage.setItem("paperAccount",JSON.stringify(a));}
+function saveAccount(key,account){
+  localStorage.setItem(key,JSON.stringify(account));
+}
 
-function openValue(a){
-  var v=0;
-  Object.keys(a.open||{}).forEach(function(sym){
-    var p=a.open[sym];
-    v+=Number(p.shares||0)*Number(p.lastPrice||p.entry||0);
+function getSwingAccount(){return getAccount("swingAccount",5000);}
+function saveSwingAccount(a){saveAccount("swingAccount",a);}
+function getDayAccount(){return getAccount("dayAccount",5000);}
+function saveDayAccount(a){saveAccount("dayAccount",a);}
+
+function updateOpenPrices(account){
+  Object.keys(account.open||{}).forEach(function(sym){
+    var r = RESULTS.find(function(x){return x.symbol === sym;});
+    if(r && Number.isFinite(Number(r.price))){
+      account.open[sym].lastPrice = Number(r.price);
+      account.open[sym].lastScore = Number(r.score);
+      account.open[sym].lastDecision = r.decision;
+    }
   });
-  return v;
 }
 
-function equity(a){return Number(a.cash||0)+openValue(a);}
-
-function unreal(a){
-  var v=0;
-  Object.keys(a.open||{}).forEach(function(sym){
-    var p=a.open[sym];
-    v+=(Number(p.lastPrice||p.entry||0)-Number(p.entry||0))*Number(p.shares||0);
+function accountOpenValue(account){
+  var value=0;
+  Object.keys(account.open||{}).forEach(function(sym){
+    var p=account.open[sym];
+    value += Number(p.shares||0) * Number(p.lastPrice||p.entry||0);
   });
-  return v;
+  return value;
 }
 
-function realised(a){
-  return(a.closed||[]).reduce(function(s,t){return s+Number(t.pnl||0);},0);
+function accountOpenPnl(account){
+  var pnl=0;
+  Object.keys(account.open||{}).forEach(function(sym){
+    var p=account.open[sym];
+    pnl += (Number(p.lastPrice||p.entry||0) - Number(p.entry||0)) * Number(p.shares||0);
+  });
+  return pnl;
 }
 
-function sameToday(v){
-  var d=new Date(v);
-  if(isNaN(d.getTime()))return false;
-  var n=new Date();
-  return d.getFullYear()===n.getFullYear()&&d.getMonth()===n.getMonth()&&d.getDate()===n.getDate();
+function accountClosedPnl(account){
+  return(account.closed||[]).reduce(function(sum,t){return sum+Number(t.pnl||0);},0);
 }
 
-function dailyPnl(a){
-  return(a.closed||[]).filter(function(t){return sameToday(t.exitTime);}).reduce(function(s,t){return s+Number(t.pnl||0);},0);
+function accountEquity(account){
+  return Number(account.cash||0)+accountOpenValue(account);
 }
 
-function entriesToday(a){
-  var c=(a.closed||[]).filter(function(t){return sameToday(t.entryTime);}).length;
-  var o=Object.keys(a.open||{}).filter(function(s){return sameToday(a.open[s].entryTime);}).length;
-  return c+o;
-}
-
-function renderAccount(){
-  var a=getAccount();
-  var closed=a.closed||[];
+function accountWinRate(account){
+  var closed=account.closed||[];
+  if(!closed.length)return 0;
   var wins=closed.filter(function(t){return Number(t.pnl||0)>0;}).length;
-  var wr=closed.length?(wins/closed.length)*100:0;
-
-  setText("cashKpi",money(a.cash));
-  setText("equityKpi",money(equity(a)));
-  setText("openValueKpi",money(openValue(a)));
-  setText("realisedKpi",money(realised(a)));
-  setText("dailyPnlKpi",money(dailyPnl(a)));
-  setText("unrealisedKpi",money(unreal(a)));
-  setText("winRateKpi",wr.toFixed(1)+"%");
-  setText("closedCountKpi",closed.length);
-  setText("sidePositions",Object.keys(a.open||{}).length);
+  return (wins/closed.length)*100;
 }
 
-function addFeed(txt){
-  var items=[];
-  try{items=JSON.parse(localStorage.getItem("activityFeed")||"[]");}catch(e){}
-  items.unshift({time:new Date().toLocaleTimeString(),text:txt});
-  items=items.slice(0,80);
-  localStorage.setItem("activityFeed",JSON.stringify(items));
-  renderFeed();
+function accountEntriesToday(account){
+  var closedEntries=(account.closed||[]).filter(function(t){return sameToday(t.entryTime);}).length;
+  var openEntries=Object.keys(account.open||{}).filter(function(sym){return sameToday(account.open[sym].entryTime);}).length;
+  return closedEntries+openEntries;
 }
 
-function renderFeed(){
-  var box=el("activityFeed");
-  var items=[];
-  try{items=JSON.parse(localStorage.getItem("activityFeed")||"[]");}catch(e){}
-  if(!items.length){box.innerHTML="<div>Waiting for scanner activity.</div>";return;}
-  box.innerHTML=items.map(function(x){return"<div><b>"+esc(x.time)+"</b> - "+esc(x.text)+"</div>";}).join("");
+function closedSameTickerToday(account,symbol){
+  return(account.closed||[]).some(function(t){
+    return String(t.symbol).toUpperCase()===String(symbol).toUpperCase() && sameToday(t.exitTime);
+  });
 }
 
-function health(){
-  api("/api/health").then(function(d){
-    status("Connected","good");
-    setText("feedState","LIVE");
-    setText("dataStatus","LIVE DATA");
-    if(d.discoveryCount)setText("breadthState",d.discoveryCount+" tickers");
-    log("HEALTH KEYS: "+Object.keys(d).join(", "));
-  }).catch(function(e){
-    status("Backend failed","bad");
-    setText("feedState","ERROR");
-    showAlert("Backend failed",e.message,"bad");
+function sharesByRisk(account, entry, stop, maxTradePct, riskDollars){
+  entry = Number(entry);
+  stop = Number(stop);
+  maxTradePct = Number(maxTradePct);
+  riskDollars = Number(riskDollars);
+
+  if(!Number.isFinite(entry) || entry <= 0)return 0;
+  if(!Number.isFinite(maxTradePct) || maxTradePct <= 0)maxTradePct = 20;
+  if(!Number.isFinite(riskDollars) || riskDollars <= 0)riskDollars = 50;
+
+  var maxTradeValue = accountEquity(account) * (maxTradePct/100);
+  var valueShares = Math.floor(Math.min(Number(account.cash||0), maxTradeValue) / entry);
+
+  if(Number.isFinite(stop) && stop > 0 && stop < entry){
+    var riskPerShare = entry - stop;
+    var riskShares = Math.floor(riskDollars / riskPerShare);
+    return Math.max(0, Math.min(valueShares, riskShares));
+  }
+
+  return Math.max(0, valueShares);
+}
+
+function renderAccounts(){
+  var swing=getSwingAccount();
+  var day=getDayAccount();
+
+  updateOpenPrices(swing);
+  updateOpenPrices(day);
+
+  saveSwingAccount(swing);
+  saveDayAccount(day);
+
+  renderAccountTop("swing",swing);
+  renderAccountTop("day",day);
+
+  renderOpenTrades("swing",swing,"swingOpenBox");
+  renderOpenTrades("day",day,"dayOpenBox");
+  renderClosedTrades("swing",swing,"swingClosedBox");
+  renderClosedTrades("day",day,"dayClosedBox");
+}
+
+function renderAccountTop(prefix, account){
+  var openPnl = accountOpenPnl(account);
+  var closedPnl = accountClosedPnl(account);
+  setText(prefix+"Equity",money(accountEquity(account)));
+  setText(prefix+"Cash",money(account.cash));
+  setText(prefix+"OpenPnl",money(openPnl));
+  setText(prefix+"ClosedPnl",money(closedPnl));
+  setText(prefix+"OpenCount",Object.keys(account.open||{}).length);
+  setText(prefix+"ClosedCount",(account.closed||[]).length);
+  if(prefix==="swing")setText("swingWinRate",accountWinRate(account).toFixed(1)+"%");
+  if(prefix==="day")setText("dayEntriesToday",accountEntriesToday(account));
+}
+
+function renderOpenTrades(type, account, boxId){
+  var box=el(boxId);
+  if(!box)return;
+
+  var keys=Object.keys(account.open||{});
+  if(!keys.length){
+    box.innerHTML="<p>No open "+type+" paper trades yet.</p>";
+    return;
+  }
+
+  box.innerHTML=keys.map(function(sym){
+    var p=account.open[sym];
+    var now=Number(p.lastPrice||p.entry);
+    var pnl=(now-Number(p.entry))*Number(p.shares||1);
+    var cost=Number(p.cost||Number(p.entry)*Number(p.shares||1));
+    var pnlPct=cost?(pnl/cost)*100:0;
+    var cls=pnl>=0?"holding good":"holding bad";
+    if(type==="day")cls+=" day";
+    var r=RESULTS.find(function(x){return x.symbol===sym;});
+    var exitReason=shouldExit(type,p,r);
+
+    return "<div class='"+cls+"'>"+
+      "<b>"+escapeHtml(sym)+" open "+escapeHtml(type)+" paper</b><br>"+
+      "<b>Entry price:</b> "+money(p.entry)+" | <b>Current price:</b> "+money(now)+" | <b>Shares:</b> "+escapeHtml(p.shares||1)+"<br>"+
+      "<b>Entry time:</b> "+escapeHtml(p.entryTime||"")+" | <b>Age:</b> "+escapeHtml(ageText(p.entryTime))+"<br>"+
+      "<b>Trade cost:</b> "+money(cost)+" | <b>Live P/L:</b> <span class='"+pnlClass(pnl)+"'>"+money(pnl)+" ("+pnlPct.toFixed(2)+"%)</span><br>"+
+      "<b>Stop:</b> "+money(p.stop)+" | <b>Target:</b> "+money(p.target)+" | <b>R/R:</b> "+escapeHtml(p.rr || "-")+"<br>"+
+      "<b>Entry score:</b> "+escapeHtml(p.entryScore||"-")+" | <b>Last score:</b> "+escapeHtml(r?r.score:p.lastScore||"-")+"<br>"+
+      "<b>Entry reason:</b> "+escapeHtml(p.entryReason||"")+
+      (exitReason?"<br><b style='color:#ff5577'>Exit signal: "+escapeHtml(exitReason)+"</b>":"")+
+      "<br><button class='danger' type='button' onclick='closePaperTrade("+JSON.stringify(type)+","+JSON.stringify(sym)+",\"Manual close\")'>Close "+escapeHtml(type)+" Trade</button>"+
+      "</div>";
+  }).join("");
+}
+
+function renderClosedTrades(type, account, boxId){
+  var box=el(boxId);
+  if(!box)return;
+  var closed=account.closed||[];
+
+  if(!closed.length){
+    box.innerHTML="<p>No closed "+type+" trades yet.</p>";
+    return;
+  }
+
+  box.innerHTML=closed.slice(0,80).map(function(t){
+    var good=Number(t.pnl)>=0;
+    return "<div class='"+(good?"holding good":"holding bad")+"'>"+
+      "<b>"+escapeHtml(t.symbol)+" closed "+escapeHtml(type)+" paper</b><br>"+
+      "<b>Entry price:</b> "+money(t.entry)+" | <b>Exit price:</b> "+money(t.exit)+" | <b>Shares:</b> "+escapeHtml(t.shares)+"<br>"+
+      "<b>Entry time:</b> "+escapeHtml(t.entryTime)+"<br>"+
+      "<b>Exit time:</b> "+escapeHtml(t.exitTime)+"<br>"+
+      "<b>Trade cost:</b> "+money(t.cost)+" | <b>Proceeds:</b> "+money(t.proceeds)+"<br>"+
+      "<b>Made/Lost:</b> <span class='"+pnlClass(t.pnl)+"'>"+money(t.pnl)+" ("+Number(t.pnlPct).toFixed(2)+"%)</span><br>"+
+      "<b>Entry reason:</b> "+escapeHtml(t.entryReason||"")+"<br>"+
+      "<b>Exit reason:</b> "+escapeHtml(t.exitReason||"")+
+      "</div>";
+  }).join("");
+}
+
+function resetAccount(type){
+  if(type==="swing"){
+    var size=Number(el("swingAccountSize")?el("swingAccountSize").value:5000);
+    if(!Number.isFinite(size)||size<100)size=5000;
+    saveSwingAccount(defaultAccount(size));
+    addActivity("Swing paper account reset to "+money(size)+".");
+  }else{
+    var dsize=Number(el("dayAccountSize")?el("dayAccountSize").value:5000);
+    if(!Number.isFinite(dsize)||dsize<100)dsize=5000;
+    saveDayAccount(defaultAccount(dsize));
+    addActivity("Day paper account reset to "+money(dsize)+".");
+  }
+  renderAccounts();
+}
+
+function selfCheck(){
+  apiJson("/api/health").then(function(data){
+    status("Connected. Auto scanner active.","good");
+    setText("discoveryText",(data.discoveryCount||"?")+" tickers");
+    log("HEALTH OK version "+(data.version||"?"));
+  }).catch(function(error){
+    status("Backend failed: "+error.message,"bad");
+    showAlert("Backend failed",error.message,"bad");
   });
 }
 
 function keepAlive(){
-  api("/api/keepalive").then(function(d){
-    setText("keepalive","OK "+(d.version||""));
+  apiJson("/api/keepalive").then(function(data){
+    setText("keepalive","OK "+(data.version||""));
   }).catch(function(){
-    setText("keepalive","failed");
+    apiJson("/api/health").then(function(){
+      setText("keepalive","OK");
+    }).catch(function(){
+      setText("keepalive","failed");
+    });
   });
 }
 
 function scan(){
   if(!SCANNER_RUNNING){
-    status("Paused","bad");
+    status("Scanner paused.","bad");
     return;
   }
 
-  status("Scanning","work");
-  setText("dataStatus","SCANNING");
+  status("Scanning watchlist and expanded discovery universe...","work");
+  setText("fullScanStatus","Scanning...");
 
-  var risk=el("risk").value||"100";
-  var scanLimit=el("scanLimit").value||"100";
-  var scanUrl="/api/scan?mode=swing&symbols="+encodeURIComponent(symbols())+"&risk="+encodeURIComponent(risk);
-  var discoverUrl="/api/discover?risk="+encodeURIComponent(risk)+"&limit=20&scanLimit="+encodeURIComponent(scanLimit)+"&exclude="+encodeURIComponent(symbols());
+  var risk=el("risk")?el("risk").value:"50";
+  var mode=el("mode")?el("mode").value:"swing";
+  var symbols=getSymbols();
+  var scanLimit=el("scanLimit")?el("scanLimit").value:"140";
 
-  Promise.allSettled([api(scanUrl),api(discoverUrl)]).then(function(res){
-    var all=[];
+  var scanUrl="/api/scan?mode="+encodeURIComponent(mode)+"&symbols="+encodeURIComponent(symbols)+"&risk="+encodeURIComponent(risk||"50");
+  var discoverUrl="/api/discover?risk="+encodeURIComponent(risk||"50")+"&limit=30&scanLimit="+encodeURIComponent(scanLimit)+"&exclude="+encodeURIComponent(symbols);
+
+  Promise.allSettled([apiJson(scanUrl),apiJson(discoverUrl)]).then(function(results){
+    var allSignals=[];
     var errors=[];
+    var checked=0;
 
-    if(res[0].status==="fulfilled"){
-      var scanData=res[0].value;
-      MARKET_HEALTH=scanData.market||scanData.regime||scanData.marketRegime||"Unknown";
-      var scanSignals=getSignalsFromResponse(scanData);
-      all=all.concat(scanSignals);
-      log("WATCHLIST RESPONSE KEYS: "+Object.keys(scanData).join(", "));
-      log("WATCHLIST SIGNALS FOUND: "+scanSignals.length);
+    if(results[0].status==="fulfilled"){
+      var scanData=results[0].value;
+      MARKET_HEALTH = scanData.market || "Unknown";
+      allSignals=allSignals.concat(scanData.signals||scanData.results||scanData.data||[]);
+      checked += Number((scanData.signals||scanData.results||scanData.data||[]).length || 0);
     }else{
-      errors.push("Watchlist failed: "+res[0].reason.message);
+      errors.push("Watchlist scan failed: "+results[0].reason.message);
     }
 
-    if(res[1].status==="fulfilled"){
-      var discoverData=res[1].value;
-      var discoverSignals=getSignalsFromResponse(discoverData);
-      all=all.concat(discoverSignals);
-      if(discoverData.discoveryScanned)setText("breadthState",discoverData.discoveryScanned+" / "+discoverData.discoveryUniverse);
-      log("DISCOVER RESPONSE KEYS: "+Object.keys(discoverData).join(", "));
-      log("DISCOVER SIGNALS FOUND: "+discoverSignals.length);
+    if(results[1].status==="fulfilled"){
+      var discoverData=results[1].value;
+      allSignals=allSignals.concat(discoverData.signals||discoverData.results||discoverData.data||[]);
+      if(discoverData.discoveryScanned){
+        setText("discoveryText",discoverData.discoveryScanned+" / "+discoverData.discoveryUniverse);
+        checked += Number(discoverData.discoveryScanned || 0);
+      }
     }else{
-      errors.push("Discovery failed: "+res[1].reason.message);
+      errors.push("Discovery scan failed: "+results[1].reason.message);
     }
 
     var seen={};
-
-    all.forEach(function(x){
-      var r=clean(x);
+    allSignals.forEach(function(item){
+      var r=clean(item);
       if(!r.symbol||r.symbol==="-")return;
-
       if(seen[r.symbol]){
-        if(Number(r.rank||r.score||0)>Number(seen[r.symbol].rank||seen[r.symbol].score||0)){
-          seen[r.symbol]=r;
-        }
-      }else{
-        seen[r.symbol]=r;
+        if(Number(r.finalRank||0)>Number(seen[r.symbol].finalRank||0))seen[r.symbol]=r;
+        return;
       }
+      seen[r.symbol]=r;
     });
 
-    RESULTS=Object.keys(seen).map(function(k){return seen[k];})
-      .filter(function(r){return r&&r.symbol&&r.symbol!=="-";})
-      .sort(function(a,b){
-        var rankDiff=tradeRankScore(b)-tradeRankScore(a);
-        if(rankDiff!==0)return rankDiff;
+    var cleanList=Object.keys(seen).map(function(symbol){return seen[symbol];});
 
-        var scoreDiff=Number(b.score||0)-Number(a.score||0);
-        if(scoreDiff!==0)return scoreDiff;
+    RESULTS=cleanList.filter(function(r){
+      var score=Number(r.score||0);
+      return score >= 40 && !/AVOID/i.test(String(r.decision));
+    }).sort(function(a,b){
+      var aScore=Number(a.score||0);
+      var bScore=Number(b.score||0);
+      if(aScore < 50 && bScore >= 70)return 1;
+      if(bScore < 50 && aScore >= 70)return -1;
+      if(Number(b.finalRank)!==Number(a.finalRank))return Number(b.finalRank)-Number(a.finalRank);
+      if(bScore!==aScore)return bScore-aScore;
+      return Number(b.rr||0)-Number(a.rr||0);
+    });
 
-        return getRR(b)-getRR(a);
-      });
+    DAY_RESULTS=cleanList.filter(function(r){
+      return Number(r.score||0) >= 60 && Number(r.dayRR||0) >= 1.2 && Number.isFinite(Number(r.price));
+    }).sort(function(a,b){
+      return Number(b.dayRank||0)-Number(a.dayRank||0);
+    });
+
+    LAST_TOTAL_CHECKED = checked || cleanList.length;
+    setText("checkedCount",LAST_TOTAL_CHECKED);
 
     renderRows();
-    renderMarket();
 
-    if(RESULTS.length){
-      selectTrade(0,false);
-      checkGetReadyAlerts();
+    var t=new Date().toLocaleTimeString();
+    setText("updated",t);
+    setText("signalCount",RESULTS.length);
+    setText("topSignal",RESULTS[0]?RESULTS[0].symbol:"-");
+    setText("fullScanStatus",t+" complete");
+
+    if(errors.length){
+      status("Scan finished with warning. "+RESULTS.length+" swing results.","good");
+      log(errors.join(" | "));
     }else{
-      setText("chartTitle","NO TRADES RETURNED");
-      setText("chartStatus","CHECK LOG / BACKEND RESPONSE");
-      el("details").innerHTML="The scan ran, but no usable symbols were found in the backend response.";
-      el("warnings").innerHTML="<b>Debug:</b><br>"+esc(errors.join(" | ")||"No frontend errors. Backend may be returning empty arrays.");
+      status("Full scan complete. "+RESULTS.length+" swing results, "+DAY_RESULTS.length+" day watches.","good");
     }
 
-    setText("dataStatus",errors.length?"PARTIAL_LIVE_DATA":"LIVE_DATA");
-    setText("feedState",errors.length?"PARTIAL":"LIVE");
+    keepSelectedAfterRefresh();
 
-    status("Scan complete: "+RESULTS.length,"good");
+    autoSwingCheck();
+    autoDayCheck();
 
-    if(errors.length)log(errors.join(" | "));
-
-    autoPaperCheck();
-    renderPaper();
-    renderAccount();
-    schedule();
-  }).catch(function(e){
-    status("Scan failed","bad");
-    setText("dataStatus","ERROR");
-    showAlert("Scan failed",e.message,"bad");
-    schedule();
+    renderAccounts();
+    renderBestTrades();
+    renderDayTrades();
+    renderMarketHealth();
+    scheduleLoop();
+  }).catch(function(error){
+    status("Scan failed: "+error.message,"bad");
+    setText("fullScanStatus","Failed");
+    log("SCAN ERROR: "+error.message);
+    showAlert("Scan failed",error.message,"bad");
+    scheduleLoop();
   });
 }
 
-function renderMarket(){
-  setText("regime",MARKET_HEALTH||"Unknown");
-
-  var entered=RESULTS.filter(function(r){return stage(r)==="ENTER";}).length;
-  var ready=RESULTS.filter(function(r){return stage(r)==="GET READY";}).length;
-  var breadth=RESULTS.length?Math.round(((entered+ready)/RESULTS.length)*100):0;
-
-  setText("breadthState",RESULTS.length?breadth+"%":"Waiting");
-  setText("spyState",MARKET_HEALTH==="Bullish"?"BULLISH":"UNKNOWN");
-  setText("volState","UNKNOWN");
-
-  if(RESULTS.length){
-    setText("chartStatus",setup(RESULTS[0])+" | "+stage(RESULTS[0])+" | WATCHLIST");
+function keepSelectedAfterRefresh(){
+  if(SELECTED_SYMBOL){
+    var idx=RESULTS.findIndex(function(r){return r.symbol===SELECTED_SYMBOL;});
+    if(idx>=0){
+      selectTrade(idx,false);
+      return;
+    }
   }
+  if(RESULTS.length)selectTrade(0,false);
 }
 
-
-function getRR(r){
-  var price=Number(r.price);
-  var stop=Number(r.stop);
-  var target=Number(r.target);
-
-  /*
-    Correct R:R for a long swing trade:
-    reward = target - entry
-    risk = entry - stop
-    R:R = reward / risk
-
-    Use the current displayed price first because that is what the scanner table is showing.
-  */
-
-  if(Number.isFinite(price) && Number.isFinite(stop) && Number.isFinite(target) && price > stop && target > price){
-    return (target-price)/(price-stop);
-  }
-
-  /*
-    Fallback for pullback/watch setups:
-    If the current price is not a valid entry, calculate planned R:R from the middle
-    of the displayed buy zone.
-  */
-
-  var buyLow=Number(r.buyLow);
-  var buyHigh=Number(r.buyHigh);
-
-  if(Number.isFinite(buyLow) && Number.isFinite(buyHigh) && Number.isFinite(stop) && Number.isFinite(target) && buyLow > 0 && buyHigh > 0){
-    var plannedEntry=(buyLow+buyHigh)/2;
-
-    if(plannedEntry > stop && target > plannedEntry){
-      return (target-plannedEntry)/(plannedEntry-stop);
-    }
-  }
-
-  /*
-    Last fallback only:
-    Use backend R:R only if price/zone calculation cannot be done.
-  */
-
-  var backendRR=Number(r.rr);
-
-  if(Number.isFinite(backendRR) && backendRR > 0){
-    return backendRR;
-  }
-
-  return 0;
-}
-
-function getDistanceFromBuyZone(r){
-  var price=Number(r.price);
-  var buyLow=Number(r.buyLow);
-  var buyHigh=Number(r.buyHigh);
-
-  if(!Number.isFinite(price) || !Number.isFinite(buyLow) || !Number.isFinite(buyHigh) || buyLow <= 0 || buyHigh <= 0){
-    return null;
-  }
-
-  if(price >= buyLow && price <= buyHigh){
-    return 0;
-  }
-
-  if(price > buyHigh){
-    return ((price-buyHigh)/buyHigh)*100;
-  }
-
-  return -((buyLow-price)/buyLow)*100;
-}
-
-function getRejectReason(r){
-  var rr=getRR(r);
-  var price=Number(r.price);
-  var stop=Number(r.stop);
-  var target=Number(r.target);
-  var score=Number(r.score||0);
-  var minRR=Number(el("autoMinRR").value||1.8);
-  var minScore=Number(el("autoMinScore").value||82);
-  var distance=getDistanceFromBuyZone(r);
-
-  if(!Number.isFinite(price) || price <= 0){
-    return "No valid price";
-  }
-
-  if(!Number.isFinite(stop) || stop <= 0){
-    return "No valid stop";
-  }
-
-  if(!Number.isFinite(target) || target <= 0){
-    return "No valid target";
-  }
-
-  if(rr < minRR){
-    return "R/R too low";
-  }
-
-  if(score < minScore-12){
-    return "Score too low";
-  }
-
-  if(distance !== null && distance > 3){
-    return "Too extended";
-  }
-
-  if(distance !== null && distance < -6){
-    return "Too far below buy zone";
-  }
-
-  return "";
-}
-
-function tradeRankScore(r){
-  var score=Number(r.score||0);
-  var strength=Number(r.strengthScore||r.score||0);
-  var rr=getRR(r);
-  var distance=getDistanceFromBuyZone(r);
-  var st=stage(r);
-  var reject=getRejectReason(r);
-  var rank=0;
-
-  /*
-    Balanced ranking:
-    Score/setup quality is the main driver.
-    R:R still matters, but it cannot let a weak score beat a strong setup.
-  */
-
-  rank += score * 0.62;
-  rank += strength * 0.18;
-
-  /*
-    R:R bonus is capped.
-    A good R:R improves rank, but it does not overpower setup score.
-  */
-
-  if(Number.isFinite(rr) && rr > 0){
-    if(rr >= 3){
-      rank += 16;
-    }else if(rr >= 2.5){
-      rank += 14;
-    }else if(rr >= 2){
-      rank += 12;
-    }else if(rr >= 1.8){
-      rank += 9;
-    }else if(rr >= 1.5){
-      rank += 2;
-    }else{
-      rank -= 8;
-    }
-  }else{
-    rank -= 12;
-  }
-
-  /*
-    Stage bonus.
-    ENTER is best, GET READY is next, WATCH remains lower.
-  */
-
-  if(st==="ENTER"){
-    rank += 22;
-  }else if(st==="GET READY"){
-    rank += 13;
-  }else{
-    rank += 0;
-  }
-
-  /*
-    Price location.
-    Best setups are in or close to the buy zone.
-    Extended trades get reduced, but not destroyed unless they are very extended.
-  */
-
-  if(distance !== null){
-    var absDistance=Math.abs(distance);
-
-    if(absDistance <= 0.5){
-      rank += 10;
-    }else if(absDistance <= 1.5){
-      rank += 7;
-    }else if(absDistance <= 3){
-      rank += 3;
-    }
-
-    if(distance > 3){
-      rank -= Math.min(24, distance * 3);
-    }
-
-    if(distance < -6){
-      rank -= 12;
-    }
-  }
-
-  /*
-    Safety gates:
-    Low-score trades cannot rank above strong setups just because R:R is good.
-  */
-
-  if(score < 40){
-    rank -= 90;
-  }else if(score < 50){
-    rank -= 65;
-  }else if(score < 60){
-    rank -= 35;
-  }else if(score < 70){
-    rank -= 12;
-  }
-
-  /*
-    Reject reason penalties.
-    These are not all equal.
-    R/R too low is a watch problem, not a total quality failure.
-    Score too low is a bigger problem.
-  */
-
-  if(reject){
-    if(/score too low/i.test(reject)){
-      rank -= 55;
-    }else if(/R\/R too low/i.test(reject)){
-      rank -= 18;
-    }else if(/too extended/i.test(reject)){
-      rank -= 28;
-    }else if(/too far below/i.test(reject)){
-      rank -= 25;
-    }else{
-      rank -= 30;
-    }
-  }
-
-  /*
-    Extra confirmation bonuses.
-  */
-
-  if(score >= 80 && rr >= 1.5){
-    rank += 8;
-  }
-
-  if(score >= 75 && rr >= 1.8){
-    rank += 10;
-  }
-
-  return rank;
-}
 function renderRows(){
-  var body=el("rows");
-  if(!body)return;
+  var tbody=el("rows");
+  if(!tbody)return;
 
   if(!RESULTS.length){
-    body.innerHTML='<tr><td colspan="12" style="text-align:center;padding:24px;color:#9fe9ba">No live results returned. Check backend logs or loosen scanner rules.</td></tr>';
+    tbody.innerHTML='<tr><td colspan="12" style="text-align:center;padding:20px;color:#9fe9ba">No results returned.</td></tr>';
+    renderBestTrades();
+    renderDayTrades();
+    renderMarketHealth();
     return;
   }
 
-  body.innerHTML=RESULTS.map(function(r,i){
-    var chg=Number(r.change);
-    var chgText=Number.isFinite(chg)?((chg>=0?"▲ ":"▼ ")+Math.abs(chg).toFixed(2)+"%"):"-";
-    var chgClass=Number.isFinite(chg)?(chg>=0?"greenText":"redText"):"";
-    var st=stage(r);
-    var badge=st==="ENTER"?"badge enter":st==="GET READY"?"badge ready":"badge watch";
+  tbody.innerHTML=RESULTS.map(function(r,i){
+    var cls=/ENTER|BUY|ENTRY/i.test(String(r.decision))?"badge enter":/EXIT|SELL|TRIM/i.test(String(r.decision))?"badge exit":/AVOID/i.test(String(r.decision))?"badge avoid":"badge";
 
-    return"<tr class='"+rowClass(r)+"' data-index='"+i+"'>"+
-      "<td class='rank'>"+(i+1)+"</td>"+
-      "<td><b>"+esc(r.symbol)+"</b></td>"+
-      "<td>"+esc(setup(r))+"</td>"+
-      "<td><span class='conf'>"+esc(r.score)+"</span></td>"+
-      "<td>"+esc(grade(r))+"</td>"+
-      "<td>"+esc(edge(r))+"</td>"+
-      "<td>"+money(r.price)+"</td>"+
-      "<td class='"+chgClass+"'>"+esc(chgText)+"</td>"+
-      "<td>"+(getRR(r) ? getRR(r).toFixed(2) : "-")+"</td>"+
-      "<td>"+esc(reason(r))+"</td>"+
-      "<td><span class='"+badge+"'>"+st+"</span></td>"+
-      "<td><button onclick='event.stopPropagation();manualPaperFromIndex("+i+")'>Enter</button></td>"+
-    "</tr>";
+    return '<tr class="' + rowClass(r) + '" data-index="'+i+'">'+
+      '<td>'+(i+1)+'</td>'+
+      '<td><b>'+escapeHtml(r.symbol)+'</b></td>'+
+      '<td><span class="'+cls+'">'+escapeHtml(String(r.decision).replace(/_/g," "))+'</span><br>'+chaseBadge(r)+'</td>'+
+      '<td>'+escapeHtml(r.score)+'</td>'+
+      '<td>'+escapeHtml(r.strengthScore||"-")+'</td>'+
+      '<td>'+money(r.price)+'</td>'+
+      '<td>'+money(r.trigger)+'</td>'+
+      '<td>'+money(r.buyLow)+' to '+money(r.buyHigh)+'</td>'+
+      '<td>'+money(r.stop)+'</td>'+
+      '<td>'+money(r.target)+'</td>'+
+      '<td>'+escapeHtml(r.rr)+'</td>'+
+      '<td>'+escapeHtml(shortReason(r))+'<br><span style="color:#9fe9ba">'+escapeHtml(r.summary)+'</span></td>'+
+      '</tr>';
   }).join("");
 
   document.querySelectorAll("#rows tr[data-index]").forEach(function(row){
-    row.onclick=function(){selectTrade(Number(row.getAttribute("data-index")),true);};
+    row.addEventListener("click",function(){
+      selectTrade(Number(row.getAttribute("data-index")),true);
+    });
   });
+
+  renderBestTrades();
+  renderDayTrades();
+  renderMarketHealth();
 }
 
-function selectTrade(i,voice){
-  var r=RESULTS[i];
+function selectTrade(index,speakIt){
+  var r=RESULTS[index];
   if(!r)return;
 
   SELECTED=r;
+  SELECTED_SYMBOL=r.symbol;
+  localStorage.setItem("selectedSymbol",r.symbol);
 
-  document.querySelectorAll("#rows tr").forEach(function(x){x.classList.remove("selected");});
-  var active=document.querySelector('#rows tr[data-index="'+i+'"]');
+  document.querySelectorAll("#rows tr").forEach(function(row){row.classList.remove("selected");});
+  var active=document.querySelector('#rows tr[data-index="'+index+'"]');
   if(active)active.classList.add("selected");
 
-  var x=sr(r);
-
-  setText("selectedSymbol",r.symbol);
-  setText("selectedBadge",stage(r));
+  setText("selectedName",r.symbol);
   setText("dPrice",money(r.price));
+  setText("dTrigger",money(r.trigger));
   setText("dBuy",money(r.buyLow)+" to "+money(r.buyHigh));
   setText("dStop",money(r.stop));
   setText("dTarget",money(r.target));
-  setText("chartTitle",r.symbol+" CHART - FULL WIDTH");
-  setText("chartStatus",setup(r)+" | "+stage(r)+" | WATCHLIST");
+  setText("dRR",r.rr);
 
-  var warns=r.warnings.length?r.warnings.map(function(v){return"- "+esc(v);}).join("<br>"):"No major warnings returned.";
+  var reasons=r.reasons.length?r.reasons.map(function(x){return "- "+escapeHtml(x);}).join("<br>"):"No detailed reasons returned.";
+  var warns=r.warnings.length?r.warnings.map(function(x){return "- "+escapeHtml(x);}).join("<br>"):"No major warnings returned.";
+  var chase = chaseBadge(r);
 
-  el("details").innerHTML="<b>"+esc(r.symbol)+" "+esc(setup(r))+"-"+esc(stage(r))+"</b><br>"+
-    "Price: "+money(r.price)+"<br>"+
-    "Buy zone: "+money(r.buyLow)+" to "+money(r.buyHigh)+"<br>"+
-    "Support: "+money(x.support)+"<br>"+
-    "Resistance: "+money(x.resistance)+"<br>"+
-    "Stop: "+money(r.stop)+"<br>"+
-    "Target: "+money(r.target)+"<br>"+
-    "Risk/reward: "+(getRR(r) ? getRR(r).toFixed(2) : "-")+"<br>"+
-    "Expected hold: 24 hours or more unless stop or risk exit triggers.";
+  el("details").innerHTML=
+    "<h2>"+escapeHtml(r.symbol)+" - "+escapeHtml(String(r.decision).replace(/_/g," "))+"</h2>"+
+    "<p><b>Short reason:</b> "+escapeHtml(shortReason(r))+" "+chase+"</p>"+
+    "<p><b>Swing plan:</b><br>"+
+    "Trigger: "+money(r.trigger)+".<br>"+
+    "Buy zone: "+money(r.buyLow)+" to "+money(r.buyHigh)+".<br>"+
+    "Swing stop: "+money(r.stop)+".<br>"+
+    "Target 1: "+money(r.target)+". Target 2: "+money(r.target2)+".<br>"+
+    "R:R: "+escapeHtml(r.rr)+".</p>"+
+    "<p><b>Day paper test plan:</b><br>"+
+    "Trigger: "+money(r.trigger)+".<br>"+
+    "Tight stop: "+money(r.tightStop)+".<br>"+
+    "Day target: "+money(r.dayTarget)+".<br>"+
+    "Day R:R: "+Number(r.dayRR||0).toFixed(2)+".<br>"+
+    "Reason: "+escapeHtml(dayReason(r))+"</p>"+
+    "<p><b>Explanation:</b> "+escapeHtml(r.summary)+"</p>";
 
   el("warnings").innerHTML="<b>Warnings:</b><br>"+warns;
 
-  setText("thesisWhy",r.summary||"No summary returned from backend.");
-  setText("thesisEntry","A good entry is not just a green signal. It should be near the buy zone: "+money(r.buyLow)+" to "+money(r.buyHigh)+". If price is above that area, the lesson is to wait and not chase.");
-  setText("thesisExit","The risk line is the stop at "+money(r.stop)+". The reward line is the target at "+money(r.target)+". Current risk/reward is "+(getRR(r) ? getRR(r).toFixed(2) : "-")+". If R/R is under the minimum, this is a watch only, not a trade.");
-  setText("thesisLesson",getLessonText(r));
+  el("education").innerHTML=
+    "<b>Why it ranked:</b><br>"+reasons+
+    "<br><br><b>Swing paper:</b> safer, wider plan, PDT-style, max risk rules."+
+    "<br><b>Day paper:</b> test-only, tighter trigger/stop/target, not for live day trading without knowing PDT rules."+
+    "<br><br><b>Important:</b> the paper trader now shows entry price, exit price, entry time, exit time, live P/L, and closed P/L.";
 
-  loadSelectedChart();
+  drawCandlestickChart(r);
 
-  if(voice)speak(r.symbol+" selected. "+setup(r)+" "+stage(r)+". Score "+r.score+".");
+  if(speakIt){
+    speak(r.symbol+" selected. Swing decision "+String(r.decision).replace(/_/g," ")+". Day watch says "+dayReason(r)+".");
+  }
 }
 
-function getLessonText(r){
-  if(stage(r)==="ENTER"){
-    return "This is an entry candidate because the scanner says the setup is active. The lesson is to still respect position size, stop loss, and 24 hour plus swing timing.";
-  }
-
-  if(stage(r)==="GET READY"){
-    return "This is close to entry. The lesson is preparation: know the buy zone, stop, target, and risk before it becomes an entry.";
-  }
-
-  if(setup(r)==="Pullback"){
-    return "This is a pullback watch. The lesson is patience. Strong stocks often give better risk/reward when they pull back into the buy zone.";
-  }
-
-  if(setup(r)==="Breakout"){
-    return "This is a breakout watch. The lesson is confirmation. Do not enter unless price proves strength and risk/reward remains acceptable.";
-  }
-
-  return "This is watchlist only. The lesson is that not every scanned stock is a trade. A professional system rejects weak or poorly placed setups.";
-}
-
-
-function setActiveChartButtons(){
-  document.querySelectorAll('#chartTools button').forEach(function(btn){
-    var same = btn.getAttribute('data-range')===CHART_RANGE && btn.getAttribute('data-interval')===CHART_INTERVAL && Number(btn.getAttribute('data-limit')||0)===Number(CHART_LIMIT||0);
-    btn.classList.toggle('active', same);
-  });
-}
-
-function getBarsArrayFromApi(data){
-  if(!data)return [];
-  if(Array.isArray(data))return data;
-  if(Array.isArray(data.bars))return data.bars;
-  if(Array.isArray(data.candles))return data.candles;
-  if(data.data&&Array.isArray(data.data.bars))return data.data.bars;
-  if(data.payload&&Array.isArray(data.payload.bars))return data.payload.bars;
-  return [];
-}
-
-function setChartTimeframe(range,interval,label,limit){
-  CHART_RANGE=range;
-  CHART_INTERVAL=interval;
-  CHART_LABEL=label;
-  CHART_LIMIT=Number(limit||0);
-  setActiveChartButtons();
-  loadSelectedChart();
-}
-
-function loadSelectedChart(){
-  if(!SELECTED){
-    setActiveChartButtons();
-    return;
-  }
-
-  setText('chartTitle',SELECTED.symbol+' CHART - '+CHART_LABEL);
-  setText('chartStatus','Loading '+CHART_LABEL);
-  setActiveChartButtons();
-
-  var key=SELECTED.symbol+'|'+CHART_RANGE+'|'+CHART_INTERVAL;
-
-  if(CHART_CACHE[key]){
-    var cached=Object.assign({},SELECTED,{bars:CHART_CACHE[key]});
-    drawChart(cached);
-    return;
-  }
-
-  api('/api/bars?symbol='+encodeURIComponent(SELECTED.symbol)+'&range='+encodeURIComponent(CHART_RANGE)+'&interval='+encodeURIComponent(CHART_INTERVAL))
-    .then(function(data){
-      var apiBars=getBarsArrayFromApi(data);
-
-      if(apiBars.length){
-        CHART_CACHE[key]=apiBars;
-        var copy=Object.assign({},SELECTED,{bars:apiBars});
-        drawChart(copy);
-      }else{
-        setText('chartStatus','No '+CHART_LABEL+' bars. Showing scanner chart.');
-        drawChart(SELECTED);
-      }
-    })
-    .catch(function(e){
-      setText('chartStatus','Chart fetch failed. Showing scanner chart.');
-      log('CHART FETCH FAILED: '+e.message);
-      drawChart(SELECTED);
-    });
-}
-
-function chartDateLabel(v){
-  if(!v)return '';
-  var d=new Date(v);
-  if(isNaN(d.getTime()))return String(v).slice(0,10);
-  if(CHART_INTERVAL==='5m'||CHART_INTERVAL==='15m'||CHART_INTERVAL==='1h'){
-    return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-  }
-  return d.toLocaleDateString([], {month:'short', day:'numeric'});
-}
-
-function drawChart(r){
+function drawCandlestickChart(r){
   var canvas=el("chart");
   if(!canvas)return;
 
   var rect=canvas.getBoundingClientRect();
   var dpr=window.devicePixelRatio||1;
-
-  canvas.width=Math.max(1400,Math.floor(rect.width*dpr));
+  canvas.width=Math.max(1200,Math.floor(rect.width*dpr));
   canvas.height=Math.max(620,Math.floor(rect.height*dpr));
 
   var ctx=canvas.getContext("2d");
-  var w=canvas.width;
-  var h=canvas.height;
-
+  var w=canvas.width,h=canvas.height;
   ctx.clearRect(0,0,w,h);
-  ctx.fillStyle="#02080a";
+  ctx.fillStyle="#000";
   ctx.fillRect(0,0,w,h);
 
-  var allBars=bars(r);
-  var limit=Number(CHART_LIMIT||120);
-  var b=limit>0?allBars.slice(-limit):allBars.slice(-120);
+  var bars=r.bars.map(function(b){
+    return{
+      open:num(b.open!==undefined?b.open:b.o),
+      high:num(b.high!==undefined?b.high:b.h),
+      low:num(b.low!==undefined?b.low:b.l),
+      close:num(b.close!==undefined?b.close:b.c),
+      date:b.date||""
+    };
+  }).filter(function(b){return Number.isFinite(b.close)&&Number.isFinite(b.high)&&Number.isFinite(b.low);}).slice(-90);
 
-  if(!b.length){
-    ctx.fillStyle="#9dffbc";
+  if(!bars.length){
+    ctx.fillStyle="#7dffa8";
     ctx.font=(22*dpr)+"px Arial";
-    ctx.fillText("No candle data returned for "+r.symbol,24*dpr,50*dpr);
+    ctx.fillText("No candle data returned for this symbol.",24*dpr,46*dpr);
     return;
   }
 
-  b.forEach(function(x){if(!Number.isFinite(x.open))x.open=x.close;});
+  bars.forEach(function(b){if(!Number.isFinite(b.open))b.open=b.close;});
 
-  setText('chartTitle',r.symbol+' CHART - '+CHART_LABEL);
-  setText('chartStatus',CHART_LABEL+' | '+b.length+' candles | '+setup(r)+' | '+stage(r));
-
-  var xsr=sr(r);
-  var levels=[r.price,r.buyLow,r.buyHigh,r.stop,r.target,r.target2,xsr.support,xsr.resistance].map(num).filter(Number.isFinite);
+  var levels=[r.price,r.buyLow,r.buyHigh,r.stop,r.target,r.target2,r.trigger,r.tightStop,r.dayTarget].map(num).filter(Number.isFinite);
   var vals=[];
-
-  b.forEach(function(x){vals.push(x.high,x.low,x.open,x.close);});
+  bars.forEach(function(b){vals.push(b.high,b.low,b.open,b.close);});
   levels.forEach(function(v){vals.push(v);});
 
-  var min=Math.min.apply(null,vals)*.99;
-  var max=Math.max.apply(null,vals)*1.01;
+  var min=Math.min.apply(null,vals)*.992;
+  var max=Math.max.apply(null,vals)*1.008;
   if(max<=min)max=min+1;
 
-  var left=110*dpr;
-  var right=230*dpr;
-  var top=45*dpr;
-  var bottom=65*dpr;
-  var cw=w-left-right;
-  var ch=h-top-bottom;
-  var step=cw/Math.max(1,b.length);
-  var bodyW=Math.max(4*dpr,Math.min(13*dpr,step*.66));
+  var left=76*dpr,right=220*dpr,top=42*dpr,bottom=58*dpr;
+  var cw=w-left-right,ch=h-top-bottom;
+  var step=cw/Math.max(1,bars.length);
+  var bodyW=Math.max(6*dpr,Math.min(17*dpr,step*.72));
 
-  function y(v){return top+ch-((v-min)/(max-min))*ch;}
-  function x(i){return left+step*i+step/2;}
+  function xFor(i){return left+step*i+step/2;}
+  function yFor(v){return top+ch-((v-min)/(max-min))*ch;}
 
-  ctx.strokeStyle="rgba(255,255,255,.08)";
+  ctx.strokeStyle="rgba(0,255,136,.12)";
   ctx.lineWidth=dpr;
+  ctx.fillStyle="#9fe9ba";
+  ctx.font=(12*dpr)+"px Arial";
 
-  ctx.fillStyle="#8fa59b";
-  ctx.font=(11*dpr)+"px Arial";
-
-  for(var g=0;g<=8;g++){
-    var gy=top+ch*g/8;
-    var priceLabel=max-(max-min)*g/8;
+  for(var g=0;g<=6;g++){
+    var gy=top+ch*g/6;
+    var priceLabel=max-(max-min)*g/6;
     ctx.beginPath();
     ctx.moveTo(left,gy);
     ctx.lineTo(w-right,gy);
@@ -1830,109 +1837,66 @@ function drawChart(r){
     ctx.fillText("$"+priceLabel.toFixed(2),10*dpr,gy+4*dpr);
   }
 
-  if(Number.isFinite(Number(r.buyLow))&&Number.isFinite(Number(r.buyHigh))){
-    var yHi=y(Number(r.buyHigh));
-    var yLo=y(Number(r.buyLow));
-    ctx.fillStyle="rgba(255,209,102,.10)";
-    ctx.fillRect(left,Math.min(yHi,yLo),cw,Math.abs(yLo-yHi));
+  if(Number.isFinite(num(r.buyLow))&&Number.isFinite(num(r.buyHigh))){
+    var y1=yFor(Math.max(num(r.buyLow),num(r.buyHigh)));
+    var y2=yFor(Math.min(num(r.buyLow),num(r.buyHigh)));
+    ctx.fillStyle="rgba(255,209,102,.12)";
+    ctx.fillRect(left,y1,cw,Math.max(5*dpr,y2-y1));
+    ctx.fillStyle="#ffd166";
+    ctx.font="bold "+(14*dpr)+"px Arial";
+    ctx.fillText("BUY ZONE",left+12*dpr,y1+22*dpr);
   }
 
-  b.forEach(function(bar,i){
-    var xx=x(i);
-    var yh=y(bar.high);
-    var yl=y(bar.low);
-    var yo=y(bar.open);
-    var yc=y(bar.close);
-    var c=bar.close>=bar.open?"#39ff14":"#ff4d6d";
-
-    ctx.strokeStyle=c;
-    ctx.lineWidth=1.5*dpr;
+  bars.forEach(function(b,i){
+    var x=xFor(i);
+    var yHigh=yFor(b.high),yLow=yFor(b.low),yOpen=yFor(b.open),yClose=yFor(b.close);
+    var bullish=b.close>=b.open;
+    var color=bullish?"#00ff88":"#ff5577";
+    var topBody=Math.min(yOpen,yClose);
+    var bodyH=Math.max(2*dpr,Math.abs(yOpen-yClose));
+    ctx.strokeStyle=color;
+    ctx.lineWidth=1.7*dpr;
     ctx.beginPath();
-    ctx.moveTo(xx,yh);
-    ctx.lineTo(xx,yl);
+    ctx.moveTo(x,yHigh);
+    ctx.lineTo(x,yLow);
     ctx.stroke();
-
-    ctx.fillStyle=c;
-    ctx.fillRect(xx-bodyW/2,Math.min(yo,yc),bodyW,Math.max(2*dpr,Math.abs(yo-yc)));
+    ctx.fillStyle=color;
+    ctx.fillRect(x-bodyW/2,topBody,bodyW,bodyH);
   });
 
-  function line(v,c,label,dash){
+  function levelLine(v,c,label){
     v=num(v);
     if(!Number.isFinite(v))return;
-    var yy=y(v);
-
+    var y=yFor(v);
     ctx.strokeStyle=c;
-    ctx.lineWidth=2*dpr;
-    if(dash)ctx.setLineDash([8*dpr,6*dpr]);
-
+    ctx.lineWidth=2.2*dpr;
+    ctx.setLineDash([9*dpr,6*dpr]);
     ctx.beginPath();
-    ctx.moveTo(left,yy);
-    ctx.lineTo(w-right,yy);
+    ctx.moveTo(left,y);
+    ctx.lineTo(w-right,y);
     ctx.stroke();
-
     ctx.setLineDash([]);
     ctx.fillStyle=c;
-    ctx.font="bold "+(13*dpr)+"px Arial";
-    ctx.fillText(label,w-right+8*dpr,yy-4*dpr);
-    ctx.fillText(money(v),w-right+8*dpr,yy+14*dpr);
-  }
-
-  line(r.target2,"#55b7ff","T2",true);
-  line(r.target,"#39ff14","TARGET",true);
-  line(r.buyHigh,"#ffd166","BUY HIGH",true);
-  line(r.buyLow,"#ffd166","BUY LOW",true);
-  line(r.stop,"#ff4d6d","STOP",true);
-  line(r.price,"#ffffff","PRICE",true);
-
-  if(b.length){
-    var first=b[0];
-    var last=b[b.length-1];
-    var mid=b[Math.floor(b.length/2)];
-
-    ctx.fillStyle="#8fa59b";
-    ctx.font=(12*dpr)+"px Arial";
-    ctx.fillText(chartDateLabel(first.date),left,h-24*dpr);
-    ctx.fillText(chartDateLabel(mid.date),left+cw/2-35*dpr,h-24*dpr);
-    ctx.fillText(chartDateLabel(last.date),w-right-70*dpr,h-24*dpr);
-
-    ctx.fillStyle="#ffffff";
     ctx.font="bold "+(14*dpr)+"px Arial";
-    ctx.fillText("O "+money(last.open)+"  H "+money(last.high)+"  L "+money(last.low)+"  C "+money(last.close),left,top+18*dpr);
+    ctx.fillText(label,w-right+10*dpr,y-5*dpr);
+    ctx.fillText(money(v),w-right+10*dpr,y+16*dpr);
   }
 
-  ctx.fillStyle="#fff";
-  ctx.font="bold "+(20*dpr)+"px Arial";
-  ctx.fillText(r.symbol+" "+setup(r)+" - "+stage(r)+" | "+CHART_LABEL,left,top-15*dpr);
+  levelLine(r.price,"#fff","CURRENT");
+  levelLine(r.trigger,"#9ed1ff","TRIGGER");
+  levelLine(r.stop,"#ff5577","SWING STOP");
+  levelLine(r.tightStop,"#ff9aae","TIGHT STOP");
+  levelLine(r.target,"#00ff88","TARGET");
+  levelLine(r.dayTarget,"#57a6ff","DAY TARGET");
+  levelLine(r.target2,"#57a6ff","T2");
 
-  ctx.fillStyle="rgba(57,255,20,.16)";
-  ctx.font="bold "+(48*dpr)+"px Arial";
-  ctx.fillText(r.symbol,left+16*dpr,top+64*dpr);
-}
+  ctx.fillStyle="rgba(125,255,168,.25)";
+  ctx.font="bold "+(44*dpr)+"px Arial";
+  ctx.fillText(r.symbol,left+14*dpr,top+48*dpr);
 
-function checkGetReadyAlerts(){
-  var ready=RESULTS.filter(function(r){return stage(r)==="GET READY";});
-  if(!ready.length)return;
-
-  var r=ready[0];
-  var key=r.symbol+"-"+Math.round(Number(r.price||0)*100)+"-"+stage(r);
-  var now=Date.now();
-
-  if(READY_SEEN[key]&&now-READY_SEEN[key]<30*60000)return;
-  READY_SEEN[key]=now;
-
-  showPop("Get Ready - Trade Near Entry",[
-    "<b>Symbol:</b> "+esc(r.symbol),
-    "<b>Current price:</b> "+money(r.price),
-    "<b>Buy zone:</b> "+money(r.buyLow)+" to "+money(r.buyHigh),
-    "<b>Stop:</b> "+money(r.stop),
-    "<b>Target:</b> "+money(r.target),
-    "<b>Score:</b> "+esc(r.score),
-    "<b>Why:</b> Price is close to the planned entry area. Prepare the trade plan, but do not enter unless the entry rule is met.",
-    "<b>Lesson:</b> Professionals prepare before the signal. They do not chase after it."
-  ],"ready");
-
-  speak("Get ready. "+r.symbol+" is near the planned entry zone.");
-  addFeed("GET READY: "+r.symbol+" near entry zone.");
+  ctx.fillStyle="#9fe9ba";
+  ctx.font=(14*dpr)+"px Arial";
+  ctx.fillText("Swing and day test levels marked. Day paper uses tighter stop/target. Swing paper uses wider trade plan.",left,h-20*dpr);
 }
 
 function marketClock(){
@@ -1941,7 +1905,6 @@ function marketClock(){
   var day=ny.getDay();
   var open=new Date(ny);
   var close=new Date(ny);
-
   open.setHours(9,30,0,0);
   close.setHours(16,0,0,0);
 
@@ -1953,384 +1916,633 @@ function marketClock(){
     return h+"h "+pad(m)+"m "+pad(s)+"s";
   }
 
-  function next(d){
-    var x=new Date(d);
-    x.setDate(x.getDate()+1);
-    x.setHours(9,30,0,0);
-    while(x.getDay()===0||x.getDay()===6)x.setDate(x.getDate()+1);
-    return x;
+  function nextOpen(d){
+    var n=new Date(d);
+    n.setDate(n.getDate()+1);
+    n.setHours(9,30,0,0);
+    while(n.getDay()===0||n.getDay()===6)n.setDate(n.getDate()+1);
+    return n;
   }
 
   if(day===0||day===6){
-    var w=next(ny);
-    return{state:"Closed",next:"opens in "+fmt(w-ny)};
+    var w=nextOpen(ny);
+    return{state:"Closed",countdown:"opens in "+fmt(w-ny)};
   }
-
-  if(ny<open)return{state:"Pre-market",next:"opens in "+fmt(open-ny)};
-  if(ny>=open&&ny<close)return{state:"Open",next:"closes in "+fmt(close-ny)};
-
-  var n=next(ny);
-  return{state:"After-hours",next:"opens in "+fmt(n-ny)};
+  if(ny<open)return{state:"Pre-market",countdown:"opens in "+fmt(open-ny)};
+  if(ny>=open&&ny<close)return{state:"Open",countdown:"closes in "+fmt(close-ny)};
+  var n=nextOpen(ny);
+  return{state:"After-hours",countdown:"opens in "+fmt(n-ny)};
 }
 
-function timers(){
-  var m=marketClock();
-  var local=new Date().toLocaleTimeString();
-
-  setText("sideClock",local);
-  setText("sideMarket",m.state.toUpperCase());
-  setText("sideNext",m.next);
+function updateTimers(){
+  var now = new Date();
+  setText("localTime",now.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit", second:"2-digit"}));
+  var mc=marketClock();
+  setText("marketState",mc.state);
+  setText("marketCountdown",mc.countdown);
 
   if(SCANNER_RUNNING&&NEXT_SCAN){
-    var ms=Math.max(0,NEXT_SCAN-Date.now());
-    var t=Math.floor(ms/60000)+":"+pad(Math.floor((ms%60000)/1000));
-    setText("sideRefresh",t);
+    var ms=NEXT_SCAN-Date.now();
+    if(ms<0)ms=0;
+    setText("nextScan",Math.floor(ms/60000)+":"+pad(Math.floor((ms%60000)/1000)));
   }else{
-    setText("sideRefresh","Paused");
+    setText("nextScan","Paused");
   }
+
+  renderAccounts();
 }
 
-function schedule(){
+function scheduleLoop(){
   if(LOOP)clearTimeout(LOOP);
+  LOOP=null;
 
   if(!SCANNER_RUNNING){
     NEXT_SCAN=0;
-    timers();
+    updateTimers();
     return;
   }
 
-  var minutes=Number(el("refresh").value||1);
-  if(!Number.isFinite(minutes)||minutes<1)minutes=1;
+  var minutes=Number(el("refresh")?el("refresh").value:5);
+  if(!Number.isFinite(minutes)||minutes<1)minutes=5;
 
   NEXT_SCAN=Date.now()+minutes*60000;
-  LOOP=setTimeout(scan,minutes*60000);
-  timers();
+  LOOP=setTimeout(function(){scan();},minutes*60000);
+  updateTimers();
 }
 
-function closedSameTickerToday(a,symbol){
-  return(a.closed||[]).some(function(t){
-    return String(t.symbol).toUpperCase()===String(symbol).toUpperCase()&&sameToday(t.exitTime);
-  });
+function toggleScanner(){
+  SCANNER_RUNNING=!SCANNER_RUNNING;
+  localStorage.setItem("scannerRunning",SCANNER_RUNNING?"true":"false");
+  updateRunButtons();
+
+  if(SCANNER_RUNNING){
+    status("Scanner resumed.","good");
+    scan();
+  }else{
+    if(LOOP)clearTimeout(LOOP);
+    LOOP=null;
+    NEXT_SCAN=0;
+    status("Scanner paused.","bad");
+    updateTimers();
+  }
 }
 
-function canEnter(r,a){
-  if(a.open[r.symbol])return false;
-  if(Object.keys(a.open).length>=Number(el("maxOpenTrades").value))return false;
-  if(entriesToday(a)>=Number(el("maxDailyEntries").value))return false;
-  if(closedSameTickerToday(a,r.symbol))return false;
-  if(stage(r)!=="ENTER")return false;
-  if(Number(r.score)<Number(el("autoMinScore").value))return false;
-  if(getRR(r)<Number(el("autoMinRR").value))return false;
-  if(!Number.isFinite(Number(r.price))||!Number.isFinite(Number(r.stop))||!Number.isFinite(Number(r.target)))return false;
+function updateRunButtons(){
+  var btn=el("pauseBtn");
+  if(btn)btn.textContent=SCANNER_RUNNING?"Pause":"Resume";
+}
+
+function toggleMute(){
+  MUTED=!MUTED;
+  localStorage.setItem("scannerMuted",MUTED?"true":"false");
+  updateMuteButton();
+  if(!MUTED){
+    VOICE_UNLOCKED=true;
+    speak("Voice alerts on.");
+  }
+}
+
+function updateMuteButton(){
+  var btn=el("muteBtn");
+  if(btn){
+    btn.textContent=MUTED?"🔇":"🔊";
+    btn.title=MUTED?"Muted":"Voice alerts on";
+  }
+}
+
+function toggleSwingAuto(){
+  SWING_AUTO=!SWING_AUTO;
+  localStorage.setItem("swingAutoOn",SWING_AUTO?"true":"false");
+  updateAutoState();
+  updateRules();
+}
+
+function toggleDayAuto(){
+  DAY_AUTO=!DAY_AUTO;
+  localStorage.setItem("dayAutoOn",DAY_AUTO?"true":"false");
+  updateAutoState();
+  updateRules();
+}
+
+function updateAutoState(){
+  setText("swingAutoState",SWING_AUTO?"On":"Off");
+  setText("swingAutoStateTop",SWING_AUTO?"On":"Off");
+  setText("dayAutoState",DAY_AUTO?"On":"Off");
+  setText("dayAutoStateTop",DAY_AUTO?"On":"Off");
+
+  if(el("swingAutoBtn"))el("swingAutoBtn").textContent=SWING_AUTO?"Turn Swing Auto Off":"Turn Swing Auto On";
+  if(el("dayAutoBtn"))el("dayAutoBtn").textContent=DAY_AUTO?"Turn Day Auto Off":"Turn Day Auto On";
+}
+
+function updateRules(){
+  var swingMaxPct=el("swingMaxTradePct")?el("swingMaxTradePct").value:"20";
+  var swingRisk=el("swingRiskDollars")?el("swingRiskDollars").value:"50";
+  var swingMaxOpen=el("swingMaxOpenTrades")?el("swingMaxOpenTrades").value:"5";
+  var swingMaxDaily=el("swingMaxDailyEntries")?el("swingMaxDailyEntries").value:"3";
+
+  var dayMaxPct=el("dayMaxTradePct")?el("dayMaxTradePct").value:"12";
+  var dayRisk=el("dayRiskDollars")?el("dayRiskDollars").value:"25";
+  var dayMaxOpen=el("dayMaxOpenTrades")?el("dayMaxOpenTrades").value:"2";
+  var dayMaxDaily=el("dayMaxDailyEntries")?el("dayMaxDailyEntries").value:"3";
+  var dayHold=el("dayMaxHoldMinutes")?el("dayMaxHoldMinutes").value:"90";
+
+  if(el("swingRulesBox")){
+    el("swingRulesBox").innerHTML=
+      "<b>PDT-safe swing paper mode</b><br>"+
+      "Tier 1: Score 85+ and R:R 1.5+.<br>"+
+      "Tier 2: Score 75+ and R:R 1.8+.<br>"+
+      "Tier 3: Score 65+ and R:R 2.2+, only near buy zone.<br><br>"+
+      "<b>Risk controls</b><br>"+
+      "Max one trade "+escapeHtml(swingMaxPct)+"% of equity.<br>"+
+      "Risk dollars per trade "+money(swingRisk)+".<br>"+
+      "Max open swing trades "+escapeHtml(swingMaxOpen)+".<br>"+
+      "Max new swing entries per day "+escapeHtml(swingMaxDaily)+".<br>"+
+      "No same ticker re-entry after closing today.";
+  }
+
+  if(el("dayRulesBox")){
+    el("dayRulesBox").innerHTML=
+      "<b>Day paper test mode</b><br>"+
+      "This is for paper testing fast momentum only. It is not live trading advice.<br><br>"+
+      "<b>Entry</b><br>"+
+      "Score 65+ minimum.<br>"+
+      "Day R:R 1.3+ minimum.<br>"+
+      "Trigger must be close to current price.<br>"+
+      "Tight stop and target must exist.<br><br>"+
+      "<b>Risk controls</b><br>"+
+      "Max one day trade "+escapeHtml(dayMaxPct)+"% of equity.<br>"+
+      "Risk dollars per day trade "+money(dayRisk)+".<br>"+
+      "Max open day trades "+escapeHtml(dayMaxOpen)+".<br>"+
+      "Max day entries per session "+escapeHtml(dayMaxDaily)+".<br>"+
+      "Max hold "+escapeHtml(dayHold)+" minutes.<br>"+
+      "Auto exit at target, stop, weak score, or max hold.";
+  }
+}
+
+function setAutoDecision(html){
+  var box=el("autoDecisionBox");
+  if(box)box.innerHTML=html;
+}
+
+function swingEntryTier(r){
+  var score=Number(r.score||0);
+  var rr=Number(r.rr||0);
+  var price=Number(r.price);
+  var buyLow=Number(r.buyLow);
+  var buyHigh=Number(r.buyHigh);
+
+  var nearBuyZone=false;
+  if(Number.isFinite(price)&&Number.isFinite(buyLow)&&Number.isFinite(buyHigh)&&buyHigh>0){
+    var above=((price-buyHigh)/buyHigh)*100;
+    var below=((buyLow-price)/buyLow)*100;
+    nearBuyZone=(price>=buyLow&&price<=buyHigh)||(above<=0.75&&above>=0)||(below<=1&&below>=0);
+  }
+
+  if(score>=85&&rr>=1.5)return "Tier 1";
+  if(score>=75&&rr>=1.8)return "Tier 2";
+  if(score>=65&&rr>=2.2&&nearBuyZone)return "Tier 3";
+  return "";
+}
+
+function canSwingEnter(r,account){
+  var decision=String(r.decision||"");
+  var maxOpen=Number(el("swingMaxOpenTrades")?el("swingMaxOpenTrades").value:5);
+  var maxDaily=Number(el("swingMaxDailyEntries")?el("swingMaxDailyEntries").value:3);
+
+  if(account.open[r.symbol])return false;
+  if(Object.keys(account.open).length>=maxOpen)return false;
+  if(accountEntriesToday(account)>=maxDaily)return false;
+  if(closedSameTickerToday(account,r.symbol))return false;
+  if(!/ENTER_NOW|ENTER|BUY/i.test(decision))return false;
+  if(!Number.isFinite(Number(r.price)))return false;
+  if(Number(account.cash)<Number(r.price))return false;
+  return !!swingEntryTier(r);
+}
+
+function canDayEnter(r,account){
+  var maxOpen=Number(el("dayMaxOpenTrades")?el("dayMaxOpenTrades").value:2);
+  var maxDaily=Number(el("dayMaxDailyEntries")?el("dayMaxDailyEntries").value:3);
+  var price=Number(r.price);
+  var trigger=Number(r.trigger);
+
+  if(account.open[r.symbol])return false;
+  if(Object.keys(account.open).length>=maxOpen)return false;
+  if(accountEntriesToday(account)>=maxDaily)return false;
+  if(closedSameTickerToday(account,r.symbol))return false;
+  if(Number(r.score||0)<65)return false;
+  if(Number(r.dayRR||0)<1.3)return false;
+  if(!Number.isFinite(price)||!Number.isFinite(trigger))return false;
+  if(Number(account.cash)<price)return false;
+
+  var away=Math.abs((price-trigger)/trigger)*100;
+  if(away>0.9)return false;
+
   return true;
 }
 
-function shouldExit(pos,r){
-  var price=Number(r?r.price:pos.lastPrice||pos.entry);
-  var stop=Number(pos.stop);
-  var target=Number(pos.target);
-  var score=r?Number(r.score):Number(pos.entryScore||0);
+function shouldExit(type, position, r){
+  var price=Number(r?r.price:position.lastPrice||position.entry);
+  var stop=Number(position.stop);
+  var target=Number(position.target);
+  var score=r?Number(r.score):Number(position.entryScore||0);
+  var decision=r?String(r.decision):"";
+  var maxHold=Number(el("dayMaxHoldMinutes")?el("dayMaxHoldMinutes").value:90);
 
-  if(Number.isFinite(stop)&&price<=stop)return"Stop hit";
-  if(Number.isFinite(target)&&price>=target)return"Target hit";
-  if(Number.isFinite(score)&&score<55)return"Score breakdown";
-  return"";
-}
+  if(Number.isFinite(stop)&&price<=stop)return "Stop hit";
+  if(Number.isFinite(target)&&price>=target)return "Target hit";
 
-function autoPaperCheck(){
-  if(!AUTO_PAPER){
-    el("autoDecisionBox").innerHTML="<b>Auto paper is off.</b>";
-    return;
+  if(type==="swing"){
+    if(/AVOID|EXIT|SELL|TRIM/i.test(decision))return "Scanner changed to "+decision.replace(/_/g," ");
+    if(Number.isFinite(score)&&score<55)return "Score dropped below 55";
   }
 
-  var a=getAccount();
+  if(type==="day"){
+    if(ageMinutes(position.entryTime)>=maxHold)return "Max day hold reached";
+    if(Number.isFinite(score)&&score<55)return "Day score dropped below 55";
+  }
+
+  return "";
+}
+
+function autoSwingCheck(){
+  if(!SWING_AUTO)return;
+
+  var account=getSwingAccount();
+  updateOpenPrices(account);
   var lines=[];
 
   RESULTS.forEach(function(r,i){
-    var pos=a.open[r.symbol];
+    var pos=account.open[r.symbol];
 
     if(pos){
-      pos.lastPrice=Number(r.price);
-      var exit=shouldExit(pos,r);
-
-      if(exit){
-        var exitPrice=Number(r.price);
-        var entry=Number(pos.entry);
-        var shares=Number(pos.shares||1);
-        var cost=Number(pos.cost||entry*shares);
-        var proceeds=exitPrice*shares;
-        var pnl=proceeds-cost;
-        var pct=(pnl/cost)*100;
-
-        a.cash+=proceeds;
-
-        a.closed.unshift({
-          symbol:pos.symbol,
-          entry:entry,
-          exit:exitPrice,
-          shares:shares,
-          cost:cost,
-          proceeds:proceeds,
-          pnl:pnl,
-          pnlPct:pct,
-          entryTime:pos.entryTime,
-          exitTime:nowText(),
-          entryReason:pos.entryReason,
-          exitReason:exit,
-          entryScore:pos.entryScore,
-          exitScore:r.score
-        });
-
-        delete a.open[r.symbol];
-
-        lines.push("<b class='redText'>"+esc(r.symbol)+" paper exit</b><br>Reason: "+esc(exit)+"<br>P/L: "+money(pnl));
-
-        showPop("Paper Trade Exited",[
-          "<b>Symbol:</b> "+esc(r.symbol),
-          "<b>Exit:</b> "+money(exitPrice),
-          "<b>Entry:</b> "+money(entry),
-          "<b>P/L:</b> "+money(pnl)+" ("+pct.toFixed(2)+"%)",
-          "<b>Lesson:</b> Exit rules protect the account. Do not argue with the stop."
-        ],"bad");
-
-        addFeed(r.symbol+" exited. P/L "+money(pnl)+".");
+      var exitReason=shouldExit("swing",pos,r);
+      if(exitReason){
+        closePaperTrade("swing",r.symbol,exitReason,true);
+        lines.push("<b style='color:#ff5577'>"+escapeHtml(r.symbol)+" swing exit</b><br>"+escapeHtml(exitReason));
+      }else if(lines.length<6){
+        lines.push("<b>"+escapeHtml(r.symbol)+" swing open</b><br>Live P/L updating. No swing exit rule triggered.");
       }
-
       return;
     }
 
-    if(canEnter(r,a)){
-      var maxPct=Number(el("maxTradePct").value||20);
-      var budget=Math.min(Number(a.cash),equity(a)*(maxPct/100));
-      var price=Number(r.price);
-      var shares=Math.floor(budget/price);
-
-      if(shares<1)return;
-
-      var cost=shares*price;
-      a.cash-=cost;
-
-      a.open[r.symbol]={
-        symbol:r.symbol,
-        entry:price,
-        shares:shares,
-        cost:cost,
-        stop:Number(r.stop),
-        target:Number(r.target),
-        entryScore:Number(r.score),
-        entryTime:nowText(),
-        entryReason:r.summary,
-        lastPrice:price
-      };
-
-      lines.push("<b class='greenText'>"+esc(r.symbol)+" paper entry</b><br>Entry: "+money(price)+"<br>Shares: "+shares);
-
-      showPop("Paper Trade Entered",[
-        "<b>Symbol:</b> "+esc(r.symbol),
-        "<b>Entry:</b> "+money(price),
-        "<b>Shares:</b> "+shares,
-        "<b>Cost:</b> "+money(cost),
-        "<b>Stop:</b> "+money(r.stop),
-        "<b>Target:</b> "+money(r.target),
-        "<b>Expected hold:</b> 24 hours or more",
-        "<b>Lesson:</b> This is a planned swing trade, not a chase. Risk is defined before entry."
-      ],"");
-
-      speak("Paper trade entered. "+r.symbol+" at "+money(price)+".");
-      addFeed(r.symbol+" paper entered.");
+    if(canSwingEnter(r,account)){
+      openPaperTrade("swing",r);
+      lines.push("<b style='color:#00ff88'>"+escapeHtml(r.symbol)+" swing entry</b><br>"+escapeHtml(swingEntryTier(r))+" passed.");
+      account=getSwingAccount();
       return;
     }
 
-    if(lines.length<8&&i<8){
-      lines.push("<b>"+esc(r.symbol)+" not entered</b><br>Reason: "+esc(reason(r))+". Score "+esc(r.score)+".");
+    if(i<3&&lines.length<6){
+      lines.push("<b>"+escapeHtml(r.symbol)+" no swing entry</b><br>"+escapeHtml(shortReason(r))+". Tier not passed or safety rule blocked.");
     }
   });
 
-  saveAccount(a);
-  el("autoDecisionBox").innerHTML=lines.join("<br><br>")||"No auto paper action.";
+  if(lines.length)setAutoDecision(lines.join("<br><br>"));
 }
 
-function manualPaperFromIndex(i){
-  var r=RESULTS[i];
-  if(!r)return;
+function autoDayCheck(){
+  if(!DAY_AUTO)return;
 
-  var a=getAccount();
-  var maxPct=Number(el("maxTradePct").value||20);
-  var budget=Math.min(Number(a.cash),equity(a)*(maxPct/100));
-  var price=Number(r.price);
-  var shares=Math.floor(budget/price);
+  var account=getDayAccount();
+  updateOpenPrices(account);
+  var lines=[];
 
-  if(!Number.isFinite(price)||price<=0){
-    showAlert("Cannot enter","No valid price returned.","warn");
-    return;
+  DAY_RESULTS.forEach(function(r,i){
+    var pos=account.open[r.symbol];
+
+    if(pos){
+      var exitReason=shouldExit("day",pos,r);
+      if(exitReason){
+        closePaperTrade("day",r.symbol,exitReason,true);
+        lines.push("<b style='color:#ff5577'>"+escapeHtml(r.symbol)+" day exit</b><br>"+escapeHtml(exitReason));
+      }else if(lines.length<6){
+        lines.push("<b>"+escapeHtml(r.symbol)+" day open</b><br>Live P/L updating. No day exit rule triggered.");
+      }
+      return;
+    }
+
+    if(canDayEnter(r,account)){
+      openPaperTrade("day",r);
+      lines.push("<b style='color:#57a6ff'>"+escapeHtml(r.symbol)+" day paper entry</b><br>"+escapeHtml(dayReason(r)));
+      account=getDayAccount();
+      return;
+    }
+
+    if(i<3&&lines.length<6){
+      lines.push("<b>"+escapeHtml(r.symbol)+" no day entry</b><br>"+escapeHtml(dayReason(r)));
+    }
+  });
+
+  if(lines.length){
+    var current=el("autoDecisionBox")?el("autoDecisionBox").innerHTML:"";
+    setAutoDecision(current+"<br><br>"+lines.join("<br><br>"));
   }
+}
 
-  if(shares<1){
-    showAlert("Cannot enter","Not enough paper cash for one share.","warn");
-    return;
-  }
+function openPaperTrade(type,r){
+  var account = type==="swing" ? getSwingAccount() : getDayAccount();
+  var entry = Number(r.price);
+  var stop = type==="swing" ? Number(r.stop) : Number(r.tightStop);
+  var target = type==="swing" ? Number(r.target) : Number(r.dayTarget);
+  var rr = type==="swing" ? r.rr : Number(r.dayRR||0).toFixed(2);
+  var maxPct = type==="swing" ? Number(el("swingMaxTradePct").value) : Number(el("dayMaxTradePct").value);
+  var riskDollars = type==="swing" ? Number(el("swingRiskDollars").value) : Number(el("dayRiskDollars").value);
+  var shares = sharesByRisk(account, entry, stop, maxPct, riskDollars);
 
-  var cost=shares*price;
-  a.cash-=cost;
+  if(shares < 1)return;
 
-  a.open[r.symbol]={
+  var cost = shares * entry;
+  if(cost > account.cash)return;
+
+  account.cash -= cost;
+
+  account.open[r.symbol]={
     symbol:r.symbol,
-    entry:price,
+    type:type,
+    entry:entry,
+    exit:null,
     shares:shares,
     cost:cost,
-    stop:Number(r.stop),
-    target:Number(r.target),
-    entryScore:Number(r.score),
+    stop:stop,
+    target:target,
+    rr:rr,
+    entryScore:Number(r.score||0),
+    strengthScore:Number(r.strengthScore||r.score||0),
+    entryDecision:r.decision,
     entryTime:nowText(),
-    entryReason:"Manual paper entry from scanner",
-    lastPrice:price
+    exitTime:null,
+    entryReason:type==="swing" ? shortReason(r) : dayReason(r),
+    actionPlan:r.plan,
+    holdNote:type==="swing" ? r.hold : "Day paper test",
+    lastPrice:entry,
+    lastScore:Number(r.score||0),
+    lastDecision:r.decision
   };
 
-  saveAccount(a);
-  renderPaper();
-  renderAccount();
+  if(type==="swing")saveSwingAccount(account);
+  else saveDayAccount(account);
 
-  showPop("Manual Paper Trade Entered",[
-    "<b>Symbol:</b> "+esc(r.symbol),
-    "<b>Entry:</b> "+money(price),
-    "<b>Shares:</b> "+shares,
-    "<b>Cost:</b> "+money(cost),
-    "<b>Lesson:</b> Manual entries should still follow the plan: buy zone, stop, target, and 24h+ hold."
-  ],"");
+  var popType = type==="day" ? "day" : "";
 
-  addFeed(r.symbol+" manual paper entered.");
+  showTradePop((type==="day"?"Day Paper Trade Entered":"Swing Paper Trade Entered"), [
+    "<b>Symbol:</b> " + escapeHtml(r.symbol),
+    "<b>Entry price:</b> " + money(entry),
+    "<b>Entry time:</b> " + escapeHtml(nowText()),
+    "<b>Shares:</b> " + escapeHtml(shares),
+    "<b>Trade cost:</b> " + money(cost),
+    "<b>Stop:</b> " + money(stop),
+    "<b>Target:</b> " + money(target),
+    "<b>R/R:</b> " + escapeHtml(rr),
+    "<b>Score:</b> " + escapeHtml(r.score),
+    "<b>Reason:</b> " + escapeHtml(type==="swing" ? shortReason(r) : dayReason(r)),
+    "<b>Live P/L:</b> starts at $0.00 and updates each scan."
+  ], popType);
+
+  showAlert(type==="day"?"Day paper entry":"Swing paper entry",r.symbol+" entered at "+money(entry)+". Shares "+shares,popType);
+  speak((type==="day"?"Day paper":"Swing paper")+" trade entered. "+r.symbol+" at "+money(entry)+".");
+  addActivity((type==="day"?"Day":"Swing")+" paper entered "+r.symbol+" at "+money(entry)+", shares "+shares+", stop "+money(stop)+", target "+money(target)+".");
+  renderAccounts();
 }
 
-function renderPaper(){
-  var a=getAccount();
-  var open=a.open||{};
-  var closed=a.closed||[];
-  var keys=Object.keys(open);
+function closePaperTrade(type,symbol,reason,quiet){
+  var account = type==="swing" ? getSwingAccount() : getDayAccount();
+  var pos = account.open[symbol];
+  if(!pos)return;
 
-  if(!keys.length){
-    el("paperBox").innerHTML="<p>No open paper trades yet.</p>";
-  }else{
-    el("paperBox").innerHTML=keys.map(function(sym){
-      var p=open[sym];
-      var r=RESULTS.find(function(x){return x.symbol===sym;});
+  var r=RESULTS.find(function(x){return x.symbol===symbol;});
+  var exitPrice=r?Number(r.price):Number(pos.lastPrice||pos.entry);
+  var entryPrice=Number(pos.entry);
+  var shares=Number(pos.shares||1);
+  var cost=Number(pos.cost||entryPrice*shares);
+  var proceeds=exitPrice*shares;
+  var pnl=proceeds-cost;
+  var pnlPct=cost?(pnl/cost)*100:0;
 
-      if(r){
-        p.lastPrice=Number(r.price);
-        open[sym]=p;
-      }
+  account.cash += proceeds;
 
-      var now=Number(p.lastPrice||p.entry);
-      var pnl=(now-Number(p.entry))*Number(p.shares||1);
-      var cost=Number(p.cost||Number(p.entry)*Number(p.shares||1));
-      var pct=cost?(pnl/cost)*100:0;
+  account.closed.unshift({
+    symbol:pos.symbol,
+    type:type,
+    entry:entryPrice,
+    exit:exitPrice,
+    shares:shares,
+    cost:cost,
+    proceeds:proceeds,
+    pnl:pnl,
+    pnlPct:pnlPct,
+    entryTime:pos.entryTime,
+    exitTime:nowText(),
+    entryReason:pos.entryReason,
+    exitReason:reason||"Manual close",
+    entryScore:pos.entryScore,
+    exitScore:r?r.score:pos.lastScore
+  });
 
-      return"<div class='holding "+(pnl>=0?"good":"bad")+"'><b>"+esc(sym)+" open</b><br>"+
-        "Entry: "+money(p.entry)+" | Now: "+money(now)+" | Shares: "+esc(p.shares)+"<br>"+
-        "P/L: "+money(pnl)+" ("+pct.toFixed(2)+"%)<br>"+
-        "Expected hold: 24 hours or more unless stop or risk exit triggers.</div>";
-    }).join("");
-  }
+  delete account.open[symbol];
 
-  a.open=open;
-  saveAccount(a);
+  if(type==="swing")saveSwingAccount(account);
+  else saveDayAccount(account);
 
-  if(!closed.length){
-    el("closedBox").innerHTML="<p>No closed trades yet.</p>";
-  }else{
-    el("closedBox").innerHTML=closed.slice(0,50).map(function(t){
-      return"<div class='holding "+(Number(t.pnl)>=0?"good":"bad")+"'><b>"+esc(t.symbol)+" closed</b><br>"+
-        "Entry: "+money(t.entry)+" | Exit: "+money(t.exit)+"<br>"+
-        "P/L: "+money(t.pnl)+" ("+Number(t.pnlPct).toFixed(2)+"%)<br>"+
-        "Exit: "+esc(t.exitReason||"")+"</div>";
-    }).join("");
-  }
+  var popType = pnl>=0 ? (type==="day"?"day":"") : "bad";
 
-  renderAccount();
+  showTradePop((type==="day"?"Day Paper Trade Exited":"Swing Paper Trade Exited"), [
+    "<b>Symbol:</b> " + escapeHtml(symbol),
+    "<b>Entry price:</b> " + money(entryPrice),
+    "<b>Exit price:</b> " + money(exitPrice),
+    "<b>Entry time:</b> " + escapeHtml(pos.entryTime),
+    "<b>Exit time:</b> " + escapeHtml(nowText()),
+    "<b>Shares:</b> " + escapeHtml(shares),
+    "<b>Trade cost:</b> " + money(cost),
+    "<b>Proceeds:</b> " + money(proceeds),
+    "<b>Made/Lost:</b> " + money(pnl) + " (" + pnlPct.toFixed(2) + "%)",
+    "<b>Exit reason:</b> " + escapeHtml(reason||"Manual close")
+  ], popType);
+
+  if(!quiet)showAlert(type==="day"?"Day paper exit":"Swing paper exit",symbol+" exited at "+money(exitPrice)+". P/L "+money(pnl),pnl>=0?popType:"bad");
+
+  speak((type==="day"?"Day paper":"Swing paper")+" trade exited. "+symbol+". Profit or loss "+money(pnl)+".");
+  addActivity((type==="day"?"Day":"Swing")+" paper exited "+symbol+" at "+money(exitPrice)+". P/L "+money(pnl)+". Reason: "+(reason||"Manual close")+".");
+  renderAccounts();
 }
 
-function clearClosed(){
-  var a=getAccount();
-  a.closed=[];
-  saveAccount(a);
-  renderPaper();
-  renderAccount();
+function addManualPaper(type){
+  var sym=(el("paperSymbol").value||"").trim().toUpperCase();
+  var entry=Number(el("paperEntry").value);
+  var shares=Number(el("paperShares").value||1);
+
+  if(!sym||!Number.isFinite(entry)){
+    showAlert("Paper trade missing info","Add symbol and entry price.","warn");
+    return;
+  }
+
+  if(!Number.isFinite(shares)||shares<=0)shares=1;
+
+  var account=type==="swing"?getSwingAccount():getDayAccount();
+  var cost=entry*shares;
+
+  if(cost>account.cash){
+    showAlert("Not enough paper cash","Trade cost is "+money(cost)+" but cash is "+money(account.cash),"warn");
+    return;
+  }
+
+  account.cash-=cost;
+
+  account.open[sym]={
+    symbol:sym,
+    type:type,
+    entry:entry,
+    exit:null,
+    shares:shares,
+    cost:cost,
+    stop:null,
+    target:null,
+    rr:"-",
+    entryScore:null,
+    entryDecision:"MANUAL",
+    entryTime:nowText(),
+    exitTime:null,
+    entryReason:"Manual "+type+" paper trade",
+    lastPrice:entry,
+    lastScore:null,
+    lastDecision:"MANUAL"
+  };
+
+  if(type==="swing")saveSwingAccount(account);
+  else saveDayAccount(account);
+
+  el("paperSymbol").value="";
+  el("paperEntry").value="";
+  el("paperShares").value="";
+
+  showTradePop("Manual "+(type==="day"?"Day":"Swing")+" Paper Trade Added", [
+    "<b>Symbol:</b> "+escapeHtml(sym),
+    "<b>Entry price:</b> "+money(entry),
+    "<b>Entry time:</b> "+escapeHtml(nowText()),
+    "<b>Shares:</b> "+escapeHtml(shares),
+    "<b>Trade cost:</b> "+money(cost),
+    "<b>Live P/L:</b> starts at $0.00 and updates each scan."
+  ], type==="day"?"day":"");
+
+  addActivity("Manual "+type+" paper trade added: "+sym+" at "+money(entry)+".");
+  renderAccounts();
+}
+
+function clearClosed(type){
+  var account=type==="swing"?getSwingAccount():getDayAccount();
+  account.closed=[];
+  if(type==="swing")saveSwingAccount(account);
+  else saveDayAccount(account);
+  addActivity("Closed "+type+" paper trade log cleared.");
+  renderAccounts();
 }
 
 function exportLog(){
   var data={
     exportedAt:nowText(),
-    account:getAccount(),
-    activityFeed:JSON.parse(localStorage.getItem("activityFeed")||"[]")
+    swingAccount:getSwingAccount(),
+    dayAccount:getDayAccount(),
+    activityFeed:JSON.parse(localStorage.getItem("activityFeed") || "[]"),
+    settings:{
+      scannerRunning:SCANNER_RUNNING,
+      swingAuto:SWING_AUTO,
+      dayAuto:DAY_AUTO,
+      muted:MUTED,
+      scanLimit:el("scanLimit")?el("scanLimit").value:"140"
+    }
   };
 
-  var blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+  var text=JSON.stringify(data,null,2);
+  var blob=new Blob([text],{type:"application/json"});
   var url=URL.createObjectURL(blob);
   var a=document.createElement("a");
-
   a.href=url;
-  a.download="tradingmint-paper-log.json";
+  a.download="paper-trade-log.json";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
-function resetAccount(){
-  var size=Number(el("accountSize").value||5000);
-  if(!Number.isFinite(size)||size<100)size=5000;
-  saveAccount({starting:size,cash:size,open:{},closed:[],createdAt:nowText()});
-  renderPaper();
-  renderAccount();
-}
-
-function toggleAuto(){
-  AUTO_PAPER=!AUTO_PAPER;
-  localStorage.setItem("autoPaperOn",AUTO_PAPER?"true":"false");
-  setText("autoPaperKpi",AUTO_PAPER?"ON | $5,000":"OFF");
-  el("autoBtn").textContent=AUTO_PAPER?"Turn Auto Paper Off":"Turn Auto Paper On";
-}
-
-function rules(){
-  el("autoRulesBox").innerHTML="<b>24h+ swing system</b><br>"+
-    "This is not a day trader. Trades are planned for 24 hours or more unless stop, target, or risk exit triggers.<br><br>"+
-    "<b>Get Ready alert:</b> appears when price is near the planned buy zone and the score is close to the entry threshold.<br><br>"+
-    "<b>Paper entry popup:</b> appears when auto paper or manual paper enters a trade.<br><br>"+
-    "Auto entry requires ENTER stage, minimum score, acceptable R:R, available cash, and daily entry limits.";
-}
-
 function start(){
-  el("tradePopClose").onclick=closePop;
-  el("clearClosedBtn").onclick=clearClosed;
-  el("exportLogBtn").onclick=exportLog;
-  el("resetAccountBtn").onclick=resetAccount;
-  el("autoBtn").onclick=toggleAuto;
+  document.addEventListener("click",unlockVoiceOnce,{once:true});
 
-  document.querySelectorAll('#chartTools button').forEach(function(btn){
-    btn.onclick=function(){
-      setChartTimeframe(btn.getAttribute('data-range'),btn.getAttribute('data-interval'),btn.getAttribute('data-label'),btn.getAttribute('data-limit'));
-    };
+  el("pauseBtn").addEventListener("click",toggleScanner);
+  el("muteBtn").addEventListener("click",toggleMute);
+  el("swingAutoBtn").addEventListener("click",toggleSwingAuto);
+  el("dayAutoBtn").addEventListener("click",toggleDayAuto);
+  el("resetSwingAccountBtn").addEventListener("click",function(){resetAccount("swing");});
+  el("resetDayAccountBtn").addEventListener("click",function(){resetAccount("day");});
+  el("addSwingPaperBtn").addEventListener("click",function(){addManualPaper("swing");});
+  el("addDayPaperBtn").addEventListener("click",function(){addManualPaper("day");});
+  el("clearSwingClosedBtn").addEventListener("click",function(){clearClosed("swing");});
+  el("clearDayClosedBtn").addEventListener("click",function(){clearClosed("day");});
+  el("exportLogBtn").addEventListener("click",exportLog);
+
+  if (el("tradePopClose")) {
+    el("tradePopClose").addEventListener("click", closeTradePop);
+  }
+
+  [
+    "swingMaxTradePct","swingRiskDollars","swingMaxOpenTrades","swingMaxDailyEntries",
+    "dayMaxTradePct","dayRiskDollars","dayMaxOpenTrades","dayMaxDailyEntries","dayMaxHoldMinutes",
+    "swingAccountSize","dayAccountSize","refresh","scanLimit"
+  ].forEach(function(id){
+    if(el(id)){
+      el(id).addEventListener("input",function(){
+        updateRules();
+        scheduleLoop();
+      });
+      el(id).addEventListener("change",function(){
+        updateRules();
+        if(SCANNER_RUNNING)scan();
+      });
+    }
   });
-  setActiveChartButtons();
 
-  renderPaper();
-  renderAccount();
-  renderFeed();
-  renderMarket();
-  rules();
-  timers();
+  updateAutoState();
+  updateRules();
+  updateMuteButton();
+  updateRunButtons();
 
-  el("muteBtn").textContent=MUTED?"Unmute":"Mute";
-  setText("autoPaperKpi",AUTO_PAPER?"ON | $5,000":"OFF");
+  status("Scanner loading. Auto-start enabled.","work");
+  log("SCRIPT OK. JavaScript is running.");
 
-  setInterval(timers,1000);
+  renderAccounts();
+  renderActivity();
+  renderBestTrades();
+  renderDayTrades();
+  renderMarketHealth();
+  updateTimers();
+
+  TIMER=setInterval(updateTimers,1000);
 
   keepAlive();
-  setInterval(keepAlive,240000);
+  KEEP_TIMER=setInterval(keepAlive,240000);
 
-  health();
+  selfCheck();
+
+  document.addEventListener("visibilitychange",function(){
+    if(!document.hidden){
+      checkWakeGap();
+      keepAlive();
+      if(SCANNER_RUNNING){
+        scan();
+      }
+    }
+  });
+
+  window.addEventListener("focus",function(){
+    checkWakeGap();
+    keepAlive();
+    if(SCANNER_RUNNING){
+      scan();
+    }
+  });
 
   if(SCANNER_RUNNING){
-    setTimeout(scan,700);
+    setTimeout(scan,900);
+  }else{
+    status("Scanner paused.","bad");
   }
 }
 
