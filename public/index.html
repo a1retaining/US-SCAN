@@ -594,6 +594,7 @@ details summary{
     <button onclick="jumpTo('scanner')">⌕ SCANNER</button>
     <button onclick="jumpTo('positions')">◉ POSITIONS <span id="sidePositions" style="float:right;background:#9b5cff;color:#fff;border-radius:999px;padding:1px 7px">0</span></button>
     <button onclick="jumpTo('journal')">▣ JOURNAL</button>
+    <button onclick="jumpTo('backtest')">▣ 10Y BACKTEST</button>
     <button onclick="jumpTo('settings')">⚙ RISK / SETTINGS</button>
     <button onclick="health()">⟳ HEALTH</button>
   </div>
@@ -636,7 +637,7 @@ details summary{
   <div class="kpi"><span>24H Swing Cash</span><strong id="swingCashKpi">$5,000.00</strong></div>
   <div class="kpi"><span>Day Test Cash</span><strong id="dayCashKpi">$25,000.00</strong></div>
   <div class="kpi actionBtns">
-    <button onclick="showAlert('Backtest','Backtest will only be enabled after real historical testing is built. No fake backtest data is shown.','warn')">Backtest</button>
+    <button onclick="runBacktest()">Backtest</button>
     <button class="yellow" onclick="scan()">Refresh</button>
   </div>
 </section>
@@ -810,6 +811,113 @@ details summary{
     <div class="boxBody">
       <button id="exportLogBtn">Export Full Log</button>
       <div class="note">Exports both paper accounts, closed trades, open trades, and activity feed.</div>
+    </div>
+  </div>
+</section>
+
+
+<section id="backtest" class="panel">
+  <div class="panelTitle">
+    <span>10 YEAR BACKTEST - 24H+ SWING RULES</span>
+    <small id="backtestStatus">READY</small>
+  </div>
+
+  <div class="boxBody">
+    <div class="grid4">
+      <div class="mini"><span>Net Profit</span><b id="btNetProfit">$0.00</b></div>
+      <div class="mini"><span>Return</span><b id="btReturn">0%</b></div>
+      <div class="mini"><span>Win Rate</span><b id="btWinRate">0%</b></div>
+      <div class="mini"><span>Profit Factor</span><b id="btProfitFactor">0</b></div>
+    </div>
+
+    <div class="grid4" style="margin-top:8px">
+      <div class="mini"><span>Total Trades</span><b id="btTrades">0</b></div>
+      <div class="mini"><span>Max Drawdown</span><b id="btDrawdown">0%</b></div>
+      <div class="mini"><span>Average Hold</span><b id="btAvgHold">0 days</b></div>
+      <div class="mini"><span>Ending Equity</span><b id="btEndingEquity">$0.00</b></div>
+    </div>
+
+    <div class="note">
+      <b>Backtest settings:</b><br>
+      This uses your 24H+ swing rules, $5,000 account, risk dollars, max trade size, max open trades, and max entries per day.
+      It is historical simulation only. It does not prove future results.
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:10px">
+      <div>
+        <label>Years</label>
+        <input id="btYears" type="number" value="10" min="1" max="10">
+      </div>
+      <div>
+        <label>Account $</label>
+        <input id="btAccount" type="number" value="5000" min="100">
+      </div>
+      <div>
+        <label>Risk $</label>
+        <input id="btRisk" type="number" value="50" min="1">
+      </div>
+      <div>
+        <label>Max Trade %</label>
+        <input id="btMaxTradePct" type="number" value="20" min="1" max="100">
+      </div>
+      <div>
+        <label>Max Open</label>
+        <input id="btMaxOpen" type="number" value="5" min="1" max="20">
+      </div>
+      <div>
+        <label>Max Entries/Day</label>
+        <input id="btMaxDaily" type="number" value="3" min="1" max="20">
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <button onclick="runBacktest()">Run 10Y Backtest</button>
+      <button class="yellow" onclick="runBacktestSelected()">Backtest Selected</button>
+      <button onclick="exportBacktest()">Export Backtest</button>
+    </div>
+
+    <div class="chartWrap" style="height:330px;min-height:330px;max-height:330px;margin-top:10px">
+      <canvas id="backtestChart"></canvas>
+    </div>
+
+    <div class="tableWrap" style="max-height:300px;margin-top:10px">
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Trades</th>
+            <th>Win Rate</th>
+            <th>Profit Factor</th>
+            <th>Net Profit</th>
+            <th>Return</th>
+            <th>Max DD</th>
+            <th>Avg Hold</th>
+          </tr>
+        </thead>
+        <tbody id="backtestRows">
+          <tr><td colspan="8" style="text-align:center;padding:18px;color:#9fe9ba">No backtest run yet.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="tableWrap" style="max-height:300px;margin-top:10px">
+      <table>
+        <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Entry Date</th>
+            <th>Exit Date</th>
+            <th>Entry</th>
+            <th>Exit</th>
+            <th>Shares</th>
+            <th>P/L</th>
+            <th>Reason</th>
+          </tr>
+        </thead>
+        <tbody id="backtestTradeRows">
+          <tr><td colspan="8" style="text-align:center;padding:18px;color:#9fe9ba">No backtest trades yet.</td></tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </section>
@@ -3123,6 +3231,269 @@ function start(){
 
   setTimeout(initTradingMintChartUpgrade, 500);
 })();
+
+
+/* =========================
+   10 YEAR BACKTEST FRONT END
+   Connects Backtest button and Backtest section to /api/backtest.
+   ========================= */
+var LAST_BACKTEST = null;
+
+function backtestSymbols(){
+  var selected = SELECTED && SELECTED.symbol ? SELECTED.symbol : "";
+  var list = symbols();
+
+  if(!list && selected){
+    return selected;
+  }
+
+  return list;
+}
+
+function runBacktestSelected(){
+  if(!SELECTED || !SELECTED.symbol){
+    showAlert("Backtest", "Select a stock first.", "warn");
+    return;
+  }
+
+  runBacktest(SELECTED.symbol);
+}
+
+function runBacktest(onlySymbol){
+  var years = Number(el("btYears") ? el("btYears").value : 10);
+  var account = Number(el("btAccount") ? el("btAccount").value : 5000);
+  var risk = Number(el("btRisk") ? el("btRisk").value : 50);
+  var maxTradePct = Number(el("btMaxTradePct") ? el("btMaxTradePct").value : 20);
+  var maxOpen = Number(el("btMaxOpen") ? el("btMaxOpen").value : 5);
+  var maxDaily = Number(el("btMaxDaily") ? el("btMaxDaily").value : 3);
+
+  if(!Number.isFinite(years) || years < 1) years = 10;
+  if(years > 10) years = 10;
+
+  var syms = onlySymbol || backtestSymbols();
+
+  if(!syms){
+    showAlert("Backtest", "No symbols to backtest.", "warn");
+    return;
+  }
+
+  jumpTo("backtest");
+  setText("backtestStatus", "RUNNING");
+  showAlert("Backtest started", "Running historical test. This can take a little while.", "warn");
+  addFeed("BACKTEST STARTED: " + syms);
+
+  var url =
+    "/api/backtest?symbols=" + encodeURIComponent(syms) +
+    "&years=" + encodeURIComponent(years) +
+    "&account=" + encodeURIComponent(account) +
+    "&risk=" + encodeURIComponent(risk) +
+    "&maxTradePct=" + encodeURIComponent(maxTradePct) +
+    "&maxOpenTrades=" + encodeURIComponent(maxOpen) +
+    "&maxEntriesPerDay=" + encodeURIComponent(maxDaily);
+
+  api(url).then(function(data){
+    LAST_BACKTEST = data;
+    renderBacktest(data);
+    setText("backtestStatus", "COMPLETE");
+    showAlert("Backtest complete", "10 year backtest finished.", "");
+    addFeed("BACKTEST COMPLETE: " + syms);
+  }).catch(function(e){
+    setText("backtestStatus", "FAILED");
+    showAlert("Backtest failed", e.message, "bad");
+    addFeed("BACKTEST FAILED: " + e.message);
+  });
+}
+
+function renderBacktest(data){
+  if(!data || !data.stats){
+    showAlert("Backtest", "Backtest returned no stats.", "warn");
+    return;
+  }
+
+  var s = data.stats;
+
+  setText("btNetProfit", money(s.netProfit));
+  setText("btReturn", Number(s.netReturnPct || 0).toFixed(2) + "%");
+  setText("btWinRate", Number(s.winRate || 0).toFixed(2) + "%");
+  setText("btProfitFactor", Number(s.profitFactor || 0).toFixed(2));
+  setText("btTrades", s.totalTrades || 0);
+  setText("btDrawdown", Number(s.maxDrawdownPct || 0).toFixed(2) + "%");
+  setText("btAvgHold", Number(s.avgHoldDays || 0).toFixed(2) + " days");
+  setText("btEndingEquity", money(s.endingEquity));
+
+  renderBacktestRows(data.perSymbol || []);
+  renderBacktestTrades(data.trades || []);
+  drawBacktestChart(data.equityCurve || []);
+}
+
+function renderBacktestRows(rows){
+  var body = el("backtestRows");
+  if(!body) return;
+
+  if(!rows.length){
+    body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:18px;color:#9fe9ba">No per-symbol results.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = rows.map(function(r){
+    var profit = Number(r.netProfit || 0);
+    var cls = profit >= 0 ? "greenText" : "redText";
+
+    return "<tr>" +
+      "<td><b>" + esc(r.symbol) + "</b></td>" +
+      "<td>" + esc(r.totalTrades || 0) + "</td>" +
+      "<td>" + Number(r.winRate || 0).toFixed(2) + "%</td>" +
+      "<td>" + Number(r.profitFactor || 0).toFixed(2) + "</td>" +
+      "<td class='" + cls + "'>" + money(r.netProfit) + "</td>" +
+      "<td>" + Number(r.netReturnPct || 0).toFixed(2) + "%</td>" +
+      "<td class='redText'>" + Number(r.maxDrawdownPct || 0).toFixed(2) + "%</td>" +
+      "<td>" + Number(r.avgHoldDays || 0).toFixed(2) + "d</td>" +
+    "</tr>";
+  }).join("");
+}
+
+function renderBacktestTrades(trades){
+  var body = el("backtestTradeRows");
+  if(!body) return;
+
+  if(!trades.length){
+    body.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:18px;color:#9fe9ba">No trades returned.</td></tr>';
+    return;
+  }
+
+  body.innerHTML = trades.slice(0, 120).map(function(t){
+    var pnl = Number(t.pnl || 0);
+    var cls = pnl >= 0 ? "greenText" : "redText";
+
+    return "<tr>" +
+      "<td><b>" + esc(t.symbol) + "</b></td>" +
+      "<td>" + esc(t.entryDate || "") + "</td>" +
+      "<td>" + esc(t.exitDate || "") + "</td>" +
+      "<td>" + money(t.entry) + "</td>" +
+      "<td>" + money(t.exit) + "</td>" +
+      "<td>" + esc(t.shares || 0) + "</td>" +
+      "<td class='" + cls + "'>" + money(t.pnl) + " (" + Number(t.pnlPct || 0).toFixed(2) + "%)</td>" +
+      "<td>" + esc(t.exitReason || "") + "</td>" +
+    "</tr>";
+  }).join("");
+}
+
+function drawBacktestChart(curve){
+  var canvas = el("backtestChart");
+  if(!canvas) return;
+
+  var rect = canvas.getBoundingClientRect();
+  var dpr = window.devicePixelRatio || 1;
+
+  canvas.width = Math.max(1000, Math.floor(rect.width * dpr));
+  canvas.height = Math.max(320, Math.floor(rect.height * dpr));
+
+  var ctx = canvas.getContext("2d");
+  var w = canvas.width;
+  var h = canvas.height;
+
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle = "#02080a";
+  ctx.fillRect(0,0,w,h);
+
+  if(!curve.length){
+    ctx.fillStyle = "#9dffbc";
+    ctx.font = (18*dpr) + "px Arial";
+    ctx.fillText("No equity curve yet.", 24*dpr, 44*dpr);
+    return;
+  }
+
+  var vals = curve.map(function(p){ return Number(p.equity); }).filter(Number.isFinite);
+
+  if(!vals.length) return;
+
+  var min = Math.min.apply(null, vals);
+  var max = Math.max.apply(null, vals);
+
+  if(max <= min) max = min + 1;
+
+  var padRange = (max - min) * 0.12;
+  min -= padRange;
+  max += padRange;
+
+  var left = 72*dpr;
+  var right = 22*dpr;
+  var top = 28*dpr;
+  var bottom = 42*dpr;
+  var cw = w - left - right;
+  var ch = h - top - bottom;
+
+  function x(i){
+    return left + (cw * i / Math.max(1, curve.length - 1));
+  }
+
+  function y(v){
+    return top + ch - ((v - min) / (max - min)) * ch;
+  }
+
+  ctx.strokeStyle = "rgba(255,255,255,.08)";
+  ctx.lineWidth = dpr;
+  ctx.fillStyle = "#8fa59b";
+  ctx.font = (11*dpr) + "px Arial";
+
+  for(var g=0; g<=5; g++){
+    var gy = top + ch * g / 5;
+    var label = max - (max - min) * g / 5;
+
+    ctx.beginPath();
+    ctx.moveTo(left, gy);
+    ctx.lineTo(w - right, gy);
+    ctx.stroke();
+
+    ctx.fillText("$" + label.toFixed(0), 8*dpr, gy + 4*dpr);
+  }
+
+  ctx.strokeStyle = "#39ff14";
+  ctx.lineWidth = 2*dpr;
+  ctx.beginPath();
+
+  curve.forEach(function(p,i){
+    var px = x(i);
+    var py = y(Number(p.equity));
+
+    if(i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  });
+
+  ctx.stroke();
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold " + (15*dpr) + "px Arial";
+  ctx.fillText("10Y Backtest Equity Curve", left, 20*dpr);
+
+  var first = curve[0];
+  var last = curve[curve.length - 1];
+
+  ctx.fillStyle = "#8fa59b";
+  ctx.font = (11*dpr) + "px Arial";
+  ctx.fillText(first.date || "start", left, h - 14*dpr);
+  ctx.fillText(last.date || "end", w - right - 100*dpr, h - 14*dpr);
+}
+
+function exportBacktest(){
+  if(!LAST_BACKTEST){
+    showAlert("Export Backtest", "Run a backtest first.", "warn");
+    return;
+  }
+
+  var blob = new Blob([JSON.stringify(LAST_BACKTEST, null, 2)], { type:"application/json" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+
+  a.href = url;
+  a.download = "tradingmint-10y-backtest.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
+}
+
 
 
 if(document.readyState==="loading"){
