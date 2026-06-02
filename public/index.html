@@ -2736,6 +2736,7 @@ function start(){
   window.CHART_SCALE_MODE = localStorage.getItem("chartScaleMode") || "price";
   window.SHOW_DAY_LEVELS = localStorage.getItem("showDayLevels") !== "false";
   window.SHOW_SWING_LEVELS = localStorage.getItem("showSwingLevels") !== "false";
+  window.SHOW_TRADE_MARKS = localStorage.getItem("showTradeMarks") !== "false";
 
   var isDraggingChart = false;
   var dragStartX = 0;
@@ -2748,6 +2749,7 @@ function start(){
     localStorage.setItem("chartScaleMode", window.CHART_SCALE_MODE);
     localStorage.setItem("showDayLevels", window.SHOW_DAY_LEVELS ? "true" : "false");
     localStorage.setItem("showSwingLevels", window.SHOW_SWING_LEVELS ? "true" : "false");
+    localStorage.setItem("showTradeMarks", window.SHOW_TRADE_MARKS ? "true" : "false");
   }
 
   function redrawSelectedChart(){
@@ -2773,11 +2775,13 @@ function start(){
     var fitTrade = document.getElementById("chartFitTradeBtn");
     var dayBtn = document.getElementById("chartDayLevelsBtn");
     var swingBtn = document.getElementById("chartSwingLevelsBtn");
+    var tradeBtn = document.getElementById("chartTradeMarksBtn");
 
     if (fitPrice) fitPrice.classList.toggle("off", window.CHART_SCALE_MODE !== "price");
     if (fitTrade) fitTrade.classList.toggle("off", window.CHART_SCALE_MODE !== "trade");
     if (dayBtn) dayBtn.classList.toggle("off", !window.SHOW_DAY_LEVELS);
     if (swingBtn) swingBtn.classList.toggle("off", !window.SHOW_SWING_LEVELS);
+    if (tradeBtn) tradeBtn.classList.toggle("off", !window.SHOW_TRADE_MARKS);
   }
 
   function addChartControls(){
@@ -2829,6 +2833,11 @@ function start(){
 
     makeButton("chartSwingLevelsBtn", "Swing Levels", "", function(){
       window.SHOW_SWING_LEVELS = !window.SHOW_SWING_LEVELS;
+      redrawSelectedChart();
+    });
+
+    makeButton("chartTradeMarksBtn", "Trade Marks", "purple", function(){
+      window.SHOW_TRADE_MARKS = !window.SHOW_TRADE_MARKS;
       redrawSelectedChart();
     });
 
@@ -3145,6 +3154,189 @@ function start(){
       ctx.fillText(label + " " + money(v), labelX, ty);
     }
 
+
+    function parseTradeDate(value){
+      if (!value) return null;
+
+      var d = new Date(value);
+      if (!isNaN(d.getTime())) return d;
+
+      var parts = String(value).match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+      if (parts) {
+        var day = Number(parts[1]);
+        var month = Number(parts[2]) - 1;
+        var year = Number(parts[3]);
+        var parsed = new Date(year, month, day);
+        if (!isNaN(parsed.getTime())) return parsed;
+      }
+
+      return null;
+    }
+
+    function barTimeMs(bar){
+      if (!bar || !bar.date) return null;
+      var d = new Date(bar.date);
+      if (!isNaN(d.getTime())) return d.getTime();
+      var simple = String(bar.date).match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (simple) {
+        var xdate = new Date(Number(simple[1]), Number(simple[2]) - 1, Number(simple[3]));
+        if (!isNaN(xdate.getTime())) return xdate.getTime();
+      }
+      return null;
+    }
+
+    function nearestVisibleIndex(timeValue, fallbackEnd){
+      var d = parseTradeDate(timeValue);
+      if (!d) return fallbackEnd ? b.length - 1 : 0;
+
+      var target = d.getTime();
+      var best = fallbackEnd ? b.length - 1 : 0;
+      var bestDiff = Infinity;
+
+      for (var i = 0; i < b.length; i++) {
+        var ms = barTimeMs(b[i]);
+        if (ms === null) continue;
+        var diff = Math.abs(ms - target);
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          best = i;
+        }
+      }
+
+      return best;
+    }
+
+    function collectTradeMarks(symbol){
+      var marks = [];
+
+      function addAccountMarks(account, mode){
+        if (!account) return;
+
+        var openTrade = account.open && account.open[symbol];
+
+        if (openTrade) {
+          marks.push({
+            kind:"entry",
+            mode:mode,
+            status:"OPEN",
+            time:openTrade.entryTime,
+            price:Number(openTrade.entry),
+            shares:Number(openTrade.shares || 0),
+            cost:Number(openTrade.cost || (Number(openTrade.entry || 0) * Number(openTrade.shares || 0))),
+            pnl:null
+          });
+        }
+
+        (account.closed || []).forEach(function(t){
+          if (String(t.symbol || "").toUpperCase() !== String(symbol || "").toUpperCase()) return;
+
+          marks.push({
+            kind:"entry",
+            mode:mode,
+            status:"CLOSED",
+            time:t.entryTime || t.entryDate,
+            price:Number(t.entry),
+            shares:Number(t.shares || 0),
+            cost:Number(t.cost || (Number(t.entry || 0) * Number(t.shares || 0))),
+            pnl:null
+          });
+
+          marks.push({
+            kind:"exit",
+            mode:mode,
+            status:"CLOSED",
+            time:t.exitTime || t.exitDate,
+            price:Number(t.exit),
+            shares:Number(t.shares || 0),
+            cost:Number(t.proceeds || (Number(t.exit || 0) * Number(t.shares || 0))),
+            pnl:Number(t.pnl || 0),
+            pnlPct:Number(t.pnlPct || 0),
+            reason:t.exitReason || ""
+          });
+        });
+      }
+
+      try { addAccountMarks(getSwingAccount(), "SWING"); } catch(e) {}
+      try { addAccountMarks(getDayAccount(), "DAY"); } catch(e) {}
+
+      return marks.filter(function(m){
+        return Number.isFinite(m.price) && m.price > 0;
+      });
+    }
+
+    function drawTradeMarker(mark){
+      if (!window.SHOW_TRADE_MARKS) return;
+
+      var idx = nearestVisibleIndex(mark.time, mark.kind === "exit" || mark.status === "OPEN");
+      if (idx < 0 || idx >= b.length) return;
+
+      var px = x(idx);
+      var rawY = y(mark.price);
+      var py = Math.max(top + 16 * dpr, Math.min(top + ch - 16 * dpr, rawY));
+      var isExit = mark.kind === "exit";
+      var isProfit = Number(mark.pnl || 0) >= 0;
+      var color = isExit ? (isProfit ? "#39ff14" : "#ff4d6d") : (mark.mode === "DAY" ? "#55b7ff" : "#ffd166");
+      var label = (isExit ? "EXIT " : "BUY ") + mark.mode;
+      var sharesText = Number.isFinite(mark.shares) && mark.shares > 0 ? mark.shares + " sh" : "";
+      var costText = Number.isFinite(mark.cost) && mark.cost > 0 ? money(mark.cost) : "";
+      var pnlText = isExit && Number.isFinite(mark.pnl) ? " | P/L " + money(mark.pnl) : "";
+      var openText = mark.status === "OPEN" ? " | OPEN" : "";
+      var text = label + " " + money(mark.price) + " | " + sharesText + " | " + costText + pnlText + openText;
+
+      ctx.save();
+
+      ctx.strokeStyle = color;
+      ctx.fillStyle = color;
+      ctx.lineWidth = 2.2 * dpr;
+
+      ctx.beginPath();
+      ctx.arc(px, py, 6 * dpr, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.beginPath();
+      if (isExit) {
+        ctx.moveTo(px, py + 7 * dpr);
+        ctx.lineTo(px - 7 * dpr, py + 18 * dpr);
+        ctx.lineTo(px + 7 * dpr, py + 18 * dpr);
+      } else {
+        ctx.moveTo(px, py - 7 * dpr);
+        ctx.lineTo(px - 7 * dpr, py - 18 * dpr);
+        ctx.lineTo(px + 7 * dpr, py - 18 * dpr);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.strokeStyle = color;
+      ctx.setLineDash([5 * dpr, 5 * dpr]);
+      ctx.beginPath();
+      ctx.moveTo(px, top);
+      ctx.lineTo(px, top + ch);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.font = "bold " + (12 * dpr) + "px Arial";
+      var textW = ctx.measureText(text).width;
+      var boxW = Math.min(textW + 14 * dpr, 360 * dpr);
+      var boxH = 22 * dpr;
+      var labelX = px + 10 * dpr;
+      var labelY = isExit ? py + 24 * dpr : py - 30 * dpr;
+
+      if (labelX + boxW > w - right) labelX = px - boxW - 10 * dpr;
+      if (labelX < left) labelX = left + 4 * dpr;
+      if (labelY < top) labelY = top + 4 * dpr;
+      if (labelY + boxH > top + ch) labelY = top + ch - boxH - 4 * dpr;
+
+      ctx.fillStyle = "rgba(2,8,10,.90)";
+      ctx.fillRect(labelX, labelY, boxW, boxH);
+      ctx.strokeStyle = color;
+      ctx.strokeRect(labelX, labelY, boxW, boxH);
+
+      ctx.fillStyle = color;
+      ctx.fillText(text, labelX + 7 * dpr, labelY + 15 * dpr);
+
+      ctx.restore();
+    }
+
     levelLine(r.price, "#ffffff", "PRICE", true, true);
     levelLine(r.trigger, "#ffffff", "TRIGGER", true, true);
     levelLine(r.buyHigh, "#ffd166", "BUY HIGH", true, true);
@@ -3159,6 +3351,10 @@ function start(){
     if (window.SHOW_DAY_LEVELS) {
       levelLine(r.dayTarget, "#55b7ff", "DAY TARGET", true, false);
       levelLine(r.tightStop, "#ff9f43", "TIGHT STOP", true, false);
+    }
+
+    if (window.SHOW_TRADE_MARKS) {
+      collectTradeMarks(r.symbol).forEach(drawTradeMarker);
     }
 
     function dateLabel(v){
@@ -3213,7 +3409,7 @@ function start(){
     ctx.fillStyle = "#8fa59b";
     ctx.font = (11 * dpr) + "px Arial";
     ctx.fillText(
-      "Mouse wheel zoom | Drag left/right | Fit Price ignores far targets | Fit Trade shows all trade levels",
+      "Mouse wheel zoom | Drag left/right | Trade Marks shows paper entries/exits | Fit Price ignores far targets",
       left,
       h - 8 * dpr
     );
