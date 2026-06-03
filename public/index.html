@@ -3272,67 +3272,133 @@ function start(){
 
       var px = x(idx);
       var rawY = y(mark.price);
-      var py = Math.max(top + 16 * dpr, Math.min(top + ch - 16 * dpr, rawY));
+      var py = Math.max(top + 18 * dpr, Math.min(top + ch - 18 * dpr, rawY));
       var isExit = mark.kind === "exit";
       var isProfit = Number(mark.pnl || 0) >= 0;
+      var modeText = mark.mode === "DAY" ? "DAY" : "SWING";
       var color = isExit ? (isProfit ? "#39ff14" : "#ff4d6d") : (mark.mode === "DAY" ? "#55b7ff" : "#ffd166");
-      var label = (isExit ? "EXIT " : "BUY ") + mark.mode;
-      var sharesText = Number.isFinite(mark.shares) && mark.shares > 0 ? mark.shares + " sh" : "";
-      var costText = Number.isFinite(mark.cost) && mark.cost > 0 ? money(mark.cost) : "";
-      var pnlText = isExit && Number.isFinite(mark.pnl) ? " | P/L " + money(mark.pnl) : "";
-      var openText = mark.status === "OPEN" ? " | OPEN" : "";
-      var text = label + " " + money(mark.price) + " | " + sharesText + " | " + costText + pnlText + openText;
+      var darkFill = "rgba(2,8,10,.94)";
+      var label = (isExit ? "SOLD " : "BOUGHT ") + modeText;
+      var sharesText = Number.isFinite(mark.shares) && mark.shares > 0 ? mark.shares + " shares" : "shares -";
+      var costText = Number.isFinite(mark.cost) && mark.cost > 0 ? money(mark.cost) : "-";
+      var pnlText = isExit && Number.isFinite(mark.pnl) ? "P/L " + money(mark.pnl) + " (" + Number(mark.pnlPct || 0).toFixed(2) + "%)" : (mark.status === "OPEN" ? "OPEN TRADE" : "ENTRY");
+      var line1 = label + " @ " + money(mark.price);
+      var line2 = isExit ? pnlText : sharesText + " | paid " + costText;
+      var line3 = isExit ? sharesText + " | proceeds " + costText : (mark.status === "OPEN" ? "Still open" : "Closed trade entry");
+
+      var focused = false;
+      try {
+        if (typeof SELECTED_PAPER_TRADE !== "undefined" && SELECTED_PAPER_TRADE) {
+          focused = String(SELECTED_PAPER_TRADE.symbol || "").toUpperCase() === String(r.symbol || "").toUpperCase();
+        }
+      } catch(e) {}
 
       ctx.save();
 
-      ctx.strokeStyle = color;
-      ctx.fillStyle = color;
-      ctx.lineWidth = 2.2 * dpr;
-
-      ctx.beginPath();
-      ctx.arc(px, py, 6 * dpr, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.beginPath();
-      if (isExit) {
-        ctx.moveTo(px, py + 7 * dpr);
-        ctx.lineTo(px - 7 * dpr, py + 18 * dpr);
-        ctx.lineTo(px + 7 * dpr, py + 18 * dpr);
-      } else {
-        ctx.moveTo(px, py - 7 * dpr);
-        ctx.lineTo(px - 7 * dpr, py - 18 * dpr);
-        ctx.lineTo(px + 7 * dpr, py - 18 * dpr);
-      }
-      ctx.closePath();
-      ctx.fill();
-
-      ctx.strokeStyle = color;
-      ctx.setLineDash([5 * dpr, 5 * dpr]);
+      // vertical flag pole pinned exactly at the buy/sell candle area
+      ctx.strokeStyle = focused ? "#ffffff" : color;
+      ctx.lineWidth = focused ? 3.2 * dpr : 2.1 * dpr;
       ctx.beginPath();
       ctx.moveTo(px, top);
       ctx.lineTo(px, top + ch);
       ctx.stroke();
+
+      // price dot at exact buy/sell price
+      ctx.fillStyle = color;
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 1.8 * dpr;
+      ctx.beginPath();
+      ctx.arc(px, py, focused ? 8 * dpr : 6 * dpr, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // little arrow pointer to the exact price
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      if (isExit) {
+        ctx.moveTo(px, py + 8 * dpr);
+        ctx.lineTo(px - 8 * dpr, py + 20 * dpr);
+        ctx.lineTo(px + 8 * dpr, py + 20 * dpr);
+      } else {
+        ctx.moveTo(px, py - 8 * dpr);
+        ctx.lineTo(px - 8 * dpr, py - 20 * dpr);
+        ctx.lineTo(px + 8 * dpr, py - 20 * dpr);
+      }
+      ctx.closePath();
+      ctx.fill();
+
+      // flag box sizing
+      ctx.font = "bold " + (13 * dpr) + "px Arial";
+      var w1 = ctx.measureText(line1).width;
+      ctx.font = (12 * dpr) + "px Arial";
+      var w2 = ctx.measureText(line2).width;
+      var w3 = ctx.measureText(line3).width;
+      var flagW = Math.min(Math.max(w1, w2, w3) + 24 * dpr, 390 * dpr);
+      var flagH = 58 * dpr;
+
+      var flagX = px + 12 * dpr;
+      if (flagX + flagW > w - right) flagX = px - flagW - 12 * dpr;
+      if (flagX < left) flagX = left + 6 * dpr;
+      if (flagX + flagW > w - right) flagX = w - right - flagW - 6 * dpr;
+
+      var flagY = isExit ? py + 26 * dpr : py - flagH - 26 * dpr;
+      if (flagY < top + 4 * dpr) flagY = top + 4 * dpr;
+      if (flagY + flagH > top + ch - 4 * dpr) flagY = top + ch - flagH - 4 * dpr;
+
+      // connector from price dot to flag
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2 * dpr;
+      ctx.setLineDash([5 * dpr, 5 * dpr]);
+      ctx.beginPath();
+      ctx.moveTo(px, py);
+      ctx.lineTo(flagX < px ? flagX + flagW : flagX, flagY + flagH / 2);
+      ctx.stroke();
       ctx.setLineDash([]);
 
-      ctx.font = "bold " + (12 * dpr) + "px Arial";
-      var textW = ctx.measureText(text).width;
-      var boxW = Math.min(textW + 14 * dpr, 360 * dpr);
-      var boxH = 22 * dpr;
-      var labelX = px + 10 * dpr;
-      var labelY = isExit ? py + 24 * dpr : py - 30 * dpr;
-
-      if (labelX + boxW > w - right) labelX = px - boxW - 10 * dpr;
-      if (labelX < left) labelX = left + 4 * dpr;
-      if (labelY < top) labelY = top + 4 * dpr;
-      if (labelY + boxH > top + ch) labelY = top + ch - boxH - 4 * dpr;
-
-      ctx.fillStyle = "rgba(2,8,10,.90)";
-      ctx.fillRect(labelX, labelY, boxW, boxH);
+      // actual flag shape with notch
+      var notch = 13 * dpr;
+      ctx.beginPath();
+      ctx.moveTo(flagX, flagY);
+      ctx.lineTo(flagX + flagW, flagY);
+      ctx.lineTo(flagX + flagW - notch, flagY + flagH / 2);
+      ctx.lineTo(flagX + flagW, flagY + flagH);
+      ctx.lineTo(flagX, flagY + flagH);
+      ctx.closePath();
+      ctx.fillStyle = darkFill;
+      ctx.fill();
+      ctx.lineWidth = focused ? 3 * dpr : 2 * dpr;
       ctx.strokeStyle = color;
-      ctx.strokeRect(labelX, labelY, boxW, boxH);
+      ctx.stroke();
+
+      // left color strip makes BOUGHT/SOLD obvious
+      ctx.fillStyle = color;
+      ctx.fillRect(flagX, flagY, 6 * dpr, flagH);
 
       ctx.fillStyle = color;
-      ctx.fillText(text, labelX + 7 * dpr, labelY + 15 * dpr);
+      ctx.font = "bold " + (13 * dpr) + "px Arial";
+      ctx.fillText(line1, flagX + 13 * dpr, flagY + 18 * dpr);
+
+      ctx.fillStyle = isExit ? (isProfit ? "#39ff14" : "#ff4d6d") : "#ffffff";
+      ctx.font = "bold " + (12 * dpr) + "px Arial";
+      ctx.fillText(line2, flagX + 13 * dpr, flagY + 37 * dpr);
+
+      ctx.fillStyle = "#8fa59b";
+      ctx.font = (11 * dpr) + "px Arial";
+      ctx.fillText(line3, flagX + 13 * dpr, flagY + 52 * dpr);
+
+      // price badge on the right edge as a second visual anchor
+      var badgeText = (isExit ? "SOLD " : "BOUGHT ") + money(mark.price);
+      ctx.font = "bold " + (11 * dpr) + "px Arial";
+      var badgeW = ctx.measureText(badgeText).width + 14 * dpr;
+      var badgeH = 18 * dpr;
+      var badgeX = w - right + 8 * dpr;
+      var badgeY = Math.max(top + 3 * dpr, Math.min(top + ch - badgeH - 3 * dpr, py - badgeH / 2));
+      ctx.fillStyle = "rgba(2,8,10,.92)";
+      ctx.fillRect(badgeX, badgeY, badgeW, badgeH);
+      ctx.strokeStyle = color;
+      ctx.strokeRect(badgeX, badgeY, badgeW, badgeH);
+      ctx.fillStyle = color;
+      ctx.fillText(badgeText, badgeX + 7 * dpr, badgeY + 13 * dpr);
 
       ctx.restore();
     }
