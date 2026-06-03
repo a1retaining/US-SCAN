@@ -3692,6 +3692,345 @@ function exportBacktest(){
 
 
 
+
+/* =========================
+   CLICKABLE PAPER TRADES + CLEAR P/L FOCUS
+   Lets open/closed paper trades jump to the chart, turn Trade Marks on,
+   and show a clear profit/loss panel over the chart.
+   ========================= */
+var SELECTED_PAPER_TRADE = null;
+
+function ensureTradeFocusBox(){
+  var wrap = document.querySelector(".chartWrap");
+  if(!wrap) return null;
+
+  var box = document.getElementById("chartTradeFocusBox");
+  if(box) return box;
+
+  var style = document.createElement("style");
+  style.textContent = ""
+    + "#chartTradeFocusBox{position:absolute;left:14px;top:14px;z-index:40;min-width:310px;max-width:520px;background:rgba(2,8,10,.94);border:2px solid rgba(57,255,20,.72);border-radius:12px;padding:12px;box-shadow:0 0 28px rgba(57,255,20,.22);display:none;pointer-events:auto;}"
+    + "#chartTradeFocusBox.loss{border-color:rgba(255,77,109,.85);box-shadow:0 0 28px rgba(255,77,109,.20);}"
+    + "#chartTradeFocusBox.flat{border-color:rgba(255,209,102,.85);box-shadow:0 0 28px rgba(255,209,102,.18);}"
+    + "#chartTradeFocusBox .focusTop{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}"
+    + "#chartTradeFocusBox .focusTitle{font-size:18px;font-weight:900;color:#fff;}"
+    + "#chartTradeFocusBox .focusMode{font-size:11px;font-weight:900;border:1px solid rgba(255,255,255,.18);border-radius:999px;padding:4px 8px;color:#dce7e1;}"
+    + "#chartTradeFocusBox .focusPnl{font-size:28px;line-height:32px;font-weight:900;margin:4px 0 8px;color:#39ff14;}"
+    + "#chartTradeFocusBox.loss .focusPnl{color:#ff4d6d;}"
+    + "#chartTradeFocusBox.flat .focusPnl{color:#ffd166;}"
+    + "#chartTradeFocusBox .focusGrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;}"
+    + "#chartTradeFocusBox .focusCell{background:#02080a;border:1px solid rgba(255,255,255,.10);border-radius:7px;padding:7px;}"
+    + "#chartTradeFocusBox .focusCell span{display:block;color:#8fa59b;font-size:10px;text-transform:uppercase;}"
+    + "#chartTradeFocusBox .focusCell b{display:block;color:#fff;font-size:13px;margin-top:3px;}"
+    + ".holding.trade-click{cursor:pointer;transition:.12s;position:relative;}"
+    + ".holding.trade-click:hover{filter:brightness(1.18);transform:translateY(-1px);}"
+    + ".tradeClickHint{display:inline-block;margin-top:7px;color:#9ed1ff;font-weight:900;font-size:11px;}"
+    + ".profitBadge{display:inline-block;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:900;margin:5px 0;}"
+    + ".profitBadge.win{color:#39ff14;border:1px solid rgba(57,255,20,.65);background:rgba(57,255,20,.10);}"
+    + ".profitBadge.loss{color:#ff9aae;border:1px solid rgba(255,77,109,.65);background:rgba(255,77,109,.10);}"
+    + ".profitBadge.flat{color:#ffd166;border:1px solid rgba(255,209,102,.65);background:rgba(255,209,102,.10);}";
+  document.head.appendChild(style);
+
+  box = document.createElement("div");
+  box.id = "chartTradeFocusBox";
+  wrap.appendChild(box);
+  return box;
+}
+
+function getTradeAccount(type){
+  return type === "day" ? getDayAccount() : getSwingAccount();
+}
+
+function getFocusedTrade(type,symbol,state,closedIndex){
+  var a = getTradeAccount(type);
+  symbol = String(symbol || "").toUpperCase();
+
+  if(state === "open"){
+    var openTrade = a.open && a.open[symbol];
+    if(!openTrade) return null;
+
+    var current = Number(openTrade.lastPrice || openTrade.entry || 0);
+    var entry = Number(openTrade.entry || 0);
+    var shares = Number(openTrade.shares || 0);
+    var cost = Number(openTrade.cost || entry * shares);
+    var pnl = (current - entry) * shares;
+    var pnlPct = cost ? (pnl / cost) * 100 : 0;
+
+    return {
+      state:"open",
+      type:type,
+      symbol:symbol,
+      entry:entry,
+      exit:null,
+      current:current,
+      shares:shares,
+      cost:cost,
+      proceeds:null,
+      pnl:pnl,
+      pnlPct:pnlPct,
+      entryTime:openTrade.entryTime,
+      exitTime:null,
+      stop:openTrade.stop,
+      target:openTrade.target,
+      reason:openTrade.entryReason || "",
+      raw:openTrade
+    };
+  }
+
+  var closed = a.closed || [];
+  var t = null;
+
+  if(Number.isFinite(Number(closedIndex)) && closed[Number(closedIndex)] && String(closed[Number(closedIndex)].symbol || "").toUpperCase() === symbol){
+    t = closed[Number(closedIndex)];
+  }else{
+    t = closed.find(function(x){return String(x.symbol || "").toUpperCase() === symbol;});
+  }
+
+  if(!t) return null;
+
+  return {
+    state:"closed",
+    type:type,
+    symbol:String(t.symbol || symbol).toUpperCase(),
+    entry:Number(t.entry || 0),
+    exit:Number(t.exit || 0),
+    current:Number(t.exit || 0),
+    shares:Number(t.shares || 0),
+    cost:Number(t.cost || 0),
+    proceeds:Number(t.proceeds || 0),
+    pnl:Number(t.pnl || 0),
+    pnlPct:Number(t.pnlPct || 0),
+    entryTime:t.entryTime || t.entryDate,
+    exitTime:t.exitTime || t.exitDate,
+    stop:null,
+    target:null,
+    reason:t.exitReason || "",
+    raw:t
+  };
+}
+
+function fallbackSignalFromFocusedTrade(trade){
+  var price = Number(trade.current || trade.exit || trade.entry || 0);
+  var entry = Number(trade.entry || price || 0);
+  var stop = Number(trade.stop || (entry ? entry * .97 : price * .97));
+  var target = Number(trade.target || (entry ? entry * 1.05 : price * 1.05));
+
+  return {
+    symbol:trade.symbol,
+    decision:"WATCH",
+    setup:"Paper Trade",
+    score:0,
+    price:price || entry,
+    buyLow:entry,
+    buyHigh:entry,
+    stop:stop,
+    target:target,
+    target2:target,
+    trigger:entry,
+    tightStop:stop,
+    dayTarget:target,
+    dayRR:0,
+    rr:0,
+    support:stop,
+    resistance:target,
+    summary:"Paper trade selected from journal.",
+    warnings:[],
+    reasons:[],
+    bars:[]
+  };
+}
+
+function updateTradeFocusBox(trade){
+  var box = ensureTradeFocusBox();
+  if(!box || !trade){
+    if(box) box.style.display = "none";
+    return;
+  }
+
+  var pnl = Number(trade.pnl || 0);
+  var pct = Number(trade.pnlPct || 0);
+  var statusClass = pnl > 0 ? "" : pnl < 0 ? "loss" : "flat";
+  var label = pnl > 0 ? "PROFIT" : pnl < 0 ? "LOSS" : "FLAT";
+  var mode = (trade.type === "day" ? "DAY PAPER" : "24H+ SWING") + " | " + (trade.state === "open" ? "OPEN" : "CLOSED");
+  var mainPrice = trade.state === "open" ? trade.current : trade.exit;
+
+  box.className = statusClass;
+  box.style.display = "block";
+  box.innerHTML =
+    "<div class='focusTop'>" +
+      "<div class='focusTitle'>" + esc(trade.symbol) + " PAPER TRADE</div>" +
+      "<div class='focusMode'>" + esc(mode) + "</div>" +
+    "</div>" +
+    "<div class='focusPnl'>" + label + " " + money(pnl) + " (" + pct.toFixed(2) + "%)</div>" +
+    "<div class='focusGrid'>" +
+      "<div class='focusCell'><span>Entry</span><b>" + money(trade.entry) + "</b></div>" +
+      "<div class='focusCell'><span>" + (trade.state === "open" ? "Current" : "Exit") + "</span><b>" + money(mainPrice) + "</b></div>" +
+      "<div class='focusCell'><span>Shares</span><b>" + esc(trade.shares || 0) + "</b></div>" +
+      "<div class='focusCell'><span>Trade value</span><b>" + money(trade.cost) + "</b></div>" +
+      "<div class='focusCell'><span>Entry time</span><b>" + esc(trade.entryTime || "-") + "</b></div>" +
+      "<div class='focusCell'><span>Exit time</span><b>" + esc(trade.exitTime || (trade.state === "open" ? "Still open" : "-")) + "</b></div>" +
+    "</div>" +
+    (trade.reason ? "<div class='note' style='margin-top:8px'><b>Reason:</b><br>" + esc(trade.reason) + "</div>" : "");
+}
+
+function focusPaperTradeOnChart(type,symbol,state,closedIndex){
+  var trade = getFocusedTrade(type,symbol,state,closedIndex);
+  if(!trade){
+    showAlert("Paper trade", "Could not find that paper trade.", "warn");
+    return;
+  }
+
+  SELECTED_PAPER_TRADE = trade;
+  localStorage.setItem("focusedPaperTrade", JSON.stringify({
+    type:type,
+    symbol:trade.symbol,
+    state:state,
+    closedIndex:Number.isFinite(Number(closedIndex)) ? Number(closedIndex) : null,
+    time:Date.now()
+  }));
+
+  window.SHOW_TRADE_MARKS = true;
+  localStorage.setItem("showTradeMarks","true");
+
+  SELECTED_SYMBOL = trade.symbol;
+  localStorage.setItem("selectedSymbol", trade.symbol);
+
+  var idx = RESULTS.findIndex(function(x){return String(x.symbol || "").toUpperCase() === trade.symbol;});
+
+  updateTradeFocusBox(trade);
+  jumpTo("dashboard");
+
+  if(idx >= 0){
+    selectTrade(idx,false);
+  }else{
+    SELECTED = fallbackSignalFromFocusedTrade(trade);
+    loadSelectedChart();
+  }
+
+  setTimeout(function(){
+    updateTradeFocusBox(getFocusedTrade(type,trade.symbol,state,closedIndex) || trade);
+  }, 350);
+}
+
+function clearTradeFocus(){
+  SELECTED_PAPER_TRADE = null;
+  localStorage.removeItem("focusedPaperTrade");
+  updateTradeFocusBox(null);
+}
+
+function profitBadgeHtml(pnl,pct,label){
+  pnl = Number(pnl || 0);
+  pct = Number(pct || 0);
+
+  var cls = pnl > 0 ? "win" : pnl < 0 ? "loss" : "flat";
+  var word = pnl > 0 ? "PROFIT" : pnl < 0 ? "LOSS" : "FLAT";
+
+  return "<div class='profitBadge " + cls + "'>" + esc(label || word) + ": " + money(pnl) + " (" + pct.toFixed(2) + "%)</div>";
+}
+
+renderOpenTrades = function(type,a,boxId){
+  var box=el(boxId);
+  if(!box)return;
+
+  var keys=Object.keys(a.open||{});
+  if(!keys.length){
+    box.innerHTML="<p>No open "+(type==="day"?"day":"24H+ swing")+" paper trades yet.</p>";
+    return;
+  }
+
+  box.innerHTML=keys.map(function(sym){
+    var p=a.open[sym];
+    var now=Number(p.lastPrice||p.entry);
+    var pnl=(now-Number(p.entry))*Number(p.shares||1);
+    var cost=Number(p.cost||Number(p.entry)*Number(p.shares||1));
+    var pct=cost?(pnl/cost)*100:0;
+    var cls="holding trade-click "+(pnl>=0?"good":"bad")+(type==="day"?" day":"");
+    var title=type==="day"?"open day paper":"open 24H+ swing paper";
+
+    return "<div class='"+cls+"' onclick='focusPaperTradeOnChart("+JSON.stringify(type)+","+JSON.stringify(sym)+",\"open\")'>"+
+      "<b>"+esc(sym)+" "+title+"</b><br>"+
+      profitBadgeHtml(pnl,pct,"LIVE P/L")+
+      "<b>Entry price:</b> "+money(p.entry)+" | <b>Current price:</b> "+money(now)+" | <b>Shares:</b> "+esc(p.shares)+"<br>"+
+      "<b>Entry time:</b> "+esc(p.entryTime)+" | <b>Held:</b> "+esc(ageText(p.entryTime))+"<br>"+
+      "<b>Cost:</b> "+money(cost)+" | <b>Live P/L:</b> <span class='"+pnlClass(pnl)+"'>"+money(pnl)+" ("+pct.toFixed(2)+"%)</span><br>"+
+      "<b>Stop:</b> "+money(p.stop)+" | <b>Target:</b> "+money(p.target)+" | <b>R/R:</b> "+esc(p.rr||"-")+"<br>"+
+      "<b>Reason:</b> "+esc(p.entryReason||"")+
+      "<br><span class='tradeClickHint'>Click this trade to show it on the chart</span>"+
+      "<br><button class='red' onclick='event.stopPropagation();closePaperTrade("+JSON.stringify(type)+","+JSON.stringify(sym)+",\"Manual close\")'>Close "+esc(type)+"</button>"+
+      "</div>";
+  }).join("");
+};
+
+renderClosedTrades = function(type,a,boxId){
+  var box=el(boxId);
+  if(!box)return;
+
+  var closed=a.closed||[];
+  if(!closed.length){
+    box.innerHTML="<p>No closed "+(type==="day"?"day":"swing")+" trades yet.</p>";
+    return;
+  }
+
+  box.innerHTML=closed.slice(0,80).map(function(t,i){
+    var pnl=Number(t.pnl||0);
+    var pct=Number(t.pnlPct||0);
+    var cls="holding trade-click "+(pnl>=0?"good":"bad");
+
+    return "<div class='"+cls+"' onclick='focusPaperTradeOnChart("+JSON.stringify(type)+","+JSON.stringify(t.symbol)+",\"closed\","+i+")'>"+
+      "<b>"+esc(t.symbol)+" closed "+esc(type)+" paper</b><br>"+
+      profitBadgeHtml(pnl,pct,pnl>=0?"PROFIT":"LOSS")+
+      "<b>Entry price:</b> "+money(t.entry)+" | <b>Exit price:</b> "+money(t.exit)+" | <b>Shares:</b> "+esc(t.shares)+"<br>"+
+      "<b>Entry time:</b> "+esc(t.entryTime)+"<br>"+
+      "<b>Exit time:</b> "+esc(t.exitTime)+"<br>"+
+      "<b>Cost:</b> "+money(t.cost)+" | <b>Proceeds:</b> "+money(t.proceeds)+"<br>"+
+      "<b>Made/Lost:</b> <span class='"+pnlClass(pnl)+"'>"+money(pnl)+" ("+pct.toFixed(2)+"%)</span><br>"+
+      "<b>Exit reason:</b> "+esc(t.exitReason||"")+
+      "<br><span class='tradeClickHint'>Click this trade to show entry and exit on the chart</span>"+
+      "</div>";
+  }).join("");
+};
+
+(function(){
+  var oldOpenPaperTrade = openPaperTrade;
+  openPaperTrade = function(type,r){
+    oldOpenPaperTrade(type,r);
+
+    setTimeout(function(){
+      try{
+        var a = getTradeAccount(type);
+        if(a.open && a.open[r.symbol]){
+          focusPaperTradeOnChart(type,r.symbol,"open");
+        }
+      }catch(e){}
+    }, 120);
+  };
+
+  var oldClosePaperTrade = closePaperTrade;
+  closePaperTrade = function(type,symbol,reason,quiet){
+    oldClosePaperTrade(type,symbol,reason,quiet);
+
+    setTimeout(function(){
+      try{
+        var a = getTradeAccount(type);
+        if(a.closed && a.closed.length){
+          focusPaperTradeOnChart(type,symbol,"closed",0);
+        }
+      }catch(e){}
+    }, 120);
+  };
+})();
+
+(function(){
+  var oldDrawChart = drawChart;
+  drawChart = function(r){
+    oldDrawChart(r);
+    if(SELECTED_PAPER_TRADE && r && String(r.symbol || "").toUpperCase() === String(SELECTED_PAPER_TRADE.symbol || "").toUpperCase()){
+      updateTradeFocusBox(getFocusedTrade(SELECTED_PAPER_TRADE.type, SELECTED_PAPER_TRADE.symbol, SELECTED_PAPER_TRADE.state, SELECTED_PAPER_TRADE.closedIndex) || SELECTED_PAPER_TRADE);
+    }
+  };
+})();
+
+
 if(document.readyState==="loading"){
   document.addEventListener("DOMContentLoaded",start);
 }else{
