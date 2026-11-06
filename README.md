@@ -4,6 +4,16 @@ US stock research and browser-local paper trading. The active application is `sr
 
 Read [the investigation](docs/US-DEEP-REVIEW.md) for findings, measurements and remaining work, and [deployment and recovery](docs/DEPLOYMENT.md) before updating a hosted copy.
 
+## Continuous server paper account
+
+The SERVER PAPER panel controls a separate persistent $5,000 simulated swing portfolio. The server keeps scanning without an open browser. Start/pause requires PAPER_ADMIN_TOKEN (at least 24 characters) configured in the host environment and entered in the panel. It is never saved by the page or included in exports. The worker starts paused on first use and resumes a previously enabled account on restart when a valid operator token is configured.
+
+Fixed v1 paper rules: $50 planned stop risk, 20% maximum position value, five holdings, three entries per New York day, 10 basis points adverse slippage per side, no fixed fee. It scans the existing DEFAULT_SYMBOLS plus held symbols every two minutes during the verified regular session. It exits at an observed stop/target quote or weak score after 24 hours. Quote polling misses intermediate prices. This is a distinct policy from browser and historical proxy trading. Learning evaluates completed-session outcomes outside regular hours; it does not tune rules.
+
+Proposals record simulated entry/exit decisions and expire five minutes after their quote timestamp. They can be downloaded for independent manual review. There is no broker connection or order-submission endpoint. The first proposal per symbol/action/day is retained; a later fill keeps its own quote record. All paper closed trades and proposals are retained in the server export; the panel shows at most 100 proposals and 30 closed trades.
+
+Windows: double-click **Start Stock Learner.cmd**, choose a passphrase and open SERVER PAPER in the launched page. This local copy needs the computer running. Use the launcher rather than opening public/index.html directly.
+
 ## Run
 
 Use Node 22 or 24:

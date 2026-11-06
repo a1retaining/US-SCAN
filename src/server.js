@@ -5,6 +5,7 @@ const { createArrayStore } = require("../lib/array-store.cjs");
 const learning = require("../lib/learning.cjs");
 const usSession = require("../public/market-session.js");
 const dataQuality = require("../lib/data-quality.cjs");
+const {createWorker,authorized:paperAuthorized}=require("../lib/paper-worker.cjs");
 const dataPath = path.resolve(process.env.STOCK_DATA_DIR || path.join(__dirname,"../data"));
 const observationStore = createArrayStore(path.join(dataPath,"us-signal-observations.json"), rows => rows.every(row =>
   row && typeof row.id === "string" && typeof row.symbol === "string" && typeof row.strategyVersion === "string" && Number.isFinite(row.score) && row.costModel && row.outcomes));
@@ -18,7 +19,7 @@ app.use("/api", (req,res,next) => {res.set("Cache-Control","no-store");next();})
 
 const listingDirectory = require("../lib/us-directory.cjs").createDirectory({fetchText,directoryPath:path.join(dataPath,"listing-snapshots")});
 
-const VERSION = "stock-learner-us-v33-verified-cadence";
+const VERSION = "stock-learner-us-v34-server-paper";
 
 const DEFAULT_SYMBOLS = [
   "SPY", "QQQ", "NVDA", "TSLA", "AAPL", "MSFT", "META", "AMD",
@@ -763,6 +764,20 @@ async function backtestSymbols(symbolList,params){
       "Neutral market context; no survivorship or complete corporate-action correction. Historical results are not proof of an edge."]};
 }
 
+const paperWorker=createWorker({directory:dataPath,adminToken:process.env.PAPER_ADMIN_TOKEN||"",
+  scan:held=>scanSymbols(uniqueArray([...DEFAULT_SYMBOLS,...held]),50),
+  evaluate:evaluateObservations,entryTier:swingEntryTier});
+app.get("/api/paper/status",(req,res)=>{try{res.json({ok:true,...paperWorker.status()});}catch(error){res.status(503).json({ok:false,error:error.message});}});
+app.get("/api/paper/export",(req,res)=>{try{res.set("Content-Disposition",'attachment; filename="us-server-paper.json"');res.json(paperWorker.export());}catch(error){res.status(503).json({ok:false,error:error.message});}});
+app.post("/api/paper/control",(req,res)=>{
+  const token=req.get("X-Paper-Token");
+  if(!paperAuthorized(process.env.PAPER_ADMIN_TOKEN||"",token))return res.status(403).json({ok:false,error:"Operator token required"});
+  if(typeof req.body.enabled!=="boolean")return res.status(400).json({ok:false,error:"enabled must be true or false"});
+  try{
+    res.json({ok:true,...paperWorker.control(req.body.enabled,token)});
+    if(req.body.enabled)paperWorker.tick().catch(error=>console.error('US paper worker: '+error.message));
+  }catch(error){res.status(503).json({ok:false,error:error.message});}
+});
 app.get("/api/session",(req,res)=>res.json({ok:true,...usSession.at(),policy:RESEARCH_POLICY}));
 app.get("/api/learning",(req,res)=>{try{res.json({ok:true,...learningReport()});}catch(error){res.status(503).json({ok:false,error:error.message});}});
 app.post("/api/learning/evaluate",async(req,res)=>{try{res.json({ok:true,...await evaluateObservations()});}catch(error){res.status(503).json({ok:false,error:error.message});}});
@@ -840,4 +855,5 @@ app.use(function(req, res) {
 app.listen(PORT,process.env.STOCK_BIND_HOST || "0.0.0.0",function() {
   console.log("TradingMint Pro server running on port " + PORT);
   console.log("Version: " + VERSION);
+  paperWorker.start();
 });

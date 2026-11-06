@@ -3,12 +3,12 @@ const path=require('node:path');
 const os=require('node:os');
 const vm=require('node:vm');
 const {createRequire}=require('node:module');
-exports.loadServer=t=>{
+exports.loadServer=(t,environment={})=>{
   const directory=fs.mkdtempSync(path.join(os.tmpdir(),'us-stock-test-'));
   t.after(()=>fs.rmSync(directory,{recursive:true,force:true}));
   const serverPath=path.resolve(__dirname,'../src/server.js');
   const context=vm.createContext({require:createRequire(serverPath),__dirname:path.join(directory,'src'),
-    process:{env:{STOCK_DATA_DIR:path.join(directory,'data')},uptime:()=>0},console,Buffer,URL,AbortController,
+    process:{env:{STOCK_DATA_DIR:path.join(directory,'data'),...environment},uptime:()=>0},console,Buffer,URL,AbortController,
     setTimeout,clearTimeout,fetch:()=>{throw new Error('Unexpected network access');}});
   vm.runInContext(fs.readFileSync(serverPath,'utf8').replace(/app\.listen\(PORT,[\s\S]*$/,''),context);
   return {directory,run:code=>vm.runInContext(code,context)};

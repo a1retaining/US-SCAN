@@ -2,7 +2,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
 const root=path.resolve(__dirname,'..');
-const files=['src/server.js','public/paper-storage.js','public/market-session.js',
+const files=['src/server.js','public/paper-storage.js','public/market-session.js','public/server-paper.js',
   ...fs.readdirSync(path.join(root,'lib')).filter(name=>name.endsWith('.cjs')).map(name=>'lib/'+name)];
 for(const file of files)new vm.Script(fs.readFileSync(path.join(root,file),'utf8'),{filename:file});
 const html=fs.readFileSync(path.join(root,'public/index.html'),'utf8');

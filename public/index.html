@@ -595,6 +595,7 @@ details summary{
     <button onclick="jumpTo('positions')">◉ POSITIONS <span id="sidePositions" style="float:right;background:#9b5cff;color:#fff;border-radius:999px;padding:1px 7px">0</span></button>
     <button onclick="jumpTo('journal')">▣ JOURNAL</button>
     <button onclick="jumpTo('backtest')">▣ 10Y BACKTEST</button>
+    <button onclick="jumpTo('serverPaper')">◉ SERVER PAPER</button>
     <button onclick="jumpTo('settings')">⚙ RISK / SETTINGS</button>
     <button onclick="health()">⟳ HEALTH</button>
   </div>
@@ -828,6 +829,35 @@ details summary{
     <p id="usLearningStatus" class="note" role="status">Loading observations…</p>
     <p id="usLearningComparison" class="note"></p>
     <p class="note">Scores are rule points, not probabilities of profit. Historical tests use a different daily-bar policy. No profitable edge has been established.</p>
+  </div>
+</section>
+<section id="serverPaper" class="panel">
+  <div class="panelTitle"><h2>Continuous US paper trading</h2><small>SIMULATED MONEY</small></div>
+  <div class="boxBody">
+    <p>Runs on the server while your browser is closed. This separate $5,000 swing account keeps your browser accounts intact. No broker is connected.</p>
+    <p id="serverPaperStatus" class="note" role="status">Checking server…</p>
+    <div class="grid4">
+      <div class="mini"><span>Paper cash</span><b id="serverPaperCash">—</b></div>
+      <div class="mini"><span>Marked paper equity</span><b id="serverPaperEquity">—</b></div>
+      <div class="mini"><span>Last market scan</span><b id="serverPaperScan">Not yet</b></div>
+      <div class="mini"><span>Last learning update</span><b id="serverPaperLearning">Not yet</b></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin-top:12px">
+      <label>Operator key <input id="serverPaperToken" type="password" autocomplete="off" placeholder="Hosting operator key" style="min-width:240px"></label>
+      <button id="serverPaperStart">Start paper worker</button>
+      <button id="serverPaperPause">Pause paper worker</button>
+      <button id="serverPaperRefresh">Refresh status</button>
+      <a href="/api/paper/export" style="color:#8effaa" download>Download server paper history</a>
+    </div>
+    <p id="serverPaperWarning" class="note yellowText"></p>
+    <p class="note">Fixed research rules: $50 planned risk, 20% maximum position value, five holdings, three entries per New York day and 0.10% adverse slippage per side. Observed quotes drive exits; gaps between two-minute checks are unobserved. Pausing stops monitoring and new simulated trades. Rules do not tune themselves.</p>
+    <h3>Server paper holdings</h3>
+    <div style="overflow-x:auto"><table><thead><tr><th>Stock</th><th>Shares</th><th>Entry</th><th>Last quote</th><th>Quote time</th><th>Stop / target</th></tr></thead><tbody id="serverPaperHoldings"></tbody></table></div>
+    <h3>Trade proposals — review only</h3>
+    <p class="note">These record simulated decisions. Check fresh prices, earnings, events, risk and your broker before independently choosing any real order. Expired proposals are history, not current prices. No button sends an order.</p>
+    <div style="overflow-x:auto"><table><thead><tr><th>Stock / action</th><th>Observed</th><th>Validity</th><th>Paper shares</th><th>Reference</th><th>Reason</th><th>Details</th></tr></thead><tbody id="serverPaperProposals"></tbody></table></div>
+    <h3>Recent closed paper trades</h3>
+    <div style="overflow-x:auto"><table><thead><tr><th>Stock</th><th>Exit time</th><th>Exit</th><th>Paper P/L</th><th>Reason</th></tr></thead><tbody id="serverPaperClosed"></tbody></table></div>
   </div>
 </section>
 <section id="backtest" class="panel">
@@ -4088,5 +4118,6 @@ if(document.readyState==="loading"){
   start();
 }
 </script>
+<script src="server-paper.js" defer></script>
 </body>
 </html>
