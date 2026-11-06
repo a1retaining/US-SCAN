@@ -1,42 +1,24 @@
-# TradingMint PRO v5.3
+# Stock learner US scanner
 
-This is the "everything baseline" version.
+US stock research and browser-local paper trading. The active application is `src/server.js` with `public/index.html`. Older root files and `src/engines` are not the running application. There is no demonstrated self-training edge or live broker execution.
 
-## New in v5.3
+Read [the investigation](docs/US-DEEP-REVIEW.md) for findings, measurements and remaining work, and [deployment and recovery](docs/DEPLOYMENT.md) before updating a hosted copy.
 
-- Walk-forward testing
-- Self-training review engine
-- Conservative auto-apply training option
-- Sector exposure limits
-- Correlation limits
-- Paper trading reports
-- Setup/symbol/sector performance breakdown
-- Trade replay/review
-- SQLite adapter with JSON fallback
-- More health/system states
-- Max-history proof engine remains active
-- Auto paper remains ON
-- $5,000 paper account remains fixed
-- Live broker trading remains disabled
+## Run
 
-## Why this matters
+Use Node 22 or 24:
 
-Backtesting alone is not enough. v5.3 adds walk-forward validation so the system has to prove itself on unseen later windows, not just historical hindsight.
-
-## Render
-
-Build Command:
-
-```bash
-npm install
-```
-
-Start Command:
-
-```bash
+```sh
+npm ci
+npm run check
+npm test
 npm start
 ```
 
-## Sound
+The default port is 10000. `PORT`, `STOCK_BIND_HOST` and `STOCK_DATA_DIR` override settings. Bind development to `127.0.0.1`; give a hosted instance a persistent private data directory.
 
-Browsers block sound until user interaction. Press **Enable**, then **Test**.
+Current listing identity, USD, completed-bar cadence and New York regular sessions gate research execution. Calendar coverage is 2026–2028; expiry blocks new entries. Public data delay and spreads remain unknown. ETFs and unclassified products are watch-only.
+
+Browser accounts retain history and reject stale writes. One tab owns writes through Web Locks; other tabs are read-only. Close the owner and reload another tab to claim it. Server learning observations are separate from private browser accounts. Learning is exploratory and does not automatically tune rules.
+
+Historical tests are a daily proxy with chronological accounting, costs and adverse fills; they do not reproduce the whole live policy. `scripts/proxy-study.cjs` runs the fixed-symbol engineering cost experiment; inspect its arguments before running.

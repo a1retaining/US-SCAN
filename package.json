@@ -1,12 +1,15 @@
 {
   "name": "tradingmint-pro-scanner",
-  "version": "25.0.0",
+  "version": "33.0.0",
   "description": "TradingMint Pro live 24h+ swing scanner with paper trading dashboard.",
   "type": "commonjs",
   "private": true,
   "scripts": {
     "start": "node src/server.js",
-    "dev": "node src/server.js"
+    "dev": "node src/server.js",
+    "check": "node scripts/check.cjs",
+    "test": "node --test tests-node/*.test.cjs",
+    "research:proxy": "node scripts/proxy-study.cjs"
   },
   "dependencies": {
     "express": "^4.18.3"

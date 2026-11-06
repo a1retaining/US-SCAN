@@ -3,6 +3,7 @@ services:
     name: us-scan
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm ci --omit=dev && npm run check && npm test
     startCommand: npm start
     autoDeploy: true
+    healthCheckPath: /api/health
